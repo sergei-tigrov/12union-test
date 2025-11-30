@@ -1,827 +1,837 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
-import { selectPersonalIndicators, selectRelationshipIndicators } from '../../utils/indicators-filters';
-import { 
-  Heart, 
-  User, 
-  Users, 
-  Target,
+import {
   RotateCcw,
-  Download,
   Share2,
-  Home,
-  Award,
-  BarChart3,
-  Layers,
-  Zap,
-  Info
+  Heart,
+  TrendingUp,
+  AlertCircle
 } from 'lucide-react';
 
-// Современные компоненты
-import { 
-  ModernSection, 
-  MetricCard, 
-  ModernTabs, 
-  ToggleView,
-  ProgressIndicator
-} from '../modern/ModernResultsLayout';
-
-// Существующие компоненты
-import { UnionLadder, UnionWaveChart, CompatibilityAnalysis } from '../index';
-import MaturityGapAnalysis from './MaturityGapAnalysis';
-import ContradictionAnalysis from './ContradictionAnalysis';
-import EnhancedIndicatorsSummary from './EnhancedIndicatorsSummary';
-
-// Новые компоненты для дебага и интерпретации
-// import TestDebugInfo from '../results/TestDebugInfo';
-import PsychologicalInsights from '../results/PsychologicalInsights';
-
-// Специализированные анализы
-import TraumaPatternAnalysisRefactored from './TraumaPatternAnalysisRefactored';
-import AttachmentStyleAnalysisRefactored from './AttachmentStyleAnalysisRefactored';
-import BoundariesHealthAnalysisRefactored from './BoundariesHealthAnalysisRefactored';
-import JealousyDynamicsAnalysis from './JealousyDynamicsAnalysis';
-import RelationshipMotivationAnalysis from './RelationshipMotivationAnalysis';
-import PersonalizedRecommendations from './PersonalizedRecommendations';
-
-// Типы и утилиты
-import { SmartTestResult } from '../../utils/smart-adaptive-engine';
-import { TestResult, LevelDistributionItem, ValidationResult } from '../../utils/calculateResult';
-import { levels } from '../../utils/levels';
-import { generatePDF } from '../../utils/pdfGenerator';
-import ErrorBoundary from '../ErrorBoundary';
-
-// UI компоненты
-import Tooltip from '../ui/Tooltip';
+// Типы и функции
+import type { TestResult } from '../../types';
+import { interpretResult } from '../../results-interpreter';
+import { getLevelDefinition } from '../../levels-definitions';
+import { getActionPlan } from '../../action-library';
 
 // Стили
 import '../../styles/design-system.css';
 import '../../styles/results-page.css';
 
 interface ModernAdaptiveResultsProps {
-  result: SmartTestResult;
+  result: TestResult;
   onRestart: () => void;
 }
 
-// Функция для получения текстового описания тренда
-const getTrendText = (trend: string): string => {
-  switch (trend) {
-    case 'growing': return 'Отношения развиваются';
-    case 'declining': return 'Отношения деградируют';
-    default: return 'Отношения стабильны';
-  }
-};
+/**
+ * Компонент результатов тестирования - интегрирован с новой 12-уровневой системой
+ */
+export const ModernAdaptiveResults: React.FC<ModernAdaptiveResultsProps> = ({
+  result,
+  onRestart
+}) => {
+  const [activeTab, setActiveTab] = useState<'summary' | 'breakdown' | 'actions' | 'validation'>('summary');
 
-// ИСПРАВЛЕННАЯ функция конвертации - убираем фальсификацию данных
-const convertAdaptiveToTestResult = (adaptiveResult: SmartTestResult): TestResult => {
-  console.log('🔄 convertAdaptiveToTestResult: Начинаем конвертацию с данными:', adaptiveResult);
-  
-  const levelDistribution: LevelDistributionItem[] = [];
-  const levelScores: Array<{ levelId: number; personalScore: number; relationshipScore: number; totalScore: number }> = [];
-  
-  const personalMaturityLevel = Math.round(adaptiveResult.personalMaturity);
-  const relationshipMaturityLevel = Math.round(adaptiveResult.relationshipMaturity);
-  
-  // ИСПРАВЛЕНО: Используем реальное распределение вместо fake данных
-  for (let levelId = 1; levelId <= 12; levelId++) {
-    let personalPercentage = 0;
-    let relationshipPercentage = 0;
-    
-    // Реальное распределение на основе фактических данных
-    const personalDistance = Math.abs(levelId - adaptiveResult.personalMaturity);
-    const relationshipDistance = Math.abs(levelId - adaptiveResult.relationshipMaturity);
-    
-    // Логистическая функция для распределения
-    personalPercentage = Math.round(100 * Math.exp(-personalDistance * 0.7) * adaptiveResult.confidence);
-    relationshipPercentage = Math.round(100 * Math.exp(-relationshipDistance * 0.7) * adaptiveResult.confidence);
-    
-    // Главный уровень всегда получает максимальный процент
-    if (levelId === personalMaturityLevel) {
-      personalPercentage = Math.max(personalPercentage, 85);
-    }
-    if (levelId === relationshipMaturityLevel) {
-      relationshipPercentage = Math.max(relationshipPercentage, 85);
-    }
-    
-    const personalScore = personalPercentage;
-    const relationshipScore = relationshipPercentage;
-    const totalScore = Math.round((personalScore + relationshipScore) / 2);
-    
-    levelDistribution.push({
-      levelId,
-      personal: personalScore,
-      relationship: relationshipScore,
-      total: totalScore,
-      personalPercentage,
-      relationshipPercentage,
-      totalPercentage: totalScore
-    });
-    
-    levelScores.push({
-      levelId,
-      personalScore,
-      relationshipScore,
-      totalScore
-    });
-  }
-  
-  const validation: ValidationResult = {
-    isReliable: adaptiveResult.confidence >= 0.7,
-    reliabilityScore: Math.round(adaptiveResult.confidence * 100),
-    message: adaptiveResult.confidence >= 0.7 ? 'Адаптивный тест успешно завершен' : 'Результаты требуют осторожной интерпретации',
-    warnings: adaptiveResult.confidence < 0.7 ? ['Низкая уверенность в результатах'] : []
-  };
-  
-  // Используем оптимизированную систему фильтрации индикаторов
-  const personalIndicators = selectPersonalIndicators(adaptiveResult.indicators);
-  const relationshipIndicators = selectRelationshipIndicators(adaptiveResult.indicators);
-  
-  const result: TestResult = {
-    personalLevel: Math.round(adaptiveResult.personalMaturity),
-    relationshipLevel: Math.round(adaptiveResult.relationshipMaturity),
-    potentialLevel: Math.max(Math.round(adaptiveResult.personalMaturity), Math.round(adaptiveResult.relationshipMaturity)),
-    levelDistribution,
-    dominantLevels: [
-      { levelId: Math.round(adaptiveResult.personalMaturity), type: 'personal' as const },
-      { levelId: Math.round(adaptiveResult.relationshipMaturity), type: 'relationship' as const }
-    ],
-    levelScores,
-    profile: {
-      dominantZone: adaptiveResult.detectedZone,
-      // Синхронизируем логику с calculateResult.ts
-      developmentVector: (() => {
-        const gap = Math.abs(Math.round(adaptiveResult.personalMaturity) - Math.round(adaptiveResult.relationshipMaturity));
-        return gap > 2 ? 'contradictory' as const : gap === 0 ? 'balanced' as const : 'ascending' as const;
-      })(),
-      coherence: Math.min(100, Math.round(adaptiveResult.consistency * 100)),
-      // Стандартизируем расчет общей зрелости согласно алгоритму в calculateResult
-      maturity: Math.round(((adaptiveResult.personalMaturity + adaptiveResult.relationshipMaturity) / 24) * 100)
-    },
-    validation,
-    interpretation: {
-      title: `Уровень ${Math.round(adaptiveResult.personalMaturity)} → ${Math.round(adaptiveResult.relationshipMaturity)}`,
-      description: `Личная зрелость: ${adaptiveResult.personalMaturity.toFixed(1)} ступень, Зрелость отношений: ${adaptiveResult.relationshipMaturity.toFixed(1)} ступень`,
-      corePattern: adaptiveResult.detectedZone,
-      keyInsight: `${getTrendText(adaptiveResult.relationshipTrend)} с тенденцией к ${adaptiveResult.relationshipTrend === 'growing' ? 'развитию' : adaptiveResult.relationshipTrend === 'declining' ? 'стагнации' : 'стабильности'}`,
-      growthAreas: personalIndicators.slice(0, 3),
-      recommendations: adaptiveResult.gapAnalysis.recommendations.slice(0, 5),
-      risks: relationshipIndicators.slice(0, 3)
-    },
-    timestamp: Date.now(),
-    answersCount: adaptiveResult.questionsAsked
-  };
-  
-  return result;
-};
+  // Интерпретируем результаты
+  const interpretation = interpretResult(result);
+  const roundedLevel = Math.round(result.personalLevel);
+  const levelDef = getLevelDefinition(roundedLevel as any);
+  const actionPlan = getActionPlan(roundedLevel as any);
 
-export default function ModernAdaptiveResults({ result, onRestart }: ModernAdaptiveResultsProps) {
-  console.log('🎯 ModernAdaptiveResults: КОМПОНЕНТ ЗАПУЩЕН с result:', result);
-  
-  const navigate = useNavigate();
-  const [selectedLevelId, setSelectedLevelId] = useState<number | null>(null);
-  
-  const convertedResult = convertAdaptiveToTestResult(result);
+  // Форматируем данные для отображения
+  const completionTimeMinutes = Math.round(result.completionTime / 60000);
+  const timeFormatted = completionTimeMinutes < 1
+    ? `${Math.round(result.completionTime / 1000)} сек`
+    : `${completionTimeMinutes} мин`;
 
-  const getAdaptiveTitle = (): string => {
-    switch (result.relationshipStatus) {
-      case 'in_relationship':
-        return 'Анализ ваших отношений';
-      case 'single':
-        return 'Ваш профиль готовности';
-      case 'complicated':
-        return 'Анализ переходного периода';
-      default:
-        return 'Ваши результаты';
-    }
+  // Цвета для уровней
+  const getLevelColor = (level: number) => {
+    if (level <= 3) return '#1a0000'; // Красный
+    if (level <= 6) return '#ff9800'; // Оранжевый
+    if (level <= 8) return '#4CAF50'; // Зелёный
+    return '#2196F3'; // Синий
   };
 
-  const getAdaptiveDescription = (): string => {
-    switch (result.relationshipStatus) {
-      case 'in_relationship':
-        return 'Глубокий анализ качества и потенциала развития ваших текущих отношений по модели "Лестница Союза"';
-      case 'single':
-        return 'Анализ вашей готовности к отношениям и рекомендации по подготовке к осознанному союзу';
-      case 'complicated':
-        return 'Анализ текущей ситуации и пути к гармонизации отношений в переходный период';
-      default:
-        return 'Адаптивный тест "Лестница Союза" — ваш персональный путь к осознанным отношениям';
-    }
+  const getLevelIcon = (level: number) => {
+    if (level <= 3) return '🔥';
+    if (level <= 6) return '⚡';
+    if (level <= 8) return '💚';
+    return '✨';
   };
 
-  const getPersonalMaturityTitle = (): string => {
-    switch (result.relationshipStatus) {
-      case 'in_relationship':
-        return 'Ваша зрелость';
-      case 'single':
-        return 'Личная готовность';
-      case 'complicated':
-        return 'Внутренние ресурсы';
-      default:
-        return 'Личная зрелость';
-    }
-  };
+  // Компонент для вкладки резюме
+  const SummaryTab = () => (
+    <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+      {/* Главный результат */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        style={{
+          background: 'white',
+          border: '2px solid #e0e0e0',
+          borderRadius: '16px',
+          padding: '3rem 2rem',
+          marginBottom: '2rem',
+          textAlign: 'center'
+        }}
+      >
+        <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>
+          {getLevelIcon(roundedLevel)}
+        </div>
 
-  const getPersonalMaturityTooltip = (): string => {
-    switch (result.relationshipStatus) {
-      case 'in_relationship':
-        return 'Ваша способность быть зрелым партнером: самопознание, эмоциональная регуляция, личностный рост';
-      case 'single':
-        return 'Ваша готовность к созданию отношений: самопознание, эмоциональная стабильность, личные границы';
-      case 'complicated':
-        return 'Ваши внутренние ресурсы для прохождения кризиса: стрессоустойчивость, самоподдержка, способность к изменениям';
-      default:
-        return 'Способность к самопознанию, эмоциональной регуляции и личностному росту';
-    }
-  };
+        <h2 style={{
+          fontSize: '2.5rem',
+          fontWeight: '700',
+          color: getLevelColor(roundedLevel),
+          marginBottom: '0.5rem'
+        }}>
+          Уровень {roundedLevel}: {levelDef?.name}
+        </h2>
 
-  const getRelationshipMaturityTitle = (): string => {
-    switch (result.relationshipStatus) {
-      case 'in_relationship':
-        return 'Качество отношений';
-      case 'single':
-        return 'Потенциал для союза';
-      case 'complicated':
-        return 'Навыки преодоления кризиса';
-      default:
-        return 'Зрелость отношений';
-    }
-  };
+        <p style={{
+          fontSize: '1.1rem',
+          color: '#666',
+          marginBottom: '2rem',
+          maxWidth: '700px',
+          margin: '1rem auto 2rem'
+        }}>
+          {interpretation.heroMessage}
+        </p>
 
-  const getRelationshipMaturityTooltip = (): string => {
-    switch (result.relationshipStatus) {
-      case 'in_relationship':
-        return 'Качество ваших текущих отношений: способность к близости, разрешению конфликтов, совместному росту';
-      case 'single':
-        return 'Ваш потенциал для создания здоровых отношений: навыки близости, коммуникации, эмпатии';
-      case 'complicated':
-        return 'Ваши навыки преодоления кризиса в отношениях: способность к диалогу, поиску решений, сохранению связи';
-      default:
-        return 'Способность строить здоровые, гармоничные отношения с партнером';
-    }
-  };
-
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: 'Мои результаты адаптивного теста "Лестница Союза"',
-          text: `Я прошел адаптивный тест "Лестница Союза" и получил интересные результаты! Личная зрелость: ${Math.round(result.personalMaturity)}, Зрелость отношений: ${Math.round(result.relationshipMaturity)}`,
-          url: window.location.href,
-        });
-      } catch (error) {
-        console.log('Error sharing:', error);
-      }
-    }
-  };
-
-  const handleDownload = async () => {
-    try {
-      await generatePDF();
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-    }
-  };
-
-  const goHome = () => {
-    navigate('/');
-  };
-
-  // Группировка индикаторов (данные доступны для будущего использования)
-
-  // Подготовка табов для детального анализа
-  const detailedAnalysisTabs = [
-    {
-      id: 'compatibility',
-      label: 'Совместимость',
-      badge: '🎯',
-      content: (
-        <ErrorBoundary>
-          <CompatibilityAnalysis
-            personalMaturity={result.personalMaturity}
-            relationshipMaturity={result.relationshipMaturity}
-          />
-        </ErrorBoundary>
-      )
-    },
-    {
-      id: 'maturity-gap',
-      label: 'Анализ зрелости',
-      badge: '📊',
-      content: (
-        <ErrorBoundary>
-          <MaturityGapAnalysis
-            personalMaturity={result.personalMaturity}
-            relationshipMaturity={result.relationshipMaturity}
-            gapAnalysis={result.gapAnalysis}
-          />
-        </ErrorBoundary>
-      )
-    },
-    {
-      id: 'quality',
-      label: 'Качество ответов',
-      badge: '🔍',
-      content: (
-        <ErrorBoundary>
-          <ContradictionAnalysis
-            contradictions={result.contradictions}
-            consistency={result.consistency}
-            validationScore={result.validationScore}
-            questionsAsked={result.questionsAsked}
-          />
-        </ErrorBoundary>
-      )
-    }
-  ];
-
-  // Подготовка табов для специализированных анализов
-  const specializedAnalysisTabs = [
-    {
-      id: 'personalized',
-      label: 'Персональные рекомендации',
-      content: (
-        <ErrorBoundary>
-          <PersonalizedRecommendations 
-            personalMaturity={result.personalMaturity}
-            relationshipMaturity={result.relationshipMaturity}
-            relationshipStatus={result.relationshipStatus}
-            gapAnalysis={result.gapAnalysis}
-          />
-        </ErrorBoundary>
-      )
-    },
-    {
-      id: 'trauma',
-      label: 'Травматические паттерны',
-      content: (
-        <ErrorBoundary>
-          <TraumaPatternAnalysisRefactored 
-            traumaAnswers={result.specializedData.traumaAnswers}
-            indicators={result.specializedData.rawIndicators}
-            personalMaturity={result.personalMaturity}
-            relationshipMaturity={result.relationshipMaturity}
-          />
-        </ErrorBoundary>
-      )
-    },
-    {
-      id: 'attachment',
-      label: 'Стиль привязанности',
-      content: (
-        <ErrorBoundary>
-          <AttachmentStyleAnalysisRefactored 
-            attachmentAnswers={result.specializedData.attachmentAnswers}
-            indicators={result.specializedData.rawIndicators}
-            personalMaturity={result.personalMaturity}
-            relationshipMaturity={result.relationshipMaturity}
-          />
-        </ErrorBoundary>
-      )
-    },
-    {
-      id: 'boundaries',
-      label: 'Границы',
-      content: (
-        <ErrorBoundary>
-          <BoundariesHealthAnalysisRefactored 
-            boundariesAnswers={result.specializedData.boundariesAnswers}
-            indicators={result.specializedData.rawIndicators}
-            personalMaturity={result.personalMaturity}
-            relationshipMaturity={result.relationshipMaturity}
-          />
-        </ErrorBoundary>
-      )
-    },
-    {
-      id: 'jealousy',
-      label: 'Ревность',
-      content: (
-        <ErrorBoundary>
-          <JealousyDynamicsAnalysis 
-            jealousyAnswers={result.specializedData.jealousyAnswers}
-            indicators={result.specializedData.rawIndicators}
-            personalMaturity={result.personalMaturity}
-            relationshipMaturity={result.relationshipMaturity}
-          />
-        </ErrorBoundary>
-      )
-    },
-    {
-      id: 'motivation',
-      label: 'Мотивация',
-      content: (
-        <ErrorBoundary>
-          <RelationshipMotivationAnalysis 
-            motivationAnswers={result.specializedData.motivationAnswers}
-            indicators={result.specializedData.rawIndicators}
-            personalMaturity={result.personalMaturity}
-            relationshipMaturity={result.relationshipMaturity}
-          />
-        </ErrorBoundary>
-      )
-    }
-  ];
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50" data-testid="results-page">
-      <div className="container">
-        
-        {/* Заголовок и быстрые действия */}
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          style={{ textAlign: 'center', paddingTop: '3rem', marginBottom: '3rem' }}
-        >
-          <h1 className="gradient-text" style={{ fontSize: '3rem', fontWeight: '700', marginBottom: '1rem' }}>
-            {getAdaptiveTitle()}
-          </h1>
-          <p style={{ fontSize: '1.125rem', color: 'var(--color-text-muted)', marginBottom: '1.5rem', maxWidth: '32rem', margin: '0 auto 1.5rem' }}>
-            {getAdaptiveDescription()}
-          </p>
-          
-          {/* Быстрые действия */}
-          <div className="action-buttons">
-            <button 
-              onClick={onRestart} 
-              className="compact-btn compact-btn--primary"
-            >
-              <RotateCcw className="w-3 h-3" />
-              Пройти снова
-            </button>
-            <button 
-              onClick={handleShare} 
-              className="compact-btn compact-btn--outline"
-            >
-              <Share2 className="w-3 h-3" />
-              Поделиться
-            </button>
-            <button 
-              onClick={handleDownload} 
-              className="pdf-button compact-btn compact-btn--outline"
-              aria-label="Скачать результаты в PDF"
-            >
-              <Download className="w-3 h-3" />
-              Скачать PDF
-            </button>
-            <button 
-              onClick={goHome} 
-              className="compact-btn compact-btn--outline"
-            >
-              <Home className="w-3 h-3" />
-              На главную
-            </button>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: '1.5rem',
+          marginBottom: '2rem'
+        }}>
+          <div style={{
+            padding: '1rem',
+            background: '#f5f5f5',
+            borderRadius: '12px'
+          }}>
+            <div style={{ fontSize: '0.9rem', color: '#999', marginBottom: '0.5rem' }}>
+              Вопросов ответено
+            </div>
+            <div style={{ fontSize: '1.8rem', fontWeight: '700', color: '#2196F3' }}>
+              {result.totalQuestions}
+            </div>
           </div>
-        </motion.div>
 
+          <div style={{
+            padding: '1rem',
+            background: '#f5f5f5',
+            borderRadius: '12px'
+          }}>
+            <div style={{ fontSize: '0.9rem', color: '#999', marginBottom: '0.5rem' }}>
+              Время теста
+            </div>
+            <div style={{ fontSize: '1.8rem', fontWeight: '700', color: '#4CAF50' }}>
+              {timeFormatted}
+            </div>
+          </div>
 
+          <div style={{
+            padding: '1rem',
+            background: '#f5f5f5',
+            borderRadius: '12px'
+          }}>
+            <div style={{ fontSize: '0.9rem', color: '#999', marginBottom: '0.5rem' }}>
+              Надёжность
+            </div>
+            <div style={{ fontSize: '1.8rem', fontWeight: '700', color:
+              result.validation.reliability === 'high' ? '#4CAF50' :
+              result.validation.reliability === 'medium' ? '#ff9800' : '#f44336'
+            }}>
+              {
+                result.validation.reliability === 'high' ? 'Высокая' :
+                result.validation.reliability === 'medium' ? 'Средняя' : 'Низкая'
+              }
+            </div>
+          </div>
+        </div>
+      </motion.div>
 
-        {/* Основные результаты */}
+      {/* Главный инсайт */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        style={{
+          background: 'white',
+          border: '1px solid #e0e0e0',
+          borderRadius: '12px',
+          padding: '2rem',
+          marginBottom: '2rem'
+        }}
+      >
+        <h3 style={{
+          fontSize: '1.3rem',
+          fontWeight: '700',
+          marginBottom: '1rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem'
+        }}>
+          <Heart size={24} color="#ff6b6b" />
+          Главный инсайт
+        </h3>
+        <p style={{
+          fontSize: '1rem',
+          lineHeight: '1.6',
+          color: '#333'
+        }}>
+          {interpretation.mainInsight}
+        </p>
+      </motion.div>
+
+      {/* Описание уровня */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        style={{
+          background: 'white',
+          border: '1px solid #e0e0e0',
+          borderRadius: '12px',
+          padding: '2rem',
+          marginBottom: '2rem'
+        }}
+      >
+        <h3 style={{
+          fontSize: '1.3rem',
+          fontWeight: '700',
+          marginBottom: '1rem'
+        }}>
+          Что это значит?
+        </h3>
+        <p style={{
+          fontSize: '1rem',
+          lineHeight: '1.7',
+          color: '#555'
+        }}>
+          {interpretation.levelDescription}
+        </p>
+      </motion.div>
+
+      {/* Вызов и путь роста */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="grid md:grid-cols-3 gap-6"
-          style={{ marginBottom: '4rem' }}
+          transition={{ delay: 0.3 }}
+          style={{
+            background: 'white',
+            border: '1px solid #e0e0e0',
+            borderRadius: '12px',
+            padding: '2rem'
+          }}
         >
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-xl p-4 min-h-[140px] flex flex-col">
-            <div className="flex items-baseline justify-between mb-2">
-              <div className="flex items-baseline gap-2">
-                <User className="w-5 h-5 text-blue-600" />
-                <h3 className="text-base font-semibold text-blue-800">{getPersonalMaturityTitle()}</h3>
-              </div>
-              <Tooltip content={getPersonalMaturityTooltip()}>
-                <Info className="w-4 h-4 text-blue-400 hover:text-blue-600 cursor-help" />
-              </Tooltip>
-            </div>
-            
-            <div className="text-2xl font-bold text-blue-700 mb-1">
-              {Math.round(result.personalMaturity)} уровень
-            </div>
-            
-            <div className="text-sm font-medium text-blue-600 mb-1">
-              {levels.find(l => l.id === Math.round(result.personalMaturity))?.name || 'Связь'}
-            </div>
-            
-            <div className="text-xs text-gray-700 flex-1">
-              {levels.find(l => l.id === Math.round(result.personalMaturity))?.shortDescription || 'Доверие, интерес, открытость, диалог, уважение границ'}
-            </div>
-          </div>
-
-          {/* Центральный блок динамики отношений */}
-          <div className="bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 rounded-xl p-4 text-center min-h-[140px] flex flex-col">
-            <div className="flex items-baseline justify-between mb-2">
-              <div className="flex items-baseline gap-2">
-                <Target className="w-5 h-5 text-purple-600" />
-                <h3 className="text-base font-semibold text-purple-800">Динамика отношений</h3>
-              </div>
-              <Tooltip content="Анализ текущего состояния и траектории развития отношений">
-                <Info className="w-4 h-4 text-purple-400 hover:text-purple-600 cursor-help" />
-              </Tooltip>
-            </div>
-            
-            {/* Основной индикатор */}
-            <div className="text-lg font-bold text-purple-700 mb-1" style={{ whiteSpace: 'pre-line' }}>
-              {getTrendText(result.relationshipTrend) === 'Отношения деградируют' ? 'Отношения\nдеградируют' : getTrendText(result.relationshipTrend)}
-            </div>
-            <div className="text-sm text-purple-600 mb-3">Текущий тренд</div>
-
-            {/* Дополнительная аналитика */}
-            <div className="flex justify-center items-center gap-3 text-xs text-gray-600 mt-auto">
-              <div className="text-center">
-                <div className="font-semibold text-gray-800">{Math.round(result.confidence * 100)}%</div>
-                <div>Уверенность</div>
-              </div>
-              <div className="w-px h-4 bg-purple-300"></div>
-              <div className="text-center">
-                <div className="font-semibold text-gray-800">{Math.abs(result.personalMaturity - result.relationshipMaturity).toFixed(1)}</div>
-                <div>Разрыв</div>
-              </div>
-              <div className="w-px h-4 bg-purple-300"></div>
-              <div className="text-center">
-                <div className="font-semibold text-gray-800">{Math.round(result.consistency * 100)}%</div>
-                <div>Согласованность</div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-200 rounded-xl p-4 min-h-[140px] flex flex-col">
-            <div className="flex items-baseline justify-between mb-2">
-              <div className="flex items-baseline gap-2">
-                <Users className="w-5 h-5 text-green-600" />
-                <h3 className="text-base font-semibold text-green-800">{getRelationshipMaturityTitle()}</h3>
-              </div>
-              <Tooltip content={getRelationshipMaturityTooltip()}>
-                <Info className="w-4 h-4 text-green-400 hover:text-green-600 cursor-help" />
-              </Tooltip>
-            </div>
-            
-            <div className="text-2xl font-bold text-green-700 mb-1">
-              {Math.round(result.relationshipMaturity)} уровень
-            </div>
-            
-            <div className="text-sm font-medium text-green-600 mb-1">
-              {levels.find(l => l.id === Math.round(result.relationshipMaturity))?.name || 'Статус'}
-            </div>
-            
-            <div className="text-xs text-gray-700 flex-1">
-              {levels.find(l => l.id === Math.round(result.relationshipMaturity))?.shortDescription || 'Образ, социальная функция, имидж, традиция, фасад'}
-            </div>
-          </div>
+          <h3 style={{
+            fontSize: '1.1rem',
+            fontWeight: '700',
+            marginBottom: '1rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}>
+            <AlertCircle size={20} color="#ff9800" />
+            Главный вызов
+          </h3>
+          <p style={{
+            fontSize: '0.95rem',
+            lineHeight: '1.6',
+            color: '#666'
+          }}>
+            {interpretation.currentChallenge}
+          </p>
         </motion.div>
 
-
-
-        {/* Лестница Союза */}
-        <div style={{ marginBottom: '4rem' }}>
-          <ModernSection
-            title="Интерактивная лестница развития"
-            subtitle="Нажмите на любую ступень, чтобы узнать больше о каждом уровне"
-            icon={<Layers className="w-5 h-5" />}
-            variant="primary"
-            priority="high"
-            collapsible={false}
-          >
-          <ErrorBoundary>
-            <UnionLadder 
-              result={convertedResult}
-              selectedLevelId={selectedLevelId || Math.round(result.personalMaturity)}
-              onLevelSelect={setSelectedLevelId}
-            />
-          </ErrorBoundary>
-        </ModernSection>
-        </div>
-
-        {/* Углублённая психологическая интерпретация */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          style={{ marginBottom: '4rem' }}
+          style={{
+            background: 'white',
+            border: '1px solid #e0e0e0',
+            borderRadius: '12px',
+            padding: '2rem'
+          }}
         >
-          <ErrorBoundary>
-            <PsychologicalInsights 
-              results={convertAdaptiveToTestResult(result)}
-              className="mb-6"
-            />
-          </ErrorBoundary>
+          <h3 style={{
+            fontSize: '1.1rem',
+            fontWeight: '700',
+            marginBottom: '1rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}>
+            <TrendingUp size={20} color="#4CAF50" />
+            Путь роста
+          </h3>
+          <p style={{
+            fontSize: '0.95rem',
+            lineHeight: '1.6',
+            color: '#666'
+          }}>
+            {interpretation.growthPath}
+          </p>
         </motion.div>
+      </div>
 
-        {/* Детальный анализ */}
-        <div style={{ marginBottom: '4rem' }}>
-          <ModernSection
-            title="Детальный психологический анализ"
-            subtitle="Углубленное исследование различных аспектов вашей личности и отношений"
-            icon={<BarChart3 className="w-5 h-5" />}
-            variant="success"
-            priority="medium"
-          >
-            <ModernTabs tabs={detailedAnalysisTabs} defaultTab="compatibility" />
-          </ModernSection>
-        </div>
-
-        {/* Специализированные анализы */}
-        <div style={{ marginBottom: '4rem' }}>
-          <ModernSection
-            title="Специализированные психологические анализы"
-            subtitle="Глубокий анализ конкретных паттернов поведения и психологических особенностей"
-            icon={<Zap className="w-5 h-5" />}
-            variant="purple"
-            priority="medium"
-            defaultExpanded={false}
-          >
-            <ModernTabs tabs={specializedAnalysisTabs} defaultTab="trauma" compact />
-          </ModernSection>
-        </div>
-
-        {/* Визуализации */}
-        <div style={{ marginBottom: '4rem' }}>
-          <ModernSection
-            title="Визуализация результатов"
-            subtitle="Графическое представление ваших результатов для лучшего понимания"
-            icon={<Award className="w-5 h-5" />}
-            variant="warning"
-            priority="low"
-            defaultExpanded={false}
-          >
-          <div className="space-y-6">
-            {/* Волновой график */}
-            <div>
-              <h4 className="font-semibold mb-4">Волновой график развития</h4>
-              <ErrorBoundary>
-                <UnionWaveChart result={convertAdaptiveToTestResult(result)} />
-              </ErrorBoundary>
-            </div>
-            
-            {/* Прогресс индикаторы */}
-            <div>
-              <h4 className="font-semibold mb-4">Показатели развития</h4>
-              <div className="grid md:grid-cols-2 gap-4">
-                <ProgressIndicator
-                  label="Личная зрелость"
-                  value={Math.round(result.personalMaturity * 8.33)}
-                  color="blue"
-                />
-                <ProgressIndicator
-                  label="Зрелость отношений"
-                  value={Math.round(result.relationshipMaturity * 8.33)}
-                  color="green"
-                />
-                <ProgressIndicator
-                  label="Уверенность диагностики"
-                  value={result.confidence}
-                  color="purple"
-                />
-                <ProgressIndicator
-                  label="Согласованность ответов"
-                  value={Math.round(result.consistency * 100)}
-                  color="orange"
-                />
-              </div>
-            </div>
-
-            {/* Улучшенные индикаторы */}
-            <ToggleView label="Показать расширенный анализ индикаторов">
-              <ErrorBoundary>
-                <EnhancedIndicatorsSummary
-                  indicators={result.indicators}
-                  personalMaturity={result.personalMaturity}
-                  relationshipMaturity={result.relationshipMaturity}
-                  detectedZone={result.detectedZone}
-                />
-              </ErrorBoundary>
-            </ToggleView>
-          </div>
-        </ModernSection>
-        </div>
-
-        {/* Статистика адаптивного теста */}
-        <div style={{ marginBottom: '4rem' }}>
-          <ModernSection
-            title="Статистика адаптивного тестирования"
-            subtitle="Метрики качества и эффективности алгоритма"
-            icon={<Target className="w-5 h-5" />}
-            variant="primary"
-            priority="low"
-            defaultExpanded={false}
-          >
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <MetricCard
-              title="Задано вопросов"
-              value={result.questionsAsked}
-              subtitle="вместо обычных 25+"
-              color="blue"
-              size="sm"
-            />
-            <MetricCard
-              title="Уверенность"
-                                value={`${Math.round(result.confidence * 100)}%`}
-              subtitle="в точности диагностики"
-              color="green"
-              size="sm"
-            />
-            <MetricCard
-              title="Согласованность"
-              value={`${Math.round(result.consistency * 100)}%`}
-              subtitle="ответов"
-              color="purple"
-              size="sm"
-            />
-            <MetricCard
-              title="Время"
-              value="~3-5 мин"
-              subtitle="прохождения"
-              color="orange"
-              size="sm"
-            />
-          </div>
-        </ModernSection>
-        </div>
-
-        {/* Маркетинговый призыв к действию */}
+      {/* Следующий уровень */}
+      {interpretation.nextLevel && (
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="text-center"
-          style={{ marginTop: '5rem', marginBottom: '4rem' }}
+          style={{
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            borderRadius: '12px',
+            padding: '2rem',
+            color: 'white'
+          }}
         >
-          <div className="modern-card modern-card--primary max-w-4xl mx-auto">
-            <div className="text-center">
-              <Heart className="w-16 h-16 text-pink-500 mx-auto mb-6" />
-              <h2 className="heading-2 mb-6" style={{ fontSize: '2.5rem', color: 'var(--color-text)' }}>
-                Готовы поднять ваши отношения на новый уровень?
-              </h2>
-              
-              <div className="text-left max-w-3xl mx-auto mb-8">
-                <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-6 mb-6">
-                  <h3 className="text-xl font-bold text-purple-800 mb-4 text-center">
-                    🎯 Диагностика — это только начало вашего пути!
-                  </h3>
-                  <p className="text-purple-700 text-center text-lg leading-relaxed">
-                    Знание своего текущего уровня дает вам карту, но чтобы двигаться дальше, 
-                    нужны конкретные инструменты и пошаговый план действий. 
-                    Именно это вы получите в <strong>бесплатном марафоне "12 ступеней к идеальным отношениям"</strong>
-                  </p>
-                </div>
-                
-                <div className="grid md:grid-cols-3 gap-4 mb-6">
-                  <div className="text-center p-4 bg-yellow-50 rounded-lg">
-                    <div className="text-2xl font-bold text-yellow-600">5 дней</div>
-                    <div className="text-sm text-yellow-700">интенсивной работы</div>
-                  </div>
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-600">700.000+</div>
-                    <div className="text-sm text-blue-700">женщин изменили жизнь</div>
-                  </div>
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600">15 лет</div>
-                    <div className="text-sm text-green-700">опыта автора</div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="mb-8">
-                <a 
-                  href="https://coachingacademy.su/12steps" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="gradient-button"
-                  style={{ 
-                    fontSize: '1.25rem', 
-                    padding: '20px 40px', 
-                    borderRadius: '50px',
-                    display: 'inline-block',
-                    textDecoration: 'none',
-                    marginBottom: '1rem'
-                  }}
-                >
-                  🚀 ПРИСОЕДИНИТЬСЯ К БЕСПЛАТНОМУ МАРАФОНУ
-                </a>
-                <p className="text-sm text-gray-600">
-                  ⏰ Начните движение к отношениям вашей мечты уже сегодня
-                </p>
-              </div>
-              
-              <div className="border-t pt-6">
-                <p className="text-gray-500 text-sm mb-4">
-                  Или изучите ваши результаты глубже:
-                </p>
-                <div className="action-buttons">
-                  <button onClick={onRestart} className="compact-btn compact-btn--outline">
-                    <RotateCcw className="w-3 h-3" />
-                    Пройти тест снова
-                  </button>
-                  <button onClick={handleShare} className="compact-btn compact-btn--outline">
-                    <Share2 className="w-3 h-3" />
-                    Поделиться результатами
-                  </button>
-                </div>
-              </div>
-            </div>
+          <h3 style={{
+            fontSize: '1.1rem',
+            fontWeight: '700',
+            marginBottom: '0.5rem'
+          }}>
+            ✨ Что дальше?
+          </h3>
+          <p style={{
+            fontSize: '0.95rem',
+            lineHeight: '1.6',
+            opacity: 0.95
+          }}>
+            {interpretation.nextLevel}
+          </p>
+        </motion.div>
+      )}
+
+      {/* Валидационные замечания */}
+      {interpretation.validationNotes && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+          style={{
+            background: '#fff3cd',
+            border: '1px solid #ffeaa7',
+            borderRadius: '12px',
+            padding: '1.5rem',
+            marginTop: '2rem',
+            display: 'flex',
+            gap: '1rem',
+            alignItems: 'flex-start'
+          }}
+        >
+          <AlertCircle size={20} color="#f0ad4e" style={{ flexShrink: 0, marginTop: '2px' }} />
+          <div>
+            <h4 style={{ fontWeight: '700', marginBottom: '0.5rem', color: '#856404' }}>
+              Важно знать
+            </h4>
+            <p style={{ color: '#856404', fontSize: '0.95rem', lineHeight: '1.5' }}>
+              {interpretation.validationNotes}
+            </p>
           </div>
         </motion.div>
+      )}
+    </div>
+  );
+
+  // Компонент для вкладки распределения уровней
+  const BreakdownTab = () => (
+    <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        style={{
+          background: 'white',
+          border: '1px solid #e0e0e0',
+          borderRadius: '12px',
+          padding: '2rem'
+        }}
+      >
+        <h3 style={{ fontSize: '1.3rem', fontWeight: '700', marginBottom: '2rem' }}>
+          Распределение по уровням
+        </h3>
+
+        {result.levelScores.map((levelScore) => {
+          const barWidth = Math.max(levelScore.percentage, 5);
+          const isMainLevel = levelScore.level === roundedLevel;
+
+          return (
+            <div key={levelScore.level} style={{ marginBottom: '1.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <div style={{ fontWeight: isMainLevel ? '700' : '600' }}>
+                  {getLevelIcon(levelScore.level)} Уровень {levelScore.level}
+                  {isMainLevel && <span style={{ color: '#2196F3', marginLeft: '0.5rem' }}>(ваш уровень)</span>}
+                </div>
+                <div style={{ fontSize: '0.9rem', color: '#666' }}>
+                  {levelScore.percentage}%
+                </div>
+              </div>
+              <div style={{
+                width: '100%',
+                height: '8px',
+                background: '#f0f0f0',
+                borderRadius: '4px',
+                overflow: 'hidden'
+              }}>
+                <div style={{
+                  width: `${barWidth}%`,
+                  height: '100%',
+                  background: isMainLevel
+                    ? getLevelColor(levelScore.level)
+                    : `${getLevelColor(levelScore.level)}99`,
+                  transition: 'width 0.5s ease'
+                }} />
+              </div>
+            </div>
+          );
+        })}
+      </motion.div>
+    </div>
+  );
+
+  // Компонент для вкладки действий
+  const ActionsTab = () => (
+    <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        style={{
+          background: 'white',
+          border: '1px solid #e0e0e0',
+          borderRadius: '12px',
+          padding: '2rem',
+          marginBottom: '2rem'
+        }}
+      >
+        <h3 style={{ fontSize: '1.3rem', fontWeight: '700', marginBottom: '0.5rem' }}>
+          {actionPlan.mainChallenge}
+        </h3>
+        <p style={{ color: '#999', fontSize: '0.9rem', marginBottom: '2rem' }}>
+          Главный вызов вашего уровня
+        </p>
+      </motion.div>
+
+      {actionPlan.topActions.map((action, idx) => (
+        <motion.div
+          key={action.id}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: idx * 0.1 }}
+          style={{
+            background: 'white',
+            border: '1px solid #e0e0e0',
+            borderRadius: '12px',
+            padding: '2rem',
+            marginBottom: '1.5rem'
+          }}
+        >
+          <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+            <div style={{
+              width: '36px',
+              height: '36px',
+              background: '#e3f2fd',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: '700',
+              color: '#2196F3',
+              flexShrink: 0
+            }}>
+              {idx + 1}
+            </div>
+            <div style={{ flex: 1 }}>
+              <h4 style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '0.5rem' }}>
+                {action.title}
+              </h4>
+              <p style={{ fontSize: '0.9rem', color: '#999', marginBottom: '1rem' }}>
+                ⏱️ {action.duration} мин • 📊 Сложность: {
+                  action.difficulty === 'easy' ? 'Простая' :
+                  action.difficulty === 'moderate' ? 'Средняя' : 'Сложная'
+                }
+              </p>
+            </div>
+          </div>
+
+          <div style={{ marginBottom: '1rem' }}>
+            <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: '#555', marginBottom: '1rem' }}>
+              {action.description}
+            </p>
+          </div>
+
+          <div style={{
+            background: '#f9f9f9',
+            borderLeft: '4px solid #2196F3',
+            padding: '1rem',
+            marginBottom: '1rem',
+            borderRadius: '4px'
+          }}>
+            <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '0.5rem' }}>
+              <strong>Пример:</strong>
+            </p>
+            <p style={{ fontSize: '0.9rem', color: '#666', fontStyle: 'italic' }}>
+              {action.example}
+            </p>
+          </div>
+
+          <div style={{
+            background: '#e8f5e9',
+            borderLeft: '4px solid #4CAF50',
+            padding: '1rem',
+            borderRadius: '4px'
+          }}>
+            <p style={{ fontSize: '0.9rem', color: '#2e7d32', marginBottom: '0.5rem' }}>
+              <strong>Ожидаемый результат:</strong>
+            </p>
+            <p style={{ fontSize: '0.9rem', color: '#2e7d32' }}>
+              {action.expected_outcome}
+            </p>
+          </div>
+        </motion.div>
+      ))}
+    </div>
+  );
+
+  // Компонент для вкладки валидации
+  const ValidationTab = () => (
+    <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        style={{
+          background: 'white',
+          border: '1px solid #e0e0e0',
+          borderRadius: '12px',
+          padding: '2rem',
+          marginBottom: '2rem'
+        }}
+      >
+        <h3 style={{ fontSize: '1.3rem', fontWeight: '700', marginBottom: '2rem' }}>
+          Надёжность результатов
+        </h3>
+
+        {/* Общий рейтинг */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(2, 1fr)',
+          gap: '1.5rem',
+          marginBottom: '2rem'
+        }}>
+          <div style={{
+            padding: '1.5rem',
+            background: result.validation.reliability === 'high' ? '#e8f5e9' :
+                        result.validation.reliability === 'medium' ? '#fff9e6' : '#ffebee',
+            borderRadius: '12px',
+            border: `2px solid ${
+              result.validation.reliability === 'high' ? '#4CAF50' :
+              result.validation.reliability === 'medium' ? '#ff9800' : '#f44336'
+            }`
+          }}>
+            <div style={{ fontSize: '0.9rem', color: '#666', marginBottom: '0.5rem' }}>
+              Общий рейтинг надёжности
+            </div>
+            <div style={{
+              fontSize: '2rem',
+              fontWeight: '700',
+              color:
+                result.validation.reliability === 'high' ? '#4CAF50' :
+                result.validation.reliability === 'medium' ? '#ff9800' : '#f44336'
+            }}>
+              {result.validation.reliabilityScore}/100
+            </div>
+            <div style={{ fontSize: '0.85rem', marginTop: '0.5rem', color: '#666' }}>
+              {
+                result.validation.reliability === 'high' ? '✓ Высокая надёжность' :
+                result.validation.reliability === 'medium' ? '⚠ Средняя надёжность' : '✗ Низкая надёжность'
+              }
+            </div>
+          </div>
+
+          <div style={{
+            padding: '1.5rem',
+            background: '#f5f5f5',
+            borderRadius: '12px'
+          }}>
+            <div style={{ fontSize: '0.9rem', color: '#666', marginBottom: '0.5rem' }}>
+              Среднее время ответа
+            </div>
+            <div style={{ fontSize: '2rem', fontWeight: '700', color: '#2196F3' }}>
+              {(result.validation.averageResponseTime / 1000).toFixed(1)}сек
+            </div>
+          </div>
+        </div>
+
+        {/* Детальные показатели */}
+        <div style={{ marginBottom: '2rem' }}>
+          <h4 style={{ fontSize: '1rem', fontWeight: '700', marginBottom: '1rem' }}>
+            Анализ показателей
+          </h4>
+
+          <div style={{ display: 'grid', gap: '1rem' }}>
+            {/* Социальная желательность */}
+            <div style={{ padding: '1rem', background: '#f9f9f9', borderRadius: '8px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <span>Социальная желательность</span>
+                <span style={{ fontWeight: '700' }}>
+                  {Math.round(result.validation.socialDesirabilityScore * 100)}%
+                </span>
+              </div>
+              <div style={{
+                width: '100%',
+                height: '6px',
+                background: '#e0e0e0',
+                borderRadius: '3px',
+                overflow: 'hidden'
+              }}>
+                <div style={{
+                  width: `${result.validation.socialDesirabilityScore * 100}%`,
+                  height: '100%',
+                  background: result.validation.socialDesirabilityScore > 0.6 ? '#ff9800' : '#4CAF50'
+                }} />
+              </div>
+              <p style={{ fontSize: '0.85rem', color: '#999', marginTop: '0.5rem' }}>
+                {result.validation.socialDesirabilityScore > 0.6
+                  ? 'Вы стараетесь выглядеть лучше, чем есть на самом деле'
+                  : 'Ответы выглядят честными'}
+              </p>
+            </div>
+
+            {/* Когерентность */}
+            <div style={{ padding: '1rem', background: '#f9f9f9', borderRadius: '8px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <span>Внутренняя согласованность</span>
+                <span style={{ fontWeight: '700' }}>{result.validation.coherenceScore}</span>
+              </div>
+              <div style={{
+                width: '100%',
+                height: '6px',
+                background: '#e0e0e0',
+                borderRadius: '3px',
+                overflow: 'hidden'
+              }}>
+                <div style={{
+                  width: `${result.validation.coherenceScore}%`,
+                  height: '100%',
+                  background: result.validation.coherenceScore > 70 ? '#4CAF50' :
+                              result.validation.coherenceScore > 40 ? '#ff9800' : '#f44336'
+                }} />
+              </div>
+              <p style={{ fontSize: '0.85rem', color: '#999', marginTop: '0.5rem' }}>
+                {result.validation.coherenceScore > 70
+                  ? 'Ответы очень согласованные'
+                  : result.validation.coherenceScore > 40
+                  ? 'Есть некоторые противоречия'
+                  : 'Много противоречий в ответах'}
+              </p>
+            </div>
+
+            {/* Духовный байпас */}
+            <div style={{ padding: '1rem', background: '#f9f9f9', borderRadius: '8px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <span>Духовный байпас</span>
+                <span style={{ fontWeight: '700' }}>
+                  {Math.round(result.validation.spiritualBypassScore * 100)}%
+                </span>
+              </div>
+              <div style={{
+                width: '100%',
+                height: '6px',
+                background: '#e0e0e0',
+                borderRadius: '3px',
+                overflow: 'hidden'
+              }}>
+                <div style={{
+                  width: `${result.validation.spiritualBypassScore * 100}%`,
+                  height: '100%',
+                  background: result.validation.spiritualBypassScore > 0.6 ? '#ff9800' : '#4CAF50'
+                }} />
+              </div>
+              <p style={{ fontSize: '0.85rem', color: '#999', marginTop: '0.5rem' }}>
+                {result.validation.spiritualBypassScore > 0.6
+                  ? 'Признаки отсутствия практической основы при высоких уровнях'
+                  : 'Баланс между идеалом и практикой'}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Противоречия */}
+        {result.validation.contradictionFlags.length > 0 && (
+          <div style={{
+            background: '#fff3cd',
+            border: '1px solid #ffeaa7',
+            borderRadius: '8px',
+            padding: '1rem'
+          }}>
+            <h4 style={{ fontWeight: '700', marginBottom: '0.5rem', color: '#856404' }}>
+              ⚠️ Обнаруженные противоречия
+            </h4>
+            <ul style={{ margin: '0', paddingLeft: '1.5rem', color: '#856404' }}>
+              {result.validation.contradictionFlags.map((flag, idx) => (
+                <li key={idx} style={{ fontSize: '0.9rem', marginBottom: '0.3rem' }}>
+                  {flag}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </motion.div>
+    </div>
+  );
+
+  return (
+    <div style={{
+      backgroundColor: '#fafafa',
+      minHeight: '100vh',
+      paddingBottom: '3rem'
+    }}>
+      {/* Header */}
+      <div style={{
+        background: 'white',
+        borderBottom: '1px solid #e0e0e0',
+        padding: '2rem 1rem'
+      }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
+          <h1 style={{
+            fontSize: '2.5rem',
+            fontWeight: '700',
+            marginBottom: '0.5rem',
+            color: getLevelColor(roundedLevel)
+          }}>
+            Ваши результаты 🎉
+          </h1>
+          <p style={{ color: '#999' }}>
+            Лестница Союза - Определение уровня психологической зрелости в отношениях
+          </p>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div style={{
+        maxWidth: '1200px',
+        margin: '0 auto',
+        padding: '2rem 1rem'
+      }}>
+        <div style={{
+          display: 'flex',
+          gap: '1rem',
+          marginBottom: '2rem',
+          borderBottom: '1px solid #e0e0e0',
+          overflowX: 'auto',
+          paddingBottom: '1rem'
+        }}>
+          {(['summary', 'breakdown', 'actions', 'validation'] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              style={{
+                padding: '0.75rem 1.5rem',
+                border: 'none',
+                background: 'none',
+                cursor: 'pointer',
+                borderBottom: activeTab === tab ? '3px solid #2196F3' : 'none',
+                fontWeight: activeTab === tab ? '700' : '500',
+                color: activeTab === tab ? '#2196F3' : '#999',
+                transition: 'all 0.3s ease',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              {
+                tab === 'summary' ? '📋 Резюме' :
+                tab === 'breakdown' ? '📊 Распределение' :
+                tab === 'actions' ? '🎯 Действия' : '✅ Валидация'
+              }
+            </button>
+          ))}
+        </div>
+
+        {/* Tab Content */}
+        <div style={{ marginBottom: '2rem' }}>
+          {activeTab === 'summary' && <SummaryTab />}
+          {activeTab === 'breakdown' && <BreakdownTab />}
+          {activeTab === 'actions' && <ActionsTab />}
+          {activeTab === 'validation' && <ValidationTab />}
+        </div>
+
+        {/* Action Buttons */}
+        <div style={{
+          maxWidth: '900px',
+          margin: '0 auto',
+          display: 'flex',
+          gap: '1rem',
+          justifyContent: 'center'
+        }}>
+          <button
+            onClick={onRestart}
+            style={{
+              padding: '1rem 2rem',
+              borderRadius: '8px',
+              border: '1px solid #e0e0e0',
+              background: 'white',
+              cursor: 'pointer',
+              fontSize: '1rem',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseOver={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.background = '#f5f5f5';
+            }}
+            onMouseOut={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.background = 'white';
+            }}
+          >
+            <RotateCcw size={20} />
+            Пройти тест ещё раз
+          </button>
+
+          <button
+            onClick={() => {
+              const text = `Результат теста "Лестница Союза": Уровень ${roundedLevel} - ${levelDef?.name}. ${interpretation.heroMessage}`;
+              navigator.share?.({
+                title: 'Лестница Союза',
+                text,
+                url: window.location.href
+              }).catch(() => {
+                navigator.clipboard.writeText(`${text}\n${window.location.href}`);
+                alert('Результат скопирован в буфер обмена');
+              });
+            }}
+            style={{
+              padding: '1rem 2rem',
+              borderRadius: '8px',
+              border: 'none',
+              background: '#2196F3',
+              color: 'white',
+              cursor: 'pointer',
+              fontSize: '1rem',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseOver={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.background = '#1976D2';
+            }}
+            onMouseOut={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.background = '#2196F3';
+            }}
+          >
+            <Share2 size={20} />
+            Поделиться результатом
+          </button>
+        </div>
       </div>
     </div>
   );
-} 
+};
+
+export default ModernAdaptiveResults;
