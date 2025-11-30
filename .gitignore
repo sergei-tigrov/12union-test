@@ -1,0 +1,1 @@
+# Dependencies\nnode_modules/\npackage-lock.json\nyarn.lock\n\n# Build output\ndist/\nbuild/\n*.tsbuildinfo\n\n# IDE\n.vscode/\n.idea/\n*.swp\n*.swo\n*~\n.DS_Store\n\n# Environment\n.env\n.env.local\n.env.*.local\n\n# Logs\n*.log\nnpm-debug.log*\nyarn-debug.log*\nyarn-error.log*\n\n# Runtime data\npids/\n*.pid\n*.seed\n*.pid.lock\n\n# Testing\n.nyc_output/\ncoverage/\n

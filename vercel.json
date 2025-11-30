@@ -1,0 +1,1 @@
+{\n  \"name\": \"12union-test\",\n  \"version\": 2,\n  \"buildCommand\": \"npm run build\",\n  \"outputDirectory\": \"dist\",\n  \"env\": {},\n  \"functions\": {\n    \"src/**/*.ts\": {\n      \"memory\": 1024,\n      \"maxDuration\": 30\n    }\n  }\n}\n
