@@ -1,1 +1,543 @@
-/**\n * ИНТЕРПРЕТАЦИЯ РЕЗУЛЬТАТОВ\n * \"Лестница союза\"\n *\n * Генерирует понятные человеческие описания результатов тестирования\n * с учетом режима тестирования и валидации\n */\n\nimport {\n  TestResult,\n  ComparisonResult,\n  TestMode,\n  RelationshipStatus,\n  UnionLevel,\n} from './types';\nimport { getLevelDefinition } from './levels-definitions';\nimport { getActionPlan } from './action-library';\n\n// ============================================================================\n// ТИПЫ\n// ============================================================================\n\nexport interface ResultInterpretation {\n  heroMessage: string; // Короткое 1-2 предложение для героя\n  mainInsight: string; // Главный инсайт (2-3 предложения)\n  levelDescription: string; // Полное описание уровня\n  currentChallenge: string; // Главный вызов на этом уровне\n  growthPath: string; // Как двигаться дальше\n  recommendations: string[];\n  validationNotes?: string; // Если есть проблемы с валидацией\n  nextLevel?: string; // Что ждет на следующем уровне\n}\n\nexport interface PairComparisonInterpretation {\n  personAInterpretation: ResultInterpretation;\n  personBInterpretation: ResultInterpretation;\n  gapMessage: string; // Как рассказать о разнице\n  agreementPoints: string[]; // Где они согласны\n  conflictPoints: string[]; // Где они не согласны\n  growthRecommendations: string[]; // Рекомендации для пары\n  compatibilityScore: number; // 0-100\n  compatibilityMessage: string;\n}\n\n// ============================================================================\n// ОСНОВНАЯ ИНТЕРПРЕТАЦИЯ\n// ============================================================================\n\n/**\n * Интерпретировать результаты тестирования\n */\nexport function interpretResult(\n  result: TestResult\n): ResultInterpretation {\n  const levelDef = getLevelDefinition(result.personalLevel);\n  if (!levelDef) {\n    throw new Error(\n      `Level definition not found for level ${result.personalLevel}`\n    );\n  }\n\n  // Определить мод тестирования для контекста\n  const context = getTestModeContext(result.testMode, result.relationshipStatus);\n\n  // Генерировать сообщения\n  const heroMessage = generateHeroMessage(\n    result.personalLevel,\n    result.testMode,\n    result.relationshipStatus\n  );\n\n  const mainInsight = generateMainInsight(\n    result.personalLevel,\n    result.testMode,\n    levelDef.shortDescription\n  );\n\n  const currentChallenge = generateChallenge(\n    result.personalLevel,\n    result.testMode\n  );\n\n  const growthPath = generateGrowthPath(\n    result.personalLevel,\n    result.testMode\n  );\n\n  const nextLevelDef =\n    result.personalLevel < 12 ? getLevelDefinition((result.personalLevel + 1) as UnionLevel) : null;\n  const nextLevel = nextLevelDef ? generateNextLevelPreview(nextLevelDef) : undefined;\n\n  // Генерировать рекомендации\n  const actionPlan = getActionPlan(Math.ceil(result.personalLevel) as UnionLevel);\n  const recommendations = actionPlan.topActions.map((a) => a.title);\n\n  // Добавить валидационные замечания если нужны\n  let validationNotes: string | undefined;\n  if (result.validation.reliability === 'low') {\n    validationNotes =\n      'Внимание: результаты теста имеют низкую надежность из-за обнаруженных проблем. Рекомендуется пересдать тест позже, когда сможете быть более честны и вдумчивы.';\n  } else if (result.validation.reliability === 'medium') {\n    validationNotes =\n      'Результаты могут быть частично искажены. Учитывайте рекомендации валидации при интерпретации.';\n  }\n\n  return {\n    heroMessage,\n    mainInsight,\n    levelDescription: levelDef.fullDescription,\n    currentChallenge,\n    growthPath,\n    recommendations,\n    validationNotes,\n    nextLevel,\n  };\n}\n\n// ============================================================================\n// ГЕНЕРАТОРЫ СООБЩЕНИЙ\n// ============================================================================\n\n/**\n * Генерировать героическое сообщение (30 сек чтения)\n */\nfunction generateHeroMessage(\n  level: number,\n  mode: TestMode,\n  status: RelationshipStatus\n): string {\n  const levelInt = Math.round(level);\n\n  // Специфичные для режима\n  if (mode === 'self' && status === 'single_past') {\n    return `По результатам вашего анализа, вы находитесь на уровне ${levelInt} - ${getLevelDefinition(levelInt as UnionLevel)?.name}. Это уровень где вы в отношениях прошлого.`;\n  }\n\n  if (mode === 'self' && status === 'single_potential') {\n    return `По вашей оценке потенциала, вы можете развиться до уровня ${levelInt}. Это то куда вы хотите прийти в будущих отношениях.`;\n  }\n\n  if (mode === 'self' && status === 'in_relationship') {\n    return `В ваших текущих отношениях вы развили уровень ${levelInt} - ${getLevelDefinition(levelInt as UnionLevel)?.name}. Это ваша нынешняя реальность.`;\n  }\n\n  if (mode === 'partner_assessment') {\n    return `По вашей оценке, ваш партнер находится на уровне ${levelInt} - ${getLevelDefinition(levelInt as UnionLevel)?.name}. Это то как вы его/её видите.`;\n  }\n\n  if (mode === 'potential' && status === 'single_potential') {\n    return `Ваш потенциал развития - уровень ${levelInt}. Это достижимо при наличии подходящих условий и осознанной работы.`;\n  }\n\n  if (mode === 'pair_discussion') {\n    return `Вместе вы создали союз уровня ${levelInt} - ${getLevelDefinition(levelInt as UnionLevel)?.name}. Это уровень вашей совместной зрелости.`;\n  }\n\n  return `Ваш уровень - ${levelInt}: ${getLevelDefinition(levelInt as UnionLevel)?.name}`;\n}\n\n/**\n * Генерировать главный инсайт\n */\nfunction generateMainInsight(\n  level: number,\n  mode: TestMode,\n  shortDescription: string\n): string {\n  const levelInt = Math.round(level);\n\n  if (levelInt <= 3) {\n    return `${shortDescription} На этом уровне основной фокус на выживание, стабильность и безопасность. Это не лень, это реальность вашего состояния.`;\n  }\n\n  if (levelInt === 4) {\n    return `${shortDescription} Это уровень где отношения функционируют хорошо, но эмоциональная связь еще развивается. Вы готовы к следующему шагу.`;\n  }\n\n  if (levelInt === 5) {\n    return `${shortDescription} На этом уровне много чувств, интенсивности, но часто отсутствует стабильность. Задача - научиться управлять эмоциями без их подавления.`;\n  }\n\n  if (levelInt === 6) {\n    return `${shortDescription} Это уровень где имидж часто важнее реальности. Задача - найти аутентичность под ролью.`;\n  }\n\n  if (levelInt === 7) {\n    return `${shortDescription} Поздравляем - вы достигли первого уровня психологической зрелости. На этом уровне есть реальное взаимопонимание и безопасность.`;\n  }\n\n  if (levelInt === 8) {\n    return `${shortDescription} Это уровень безусловной любви и принятия. Вы способны любить партнера не для себя, а для его блага.`;\n  }\n\n  if (levelInt === 9) {\n    return `${shortDescription} На этом уровне два полностью независимых человека выбирают друг друга ежедневно. Это редкая зрелость.`;\n  }\n\n  if (levelInt >= 10) {\n    return `${shortDescription} Это редкий уровень где отношения становятся творческой силой. Вместе вы создаете значимое для мира.`;\n  }\n\n  return shortDescription;\n}\n\n/**\n * Генерировать описание текущего вызова\n */\nfunction generateChallenge(\n  level: number,\n  mode: TestMode\n): string {\n  const levelInt = Math.round(level);\n\n  const challenges: Record<number, string> = {\n    1: 'Главный вызов - найти безопасность и выход из токсичной ситуации. Профессиональная помощь критична.',\n    2: 'Главный вызов - осознать бессознательные паттерны и начать делать сознательные выборы.',\n    3: 'Главный вызов - развить экономическую и эмоциональную независимость, чтобы отношения были выбором а не необходимостью.',\n    4: 'Главный вызов - перейти от практической функции отношений к эмоциональной связи и аутентичности.',\n    5: 'Главный вызов - управлять эмоциональной интенсивностью и развить способность к саморегуляции.',\n    6: 'Главный вызов - найти аутентичность и перестать жить в соответствии с ожиданиями других.',\n    7: 'Главный вызов - углубить психологическую близость и продолжать развиваться как пара.',\n    8: 'Главный вызов - практиковать безусловное принятие и служение без ожидания взамен.',\n    9: 'Главный вызов - сохранять полную автономию при глубокой связи, выбирая друг друга ежедневно.',\n    10: 'Главный вызов - каналировать энергию отношений в служение миру и создание значимого.',\n    11: 'Главный вызов - воплотить творческий потенциал отношений и помогать другим парам.',\n    12: 'Главный вызов - жить как инструмент Божественной любви и исцелять других своим примером.',\n  };\n\n  return challenges[levelInt] || challenges[6];\n}\n\n/**\n * Генерировать путь развития\n */\nfunction generateGrowthPath(\n  level: number,\n  mode: TestMode\n): string {\n  const levelInt = Math.round(level);\n\n  if (levelInt <= 3) {\n    return 'Путь развития: сначала необходима безопасность и стабильность. Затем - развитие саморефлексии и осознанности. Профессиональная помощь сильно ускорит процесс.';\n  }\n\n  if (levelInt === 4) {\n    return 'Путь развития: начните говорить о чувствах. Создавайте время для эмоциональной близости. Слушайте партнера без попыток решить его проблемы.';\n  }\n\n  if (levelInt === 5) {\n    return 'Путь развития: развивайте способность к саморегуляции эмоций. Медитация, йога, терапия помогут. Разделите ревность от любви.';\n  }\n\n  if (levelInt === 6) {\n    return 'Путь развития: практикуйте уязвимость. Делитесь тем что вас стыдит. Осознайте что аутентичность притягивает людей больше чем имидж.';\n  }\n\n  if (levelInt === 7) {\n    return 'Путь развития: углубляйте практику глубокого слушания. Используйте конфликты как возможность лучше понять друг друга. Наслаждайтесь достигнутой зрелостью.';\n  }\n\n  if (levelInt === 8) {\n    return 'Путь развития: развивайте практику служения. Делайте что-то для партнера не ожидая благодарности. Расширяйте границы любви на других людей.';\n  }\n\n  if (levelInt === 9) {\n    return 'Путь развития: сохраняйте собственные проекты и интересы. Практикуйте ежедневный выбор партнера. Вдохновляйте друг друга на развитие.';\n  }\n\n  if (levelInt >= 10) {\n    return 'Путь развития: создавайте совместные проекты которые служат миру. Помогайте другим парам. Используйте вашу любовь как исцеляющую силу.';\n  }\n\n  return 'Путь развития: продолжайте осознанную работу над отношениями.';\n}\n\n/**\n * Генерировать превью следующего уровня\n */\nfunction generateNextLevelPreview(\n  nextLevelDef: Awaited<ReturnType<typeof getLevelDefinition>>\n): string {\n  if (!nextLevelDef) return '';\n  return `Следующий уровень - ${nextLevelDef.name}: ${nextLevelDef.shortDescription}`;\n}\n\n// ============================================================================\n// СРАВНЕНИЕ ДЛЯ ПАР\n// ============================================================================\n\n/**\n * Интерпретировать результаты сравнения для пары\n */\nexport function interpretPairComparison(\n  result: ComparisonResult\n): PairComparisonInterpretation {\n  // Интерпретировать основной результат\n  const mainInterpretation = interpretResult(result);\n\n  // Интерпретировать результат партнера\n  let partnerInterpretation: ResultInterpretation = {\n    heroMessage: '',\n    mainInsight: '',\n    levelDescription: '',\n    currentChallenge: '',\n    growthPath: '',\n    recommendations: [],\n  };\n\n  if (result.comparisonWith) {\n    partnerInterpretation = interpretResult(result.comparisonWith);\n  }\n\n  // Рассчитать сообщение о разнице\n  const gap = result.gap || 0;\n  const gapMessage = generateGapMessage(result.personalLevel, gap, result.testMode);\n\n  // Найти точки согласия и конфликта\n  const agreementPoints = findAgreementPoints(\n    result.personalLevel,\n    result.comparisonWith?.personalLevel || 0\n  );\n  const conflictPoints = findConflictPoints(\n    result.personalLevel,\n    result.comparisonWith?.personalLevel || 0\n  );\n\n  // Генерировать рекомендации для пары\n  const growthRecommendations = generatePairRecommendations(\n    result.personalLevel,\n    result.comparisonWith?.personalLevel || 0,\n    gap\n  );\n\n  // Рассчитать совместимость\n  const compatibilityScore = result.compatibility || calculateCompatibility(\n    result.personalLevel,\n    result.comparisonWith?.personalLevel || 0\n  );\n  const compatibilityMessage = generateCompatibilityMessage(compatibilityScore);\n\n  return {\n    personAInterpretation: mainInterpretation,\n    personBInterpretation: partnerInterpretation,\n    gapMessage,\n    agreementPoints,\n    conflictPoints,\n    growthRecommendations,\n    compatibilityScore,\n    compatibilityMessage,\n  };\n}\n\n/**\n * Генерировать сообщение о разнице уровней\n */\nfunction generateGapMessage(\n  personalLevel: number,\n  gap: number,\n  mode: TestMode\n): string {\n  if (Math.abs(gap) < 0.5) {\n    return 'Вы находитесь практически на одном уровне развития - это хороший знак для пары.';\n  }\n\n  if (gap > 0 && gap < 1.5) {\n    return 'Небольшая разница в уровнях - это создает естественную динамику где один немного тянет другого вверх.';\n  }\n\n  if (gap > 1.5 && gap < 3) {\n    return 'Заметная разница в уровнях - это может создать трение но также возможность для обоих учиться друг у друга.';\n  }\n\n  if (gap >= 3) {\n    return 'Значительная разница в уровнях - это требует сознательной работы обеих сторон. Партнер с более высоким уровнем может потянуть вверх, но нужна готовность к изменениям.';\n  }\n\n  return 'Различия в уровнях - это возможность для роста обоих.';\n}\n\n/**\n * Найти точки согласия\n */\nfunction findAgreementPoints(\n  level1: number,\n  level2: number\n): string[] {\n  const agreements: string[] = [];\n\n  const l1 = Math.round(level1);\n  const l2 = Math.round(level2);\n\n  if (l1 >= 7 && l2 >= 7) {\n    agreements.push('Оба находитесь на психологически зрелом уровне');\n  }\n\n  if ((l1 >= 8 && l2 >= 8) || (l1 >= 4 && l2 >= 4)) {\n    agreements.push('Можете обсуждать финансовые вопросы рационально');\n  }\n\n  if ((l1 >= 7 && l2 >= 7)) {\n    agreements.push('Есть способность к глубокому пониманию');\n  }\n\n  if (Math.abs(l1 - l2) < 1) {\n    agreements.push('Близость в уровне развития помогает синхронизации');\n  }\n\n  return agreements.length > 0\n    ? agreements\n    : ['Есть основание для работы и развития вместе'];\n}\n\n/**\n * Найти точки потенциального конфликта\n */\nfunction findConflictPoints(\n  level1: number,\n  level2: number\n): string[] {\n  const conflicts: string[] = [];\n  const gap = Math.abs(level1 - level2);\n\n  const l1 = Math.round(level1);\n  const l2 = Math.round(level2);\n\n  if (l1 <= 2 || l2 <= 2) {\n    conflicts.push('Один из вас может быть в состоянии травмы что затрудняет близость');\n  }\n\n  if ((l1 <= 3 && l2 >= 8) || (l1 >= 8 && l2 <= 3)) {\n    conflicts.push('Огромная разница в уровнях - одна сторона может ждать зрелости которой нет');\n  }\n\n  if ((l1 === 5 || l2 === 5) && Math.abs(l1 - l2) > 2) {\n    conflicts.push('Эмоциональная интенсивность на уровне 5 может быть сложна для партнера на другом уровне');\n  }\n\n  if ((l1 === 6 || l2 === 6) && Math.abs(l1 - l2) > 1) {\n    conflicts.push('Различие в том как важен имидж - может быть невидимый конфликт');\n  }\n\n  if (gap >= 3) {\n    conflicts.push('Значительная разница может требовать сознательного моста между вами');\n  }\n\n  return conflicts.length > 0\n    ? conflicts\n    : ['Основные точки потенциального конфликта отсутствуют'];\n}\n\n/**\n * Генерировать рекомендации для пары\n */\nfunction generatePairRecommendations(\n  level1: number,\n  level2: number,\n  gap: number\n): string[] {\n  const recommendations: string[] = [];\n\n  if (Math.abs(gap) >= 2) {\n    recommendations.push(\n      'Работайте с парным терапевтом или коучем для моста между уровнями'\n    );\n  }\n\n  if (Math.round(level1) <= 3 || Math.round(level2) <= 3) {\n    recommendations.push('Сосредоточьтесь на безопасности и стабильности в отношениях');\n  }\n\n  if (Math.round(level1) <= 5 || Math.round(level2) <= 5) {\n    recommendations.push('Развивайте регуляцию эмоций и практику глубокого слушания');\n  }\n\n  if (Math.round(level1) >= 7 && Math.round(level2) >= 7) {\n    recommendations.push('Сосредоточьтесь на создании совместного проекта который служит миру');\n  }\n\n  recommendations.push('Практикуйте еженедельный \"emotional check-in\" где вы говорите о чувствах');\n\n  return recommendations;\n}\n\n/**\n * Рассчитать совместимость\n */\nfunction calculateCompatibility(\n  level1: number,\n  level2: number\n): number {\n  const gap = Math.abs(level1 - level2);\n  let score = 100;\n\n  // Штраф за расстояние\n  score -= gap * 10;\n\n  // Бонус если оба на одинаковом высоком уровне\n  if (level1 >= 8 && level2 >= 8) {\n    score = Math.min(100, score + 15);\n  }\n\n  // Штраф если оба на низком уровне\n  if (level1 <= 2 && level2 <= 2) {\n    score = Math.max(0, score - 20);\n  }\n\n  return Math.max(0, Math.min(100, score));\n}\n\n/**\n * Генерировать сообщение о совместимости\n */\nfunction generateCompatibilityMessage(score: number): string {\n  if (score >= 80) {\n    return 'Высокая совместимость - у вас хороший фундамент для развития';\n  } else if (score >= 60) {\n    return 'Средняя совместимость - требуется сознательная работа но развитие возможно';\n  } else if (score >= 40) {\n    return 'Низкая совместимость - требуется серьезная работа или переоценка отношений';\n  } else {\n    return 'Очень низкая совместимость - без кардинальных изменений у обоих проблемы вероятны';\n  }\n}\n\n// ============================================================================\n// КОНТЕКСТ РЕЖИМА ТЕСТИРОВАНИЯ\n// ============================================================================\n\nfunction getTestModeContext(\n  mode: TestMode,\n  status: RelationshipStatus\n): string {\n  if (mode === 'self') {\n    if (status === 'single_past') return 'анализ прошлых отношений';\n    if (status === 'single_potential') return 'оценка своего потенциала';\n    return 'самооценка в текущих отношениях';\n  }\n  if (mode === 'partner_assessment') return 'оценка партнера';\n  if (mode === 'potential') return 'оценка потенциала';\n  if (mode === 'pair_discussion') return 'совместное обсуждение';\n  return 'оценка';\n}\n"
+/**
+ * ИНТЕРПРЕТАЦИЯ РЕЗУЛЬТАТОВ
+ * "Лестница союза"
+ *
+ * Генерирует понятные человеческие описания результатов тестирования
+ * с учетом режима тестирования и валидации
+ */
+
+import {
+  TestResult,
+  ComparisonResult,
+  TestMode,
+  RelationshipStatus,
+  UnionLevel,
+} from './types';
+import { getLevelDefinition } from './levels-definitions';
+import { getActionPlan } from './action-library';
+
+// ============================================================================
+// ТИПЫ
+// ============================================================================
+
+export interface ResultInterpretation {
+  heroMessage: string; // Короткое 1-2 предложение для героя
+  mainInsight: string; // Главный инсайт (2-3 предложения)
+  levelDescription: string; // Полное описание уровня
+  currentChallenge: string; // Главный вызов на этом уровне
+  growthPath: string; // Как двигаться дальше
+  recommendations: string[];
+  validationNotes?: string; // Если есть проблемы с валидацией
+  nextLevel?: string; // Что ждет на следующем уровне
+}
+
+export interface PairComparisonInterpretation {
+  personAInterpretation: ResultInterpretation;
+  personBInterpretation: ResultInterpretation;
+  gapMessage: string; // Как рассказать о разнице
+  agreementPoints: string[]; // Где они согласны
+  conflictPoints: string[]; // Где они не согласны
+  growthRecommendations: string[]; // Рекомендации для пары
+  compatibilityScore: number; // 0-100
+  compatibilityMessage: string;
+}
+
+// ============================================================================
+// ОСНОВНАЯ ИНТЕРПРЕТАЦИЯ
+// ============================================================================
+
+/**
+ * Интерпретировать результаты тестирования
+ */
+export function interpretResult(
+  result: TestResult
+): ResultInterpretation {
+  const roundedLevel = Math.round(result.personalLevel);
+  const levelDef = getLevelDefinition(roundedLevel);
+  if (!levelDef) {
+    throw new Error(
+      `Level definition not found for level ${roundedLevel}`
+    );
+  }
+
+  // Определить мод тестирования для контекста
+  const context = getTestModeContext(result.testMode, result.relationshipStatus);
+
+  // Генерировать сообщения
+  const heroMessage = generateHeroMessage(
+    roundedLevel,
+    result.testMode,
+    result.relationshipStatus
+  );
+
+  const mainInsight = generateMainInsight(
+    roundedLevel,
+    result.testMode,
+    levelDef.shortDescription
+  );
+
+  const currentChallenge = generateChallenge(
+    roundedLevel,
+    result.testMode
+  );
+
+  const growthPath = generateGrowthPath(
+    roundedLevel,
+    result.testMode
+  );
+
+  const nextLevelDef =
+    roundedLevel < 12 ? getLevelDefinition(roundedLevel + 1) : null;
+  const nextLevel = nextLevelDef ? generateNextLevelPreview(nextLevelDef) : undefined;
+
+  // Генерировать рекомендации
+  const actionPlan = getActionPlan(roundedLevel);
+  const recommendations = actionPlan.topActions.map((a) => a.title);
+
+  // Добавить валидационные замечания если нужны
+  let validationNotes: string | undefined;
+  if (result.validation.reliability === 'low') {
+    validationNotes =
+      'Внимание: результаты теста имеют низкую надежность из-за обнаруженных проблем. Рекомендуется пересдать тест позже, когда сможете быть более честны и вдумчивы.';
+  } else if (result.validation.reliability === 'medium') {
+    validationNotes =
+      'Результаты могут быть частично искажены. Учитывайте рекомендации валидации при интерпретации.';
+  }
+
+  return {
+    heroMessage,
+    mainInsight,
+    levelDescription: levelDef.fullDescription,
+    currentChallenge,
+    growthPath,
+    recommendations,
+    validationNotes,
+    nextLevel,
+  };
+}
+
+// ============================================================================
+// ГЕНЕРАТОРЫ СООБЩЕНИЙ
+// ============================================================================
+
+/**
+ * Генерировать героическое сообщение (30 сек чтения)
+ */
+function generateHeroMessage(
+  level: number,
+  mode: TestMode,
+  status: RelationshipStatus
+): string {
+  const levelInt = Math.round(level);
+
+  // Специфичные для режима
+  if (mode === 'self' && status === 'single_past') {
+    return `По результатам вашего анализа, вы находитесь на уровне ${levelInt} - ${getLevelDefinition(levelInt as UnionLevel)?.name}. Это уровень где вы в отношениях прошлого.`;
+  }
+
+  if (mode === 'self' && status === 'single_potential') {
+    return `По вашей оценке потенциала, вы можете развиться до уровня ${levelInt}. Это то куда вы хотите прийти в будущих отношениях.`;
+  }
+
+  if (mode === 'self' && status === 'in_relationship') {
+    return `В ваших текущих отношениях вы развили уровень ${levelInt} - ${getLevelDefinition(levelInt as UnionLevel)?.name}. Это ваша нынешняя реальность.`;
+  }
+
+  if (mode === 'partner_assessment') {
+    return `По вашей оценке, ваш партнер находится на уровне ${levelInt} - ${getLevelDefinition(levelInt as UnionLevel)?.name}. Это то как вы его/её видите.`;
+  }
+
+  if (mode === 'potential' && status === 'single_potential') {
+    return `Ваш потенциал развития - уровень ${levelInt}. Это достижимо при наличии подходящих условий и осознанной работы.`;
+  }
+
+  if (mode === 'pair_discussion') {
+    return `Вместе вы создали союз уровня ${levelInt} - ${getLevelDefinition(levelInt as UnionLevel)?.name}. Это уровень вашей совместной зрелости.`;
+  }
+
+  return `Ваш уровень - ${levelInt}: ${getLevelDefinition(levelInt as UnionLevel)?.name}`;
+}
+
+/**
+ * Генерировать главный инсайт
+ */
+function generateMainInsight(
+  level: number,
+  mode: TestMode,
+  shortDescription: string
+): string {
+  const levelInt = Math.round(level);
+
+  if (levelInt <= 3) {
+    return `${shortDescription} На этом уровне основной фокус на выживание, стабильность и безопасность. Это не лень, это реальность вашего состояния.`;
+  }
+
+  if (levelInt === 4) {
+    return `${shortDescription} Это уровень где отношения функционируют хорошо, но эмоциональная связь еще развивается. Вы готовы к следующему шагу.`;
+  }
+
+  if (levelInt === 5) {
+    return `${shortDescription} На этом уровне много чувств, интенсивности, но часто отсутствует стабильность. Задача - научиться управлять эмоциями без их подавления.`;
+  }
+
+  if (levelInt === 6) {
+    return `${shortDescription} Это уровень где имидж часто важнее реальности. Задача - найти аутентичность под ролью.`;
+  }
+
+  if (levelInt === 7) {
+    return `${shortDescription} Поздравляем - вы достигли первого уровня психологической зрелости. На этом уровне есть реальное взаимопонимание и безопасность.`;
+  }
+
+  if (levelInt === 8) {
+    return `${shortDescription} Это уровень безусловной любви и принятия. Вы способны любить партнера не для себя, а для его блага.`;
+  }
+
+  if (levelInt === 9) {
+    return `${shortDescription} На этом уровне два полностью независимых человека выбирают друг друга ежедневно. Это редкая зрелость.`;
+  }
+
+  if (levelInt >= 10) {
+    return `${shortDescription} Это редкий уровень где отношения становятся творческой силой. Вместе вы создаете значимое для мира.`;
+  }
+
+  return shortDescription;
+}
+
+/**
+ * Генерировать описание текущего вызова
+ */
+function generateChallenge(
+  level: number,
+  mode: TestMode
+): string {
+  const levelInt = Math.round(level);
+
+  const challenges: Record<number, string> = {
+    1: 'Главный вызов - найти безопасность и выход из токсичной ситуации. Профессиональная помощь критична.',
+    2: 'Главный вызов - осознать бессознательные паттерны и начать делать сознательные выборы.',
+    3: 'Главный вызов - развить экономическую и эмоциональную независимость, чтобы отношения были выбором а не необходимостью.',
+    4: 'Главный вызов - перейти от практической функции отношений к эмоциональной связи и аутентичности.',
+    5: 'Главный вызов - управлять эмоциональной интенсивностью и развить способность к саморегуляции.',
+    6: 'Главный вызов - найти аутентичность и перестать жить в соответствии с ожиданиями других.',
+    7: 'Главный вызов - углубить психологическую близость и продолжать развиваться как пара.',
+    8: 'Главный вызов - практиковать безусловное принятие и служение без ожидания взамен.',
+    9: 'Главный вызов - сохранять полную автономию при глубокой связи, выбирая друг друга ежедневно.',
+    10: 'Главный вызов - каналировать энергию отношений в служение миру и создание значимого.',
+    11: 'Главный вызов - воплотить творческий потенциал отношений и помогать другим парам.',
+    12: 'Главный вызов - жить как инструмент Божественной любви и исцелять других своим примером.',
+  };
+
+  return challenges[levelInt] || challenges[6];
+}
+
+/**
+ * Генерировать путь развития
+ */
+function generateGrowthPath(
+  level: number,
+  mode: TestMode
+): string {
+  const levelInt = Math.round(level);
+
+  if (levelInt <= 3) {
+    return 'Путь развития: сначала необходима безопасность и стабильность. Затем - развитие саморефлексии и осознанности. Профессиональная помощь сильно ускорит процесс.';
+  }
+
+  if (levelInt === 4) {
+    return 'Путь развития: начните говорить о чувствах. Создавайте время для эмоциональной близости. Слушайте партнера без попыток решить его проблемы.';
+  }
+
+  if (levelInt === 5) {
+    return 'Путь развития: развивайте способность к саморегуляции эмоций. Медитация, йога, терапия помогут. Разделите ревность от любви.';
+  }
+
+  if (levelInt === 6) {
+    return 'Путь развития: практикуйте уязвимость. Делитесь тем что вас стыдит. Осознайте что аутентичность притягивает людей больше чем имидж.';
+  }
+
+  if (levelInt === 7) {
+    return 'Путь развития: углубляйте практику глубокого слушания. Используйте конфликты как возможность лучше понять друг друга. Наслаждайтесь достигнутой зрелостью.';
+  }
+
+  if (levelInt === 8) {
+    return 'Путь развития: развивайте практику служения. Делайте что-то для партнера не ожидая благодарности. Расширяйте границы любви на других людей.';
+  }
+
+  if (levelInt === 9) {
+    return 'Путь развития: сохраняйте собственные проекты и интересы. Практикуйте ежедневный выбор партнера. Вдохновляйте друг друга на развитие.';
+  }
+
+  if (levelInt >= 10) {
+    return 'Путь развития: создавайте совместные проекты которые служат миру. Помогайте другим парам. Используйте вашу любовь как исцеляющую силу.';
+  }
+
+  return 'Путь развития: продолжайте осознанную работу над отношениями.';
+}
+
+/**
+ * Генерировать превью следующего уровня
+ */
+function generateNextLevelPreview(
+  nextLevelDef: Awaited<ReturnType<typeof getLevelDefinition>>
+): string {
+  if (!nextLevelDef) return '';
+  return `Следующий уровень - ${nextLevelDef.name}: ${nextLevelDef.shortDescription}`;
+}
+
+// ============================================================================
+// СРАВНЕНИЕ ДЛЯ ПАР
+// ============================================================================
+
+/**
+ * Интерпретировать результаты сравнения для пары
+ */
+export function interpretPairComparison(
+  result: ComparisonResult
+): PairComparisonInterpretation {
+  // Интерпретировать основной результат
+  const mainInterpretation = interpretResult(result);
+
+  // Интерпретировать результат партнера
+  let partnerInterpretation: ResultInterpretation = {
+    heroMessage: '',
+    mainInsight: '',
+    levelDescription: '',
+    currentChallenge: '',
+    growthPath: '',
+    recommendations: [],
+  };
+
+  if (result.comparisonWith) {
+    partnerInterpretation = interpretResult(result.comparisonWith);
+  }
+
+  // Рассчитать сообщение о разнице
+  const gap = result.gap || 0;
+  const gapMessage = generateGapMessage(result.personalLevel, gap, result.testMode);
+
+  // Найти точки согласия и конфликта
+  const agreementPoints = findAgreementPoints(
+    result.personalLevel,
+    result.comparisonWith?.personalLevel || 0
+  );
+  const conflictPoints = findConflictPoints(
+    result.personalLevel,
+    result.comparisonWith?.personalLevel || 0
+  );
+
+  // Генерировать рекомендации для пары
+  const growthRecommendations = generatePairRecommendations(
+    result.personalLevel,
+    result.comparisonWith?.personalLevel || 0,
+    gap
+  );
+
+  // Рассчитать совместимость
+  const compatibilityScore = result.compatibility || calculateCompatibility(
+    result.personalLevel,
+    result.comparisonWith?.personalLevel || 0
+  );
+  const compatibilityMessage = generateCompatibilityMessage(compatibilityScore);
+
+  return {
+    personAInterpretation: mainInterpretation,
+    personBInterpretation: partnerInterpretation,
+    gapMessage,
+    agreementPoints,
+    conflictPoints,
+    growthRecommendations,
+    compatibilityScore,
+    compatibilityMessage,
+  };
+}
+
+/**
+ * Генерировать сообщение о разнице уровней
+ */
+function generateGapMessage(
+  personalLevel: number,
+  gap: number,
+  mode: TestMode
+): string {
+  if (Math.abs(gap) < 0.5) {
+    return 'Вы находитесь практически на одном уровне развития - это хороший знак для пары.';
+  }
+
+  if (gap > 0 && gap < 1.5) {
+    return 'Небольшая разница в уровнях - это создает естественную динамику где один немного тянет другого вверх.';
+  }
+
+  if (gap > 1.5 && gap < 3) {
+    return 'Заметная разница в уровнях - это может создать трение но также возможность для обоих учиться друг у друга.';
+  }
+
+  if (gap >= 3) {
+    return 'Значительная разница в уровнях - это требует сознательной работы обеих сторон. Партнер с более высоким уровнем может потянуть вверх, но нужна готовность к изменениям.';
+  }
+
+  return 'Различия в уровнях - это возможность для роста обоих.';
+}
+
+/**
+ * Найти точки согласия
+ */
+function findAgreementPoints(
+  level1: number,
+  level2: number
+): string[] {
+  const agreements: string[] = [];
+
+  const l1 = Math.round(level1);
+  const l2 = Math.round(level2);
+
+  if (l1 >= 7 && l2 >= 7) {
+    agreements.push('Оба находитесь на психологически зрелом уровне');
+  }
+
+  if ((l1 >= 8 && l2 >= 8) || (l1 >= 4 && l2 >= 4)) {
+    agreements.push('Можете обсуждать финансовые вопросы рационально');
+  }
+
+  if ((l1 >= 7 && l2 >= 7)) {
+    agreements.push('Есть способность к глубокому пониманию');
+  }
+
+  if (Math.abs(l1 - l2) < 1) {
+    agreements.push('Близость в уровне развития помогает синхронизации');
+  }
+
+  return agreements.length > 0
+    ? agreements
+    : ['Есть основание для работы и развития вместе'];
+}
+
+/**
+ * Найти точки потенциального конфликта
+ */
+function findConflictPoints(
+  level1: number,
+  level2: number
+): string[] {
+  const conflicts: string[] = [];
+  const gap = Math.abs(level1 - level2);
+
+  const l1 = Math.round(level1);
+  const l2 = Math.round(level2);
+
+  if (l1 <= 2 || l2 <= 2) {
+    conflicts.push('Один из вас может быть в состоянии травмы что затрудняет близость');
+  }
+
+  if ((l1 <= 3 && l2 >= 8) || (l1 >= 8 && l2 <= 3)) {
+    conflicts.push('Огромная разница в уровнях - одна сторона может ждать зрелости которой нет');
+  }
+
+  if ((l1 === 5 || l2 === 5) && Math.abs(l1 - l2) > 2) {
+    conflicts.push('Эмоциональная интенсивность на уровне 5 может быть сложна для партнера на другом уровне');
+  }
+
+  if ((l1 === 6 || l2 === 6) && Math.abs(l1 - l2) > 1) {
+    conflicts.push('Различие в том как важен имидж - может быть невидимый конфликт');
+  }
+
+  if (gap >= 3) {
+    conflicts.push('Значительная разница может требовать сознательного моста между вами');
+  }
+
+  return conflicts.length > 0
+    ? conflicts
+    : ['Основные точки потенциального конфликта отсутствуют'];
+}
+
+/**
+ * Генерировать рекомендации для пары
+ */
+function generatePairRecommendations(
+  level1: number,
+  level2: number,
+  gap: number
+): string[] {
+  const recommendations: string[] = [];
+
+  if (Math.abs(gap) >= 2) {
+    recommendations.push(
+      'Работайте с парным терапевтом или коучем для моста между уровнями'
+    );
+  }
+
+  if (Math.round(level1) <= 3 || Math.round(level2) <= 3) {
+    recommendations.push('Сосредоточьтесь на безопасности и стабильности в отношениях');
+  }
+
+  if (Math.round(level1) <= 5 || Math.round(level2) <= 5) {
+    recommendations.push('Развивайте регуляцию эмоций и практику глубокого слушания');
+  }
+
+  if (Math.round(level1) >= 7 && Math.round(level2) >= 7) {
+    recommendations.push('Сосредоточьтесь на создании совместного проекта который служит миру');
+  }
+
+  recommendations.push('Практикуйте еженедельный "emotional check-in" где вы говорите о чувствах');
+
+  return recommendations;
+}
+
+/**
+ * Рассчитать совместимость
+ */
+function calculateCompatibility(
+  level1: number,
+  level2: number
+): number {
+  const gap = Math.abs(level1 - level2);
+  let score = 100;
+
+  // Штраф за расстояние
+  score -= gap * 10;
+
+  // Бонус если оба на одинаковом высоком уровне
+  if (level1 >= 8 && level2 >= 8) {
+    score = Math.min(100, score + 15);
+  }
+
+  // Штраф если оба на низком уровне
+  if (level1 <= 2 && level2 <= 2) {
+    score = Math.max(0, score - 20);
+  }
+
+  return Math.max(0, Math.min(100, score));
+}
+
+/**
+ * Генерировать сообщение о совместимости
+ */
+function generateCompatibilityMessage(score: number): string {
+  if (score >= 80) {
+    return 'Высокая совместимость - у вас хороший фундамент для развития';
+  } else if (score >= 60) {
+    return 'Средняя совместимость - требуется сознательная работа но развитие возможно';
+  } else if (score >= 40) {
+    return 'Низкая совместимость - требуется серьезная работа или переоценка отношений';
+  } else {
+    return 'Очень низкая совместимость - без кардинальных изменений у обоих проблемы вероятны';
+  }
+}
+
+// ============================================================================
+// КОНТЕКСТ РЕЖИМА ТЕСТИРОВАНИЯ
+// ============================================================================
+
+function getTestModeContext(
+  mode: TestMode,
+  status: RelationshipStatus
+): string {
+  if (mode === 'self') {
+    if (status === 'single_past') return 'анализ прошлых отношений';
+    if (status === 'single_potential') return 'оценка своего потенциала';
+    return 'самооценка в текущих отношениях';
+  }
+  if (mode === 'partner_assessment') return 'оценка партнера';
+  if (mode === 'potential') return 'оценка потенциала';
+  if (mode === 'pair_discussion') return 'совместное обсуждение';
+  return 'оценка';
+}

@@ -1,1 +1,424 @@
-/**\n * ОРКЕСТРАТОР ТЕСТИРОВАНИЯ\n * \"Лестница союза\"\n *\n * Управляет полным процессом тестирования:\n * - Инициализация сессии\n * - Управление вопросами\n * - Запись ответов\n * - Валидация\n * - Расчет результатов\n */\n\nimport {\n  TestMode,\n  RelationshipStatus,\n  RelationshipType,\n  UserProfile,\n  TestResult,\n  UserAnswer,\n} from './types';\nimport {\n  AdaptiveTestState,\n  getNextQuestion,\n  recordAnswer,\n  getCurrentLevelDetection,\n  completeTest,\n  initializeAdaptiveTest,\n} from './adaptive-algorithm';\nimport {\n  validateTestResults,\n  ValidationResult,\n} from './validation-engine';\nimport {\n  calculateTestResult,\n  calculateCompatibility,\n  calculateReliabilityScore,\n} from './score-calculation';\nimport { interpretResult, interpretPairComparison } from './results-interpreter';\n\n// ============================================================================\n// ТИПЫ\n// ============================================================================\n\nexport interface TestSessionContext {\n  sessionId: string;\n  userProfile: UserProfile;\n  state: AdaptiveTestState;\n  startTime: number;\n}\n\nexport interface TestQuestionPresentation {\n  questionId: string;\n  text: string;\n  options: Array<{\n    id: string;\n    text: string;\n  }>;\n  phase: 'zoning' | 'refinement' | 'validation' | 'complete';\n  questionsAnswered: number;\n  questionsRemaining: number;\n  estimatedLevel?: number;\n}\n\nexport interface PartnerComparison {\n  personASessionId: string;\n  personBSessionId: string;\n  gap: number;\n  compatibility: number;\n  recommendations: string[];\n}\n\n// ============================================================================\n// СЕССИОННОЕ ХРАНИЛИЩЕ (в реальном коде это должно быть в БД)\n// ============================================================================\n\nconst testSessions = new Map<string, TestSessionContext>();\nconst completedResults = new Map<string, TestResult>();\n\n// ============================================================================\n// ОСНОВНОЙ API\n// ============================================================================\n\n/**\n * Инициировать новую сессию тестирования\n */\nexport function initializeTestSession(\n  sessionId: string,\n  testMode: TestMode,\n  relationshipStatus: RelationshipStatus,\n  relationshipType: RelationshipType = 'heterosexual_pair'\n): TestSessionContext {\n  // Валидировать входные данные\n  if (!testMode || !relationshipStatus) {\n    throw new Error('Test mode and relationship status are required');\n  }\n\n  // Определить hasPartner на основе relationshipStatus\n  const hasPartner =\n    relationshipStatus === 'in_relationship' ||\n    relationshipStatus === 'pair_together';\n\n  const userProfile: UserProfile = {\n    sessionId,\n    relationshipStatus,\n    relationshipType,\n    hasPartner,\n    testMode,\n  };\n\n  const state = initializeAdaptiveTest(sessionId);\n\n  const context: TestSessionContext = {\n    sessionId,\n    userProfile,\n    state,\n    startTime: Date.now(),\n  };\n\n  testSessions.set(sessionId, context);\n\n  return context;\n}\n\n/**\n * Получить следующий вопрос для пользователя\n */\nexport function getNextTestQuestion(\n  sessionId: string\n): TestQuestionPresentation | null {\n  const context = testSessions.get(sessionId);\n  if (!context) {\n    throw new Error(`Test session not found: ${sessionId}`);\n  }\n\n  const questionSelection = getNextQuestion(context.state);\n  if (!questionSelection) {\n    return null; // Тест завершен\n  }\n\n  const testMode = context.userProfile.testMode;\n  const question = questionSelection.nextQuestion;\n\n  // Выбрать текст вопроса на основе режима\n  let questionText: string;\n  if (testMode === 'self') {\n    questionText = question.text.self;\n  } else if (testMode === 'partner_assessment') {\n    questionText = question.text.partner;\n  } else if (testMode === 'potential') {\n    questionText = question.text.potential;\n  } else if (testMode === 'pair_discussion') {\n    questionText = question.text.pair_discussion;\n  } else {\n    questionText = question.text.self;\n  }\n\n  // Подготовить варианты ответов\n  const options = question.options.map((opt) => ({\n    id: opt.id,\n    text: opt.text,\n  }));\n\n  // Получить текущую оценку уровня (если уже достаточно ответов)\n  const estimatedLevel =\n    context.state.questionsAnswered > 0\n      ? getCurrentLevelDetection(context.state).detectedLevel\n      : undefined;\n\n  return {\n    questionId: question.id,\n    text: questionText,\n    options,\n    phase: questionSelection.phase,\n    questionsAnswered: questionSelection.questionsAnswered,\n    questionsRemaining: questionSelection.questionsRemaining,\n    estimatedLevel,\n  };\n}\n\n/**\n * Записать ответ пользователя\n */\nexport function submitTestAnswer(\n  sessionId: string,\n  questionId: string,\n  selectedOptionId: string,\n  responseTimeMs: number\n): void {\n  const context = testSessions.get(sessionId);\n  if (!context) {\n    throw new Error(`Test session not found: ${sessionId}`);\n  }\n\n  // Найти вопрос\n  const question = require('./questions-database').QUESTIONS.find(\n    (q: any) => q.id === questionId\n  );\n  if (!question) {\n    throw new Error(`Question not found: ${questionId}`);\n  }\n\n  // Найти выбранный вариант ответа\n  const selectedOption = question.options.find(\n    (opt: any) => opt.id === selectedOptionId\n  );\n  if (!selectedOption) {\n    throw new Error(`Option not found: ${selectedOptionId}`);\n  }\n\n  // Создать ответ\n  const answer: UserAnswer = {\n    questionId,\n    selectedOptionId,\n    selectedLevel: selectedOption.level,\n    responseTime: responseTimeMs,\n    timestamp: Date.now(),\n    mode: context.userProfile.testMode,\n  };\n\n  // Записать ответ\n  recordAnswer(context.state, answer);\n}\n\n/**\n * Завершить тест и получить результаты\n */\nexport function completeTestSession(\n  sessionId: string\n): {\n  result: TestResult;\n  interpretation: any;\n} {\n  const context = testSessions.get(sessionId);\n  if (!context) {\n    throw new Error(`Test session not found: ${sessionId}`);\n  }\n\n  // Завершить тест и получить финальный уровень\n  const { finalLevel } = completeTest(context.state);\n\n  // Провести валидацию\n  const validationResult = validateTestResults(context.state.answers);\n\n  // Рассчитать результаты\n  const testResult = calculateTestResult(\n    sessionId,\n    context.state.answers,\n    validationResult.metrics,\n    context.userProfile.testMode,\n    context.userProfile.relationshipStatus\n  ) as TestResult;\n\n  // Добавить временные метаданные\n  testResult.createdAt = context.startTime;\n  testResult.updatedAt = Date.now();\n\n  // Сохранить результаты\n  completedResults.set(sessionId, testResult);\n\n  // Интерпретировать результаты\n  const interpretation = interpretResult(testResult);\n\n  return {\n    result: testResult,\n    interpretation,\n  };\n}\n\n/**\n * Получить сохраненные результаты тестирования\n */\nexport function getTestResult(sessionId: string): TestResult | null {\n  return completedResults.get(sessionId) || null;\n}\n\n/**\n * Сравнить результаты двух тестирований (для пар)\n */\nexport function compareTestResults(\n  sessionIdA: string,\n  sessionIdB: string\n): {\n  comparison: PartnerComparison;\n  interpretation: any;\n} {\n  const resultA = completedResults.get(sessionIdA);\n  const resultB = completedResults.get(sessionIdB);\n\n  if (!resultA || !resultB) {\n    throw new Error('One or both test results not found');\n  }\n\n  // Рассчитать разницу и совместимость\n  const gap = Math.abs(resultA.personalLevel - resultB.personalLevel);\n  const compatibility = calculateCompatibility(\n    resultA.personalLevel,\n    resultB.personalLevel\n  );\n\n  // Сгенерировать рекомендации для пары\n  const recommendations: string[] = [];\n  if (gap >= 2) {\n    recommendations.push(\n      'Рекомендуется работа с парным психологом или коучем для преодоления разницы в уровнях'\n    );\n  }\n  if (resultA.personalLevel <= 3 || resultB.personalLevel <= 3) {\n    recommendations.push(\n      'Сосредоточьтесь на создании безопасности и стабильности в отношениях'\n    );\n  }\n  if (resultA.personalLevel >= 7 && resultB.personalLevel >= 7) {\n    recommendations.push(\n      'Вы оба на психологически зрелом уровне - рассмотрите совместный проект служения'\n    );\n  }\n\n  const comparison: PartnerComparison = {\n    personASessionId: sessionIdA,\n    personBSessionId: sessionIdB,\n    gap,\n    compatibility,\n    recommendations,\n  };\n\n  // Создать ComparisonResult для интерпретации\n  const comparisonResult: any = {\n    ...resultA,\n    comparisonWith: resultB,\n    gap,\n    compatibility,\n    recommendations,\n  };\n\n  const interpretation = interpretPairComparison(comparisonResult);\n\n  return {\n    comparison,\n    interpretation,\n  };\n}\n\n/**\n * Получить статус текущей сессии\n */\nexport function getSessionStatus(\n  sessionId: string\n): {\n  currentPhase: string;\n  questionsAnswered: number;\n  estimatedLevel?: number;\n  isComplete: boolean;\n} {\n  const context = testSessions.get(sessionId);\n  if (!context) {\n    throw new Error(`Test session not found: ${sessionId}`);\n  }\n\n  const isComplete = context.state.currentPhase === 'complete';\n  const estimatedLevel =\n    context.state.questionsAnswered > 0\n      ? getCurrentLevelDetection(context.state).detectedLevel\n      : undefined;\n\n  return {\n    currentPhase: context.state.currentPhase,\n    questionsAnswered: context.state.questionsAnswered,\n    estimatedLevel,\n    isComplete,\n  };\n}\n\n/**\n * Удалить сессию (для очистки памяти)\n */\nexport function deleteTestSession(sessionId: string): void {\n  testSessions.delete(sessionId);\n  completedResults.delete(sessionId);\n}\n\n/**\n * Получить все активные сессии (для отладки)\n */\nexport function getAllActiveSessions(): string[] {\n  return Array.from(testSessions.keys());\n}\n\n/**\n * Получить все завершенные результаты (для отладки)\n */\nexport function getAllCompletedResults(): Map<string, TestResult> {\n  return new Map(completedResults);\n}\n\n// ============================================================================\n// ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ\n// ============================================================================\n\n/**\n * Валидировать параметры теста\n */\nfunction validateTestParameters(\n  testMode: TestMode,\n  relationshipStatus: RelationshipStatus\n): void {\n  const validModes: TestMode[] = ['self', 'partner_assessment', 'potential', 'pair_discussion'];\n  if (!validModes.includes(testMode)) {\n    throw new Error(\n      `Invalid test mode: ${testMode}. Must be one of: ${validModes.join(', ')}`\n    );\n  }\n\n  const validStatuses: RelationshipStatus[] = [\n    'in_relationship',\n    'single_past',\n    'single_potential',\n    'pair_together',\n  ];\n  if (!validStatuses.includes(relationshipStatus)) {\n    throw new Error(\n      `Invalid relationship status: ${relationshipStatus}. Must be one of: ${validStatuses.join(', ')}`\n    );\n  }\n}\n"
+/**
+ * ОРКЕСТРАТОР ТЕСТИРОВАНИЯ
+ * "Лестница союза"
+ *
+ * Управляет полным процессом тестирования:
+ * - Инициализация сессии
+ * - Управление вопросами
+ * - Запись ответов
+ * - Валидация
+ * - Расчет результатов
+ */
+
+import {
+  TestMode,
+  RelationshipStatus,
+  RelationshipType,
+  UserProfile,
+  TestResult,
+  UserAnswer,
+} from './types';
+import {
+  AdaptiveTestState,
+  getNextQuestion,
+  recordAnswer,
+  getCurrentLevelDetection,
+  completeTest,
+  initializeAdaptiveTest,
+} from './adaptive-algorithm';
+import {
+  validateTestResults,
+  ValidationResult,
+} from './validation-engine';
+import {
+  calculateTestResult,
+  calculateCompatibility,
+  calculateReliabilityScore,
+} from './score-calculation';
+import { interpretResult, interpretPairComparison } from './results-interpreter';
+
+// ============================================================================
+// ТИПЫ
+// ============================================================================
+
+export interface TestSessionContext {
+  sessionId: string;
+  userProfile: UserProfile;
+  state: AdaptiveTestState;
+  startTime: number;
+}
+
+export interface TestQuestionPresentation {
+  questionId: string;
+  text: string;
+  options: Array<{
+    id: string;
+    text: string;
+  }>;
+  phase: 'zoning' | 'refinement' | 'validation' | 'complete';
+  questionsAnswered: number;
+  questionsRemaining: number;
+  estimatedLevel?: number;
+}
+
+export interface PartnerComparison {
+  personASessionId: string;
+  personBSessionId: string;
+  gap: number;
+  compatibility: number;
+  recommendations: string[];
+}
+
+// ============================================================================
+// СЕССИОННОЕ ХРАНИЛИЩЕ (в реальном коде это должно быть в БД)
+// ============================================================================
+
+const testSessions = new Map<string, TestSessionContext>();
+const completedResults = new Map<string, TestResult>();
+
+// ============================================================================
+// ОСНОВНОЙ API
+// ============================================================================
+
+/**
+ * Инициировать новую сессию тестирования
+ */
+export function initializeTestSession(
+  sessionId: string,
+  testMode: TestMode,
+  relationshipStatus: RelationshipStatus,
+  relationshipType: RelationshipType = 'heterosexual_pair'
+): TestSessionContext {
+  // Валидировать входные данные
+  if (!testMode || !relationshipStatus) {
+    throw new Error('Test mode and relationship status are required');
+  }
+
+  // Определить hasPartner на основе relationshipStatus
+  const hasPartner =
+    relationshipStatus === 'in_relationship' ||
+    relationshipStatus === 'pair_together';
+
+  const userProfile: UserProfile = {
+    sessionId,
+    relationshipStatus,
+    relationshipType,
+    hasPartner,
+    testMode,
+  };
+
+  const state = initializeAdaptiveTest(sessionId);
+
+  const context: TestSessionContext = {
+    sessionId,
+    userProfile,
+    state,
+    startTime: Date.now(),
+  };
+
+  testSessions.set(sessionId, context);
+
+  return context;
+}
+
+/**
+ * Получить следующий вопрос для пользователя
+ */
+export function getNextTestQuestion(
+  sessionId: string
+): TestQuestionPresentation | null {
+  const context = testSessions.get(sessionId);
+  if (!context) {
+    throw new Error(`Test session not found: ${sessionId}`);
+  }
+
+  const questionSelection = getNextQuestion(context.state);
+  if (!questionSelection) {
+    return null; // Тест завершен
+  }
+
+  const testMode = context.userProfile.testMode;
+  const question = questionSelection.nextQuestion;
+
+  // Выбрать текст вопроса на основе режима
+  let questionText: string;
+  if (testMode === 'self') {
+    questionText = question.text.self;
+  } else if (testMode === 'partner_assessment') {
+    questionText = question.text.partner;
+  } else if (testMode === 'potential') {
+    questionText = question.text.potential;
+  } else if (testMode === 'pair_discussion') {
+    questionText = question.text.pair_discussion;
+  } else {
+    questionText = question.text.self;
+  }
+
+  // Подготовить варианты ответов
+  const options = question.options.map((opt) => ({
+    id: opt.id,
+    text: opt.text,
+  }));
+
+  // Получить текущую оценку уровня (если уже достаточно ответов)
+  const estimatedLevel =
+    context.state.questionsAnswered > 0
+      ? getCurrentLevelDetection(context.state).detectedLevel
+      : undefined;
+
+  return {
+    questionId: question.id,
+    text: questionText,
+    options,
+    phase: questionSelection.phase,
+    questionsAnswered: questionSelection.questionsAnswered,
+    questionsRemaining: questionSelection.questionsRemaining,
+    estimatedLevel,
+  };
+}
+
+/**
+ * Записать ответ пользователя
+ */
+export function submitTestAnswer(
+  sessionId: string,
+  questionId: string,
+  selectedOptionId: string,
+  responseTimeMs: number
+): void {
+  const context = testSessions.get(sessionId);
+  if (!context) {
+    throw new Error(`Test session not found: ${sessionId}`);
+  }
+
+  // Найти вопрос
+  const question = require('./questions-database').QUESTIONS.find(
+    (q: any) => q.id === questionId
+  );
+  if (!question) {
+    throw new Error(`Question not found: ${questionId}`);
+  }
+
+  // Найти выбранный вариант ответа
+  const selectedOption = question.options.find(
+    (opt: any) => opt.id === selectedOptionId
+  );
+  if (!selectedOption) {
+    throw new Error(`Option not found: ${selectedOptionId}`);
+  }
+
+  // Создать ответ
+  const answer: UserAnswer = {
+    questionId,
+    selectedOptionId,
+    selectedLevel: selectedOption.level,
+    responseTime: responseTimeMs,
+    timestamp: Date.now(),
+    mode: context.userProfile.testMode,
+  };
+
+  // Записать ответ
+  recordAnswer(context.state, answer);
+}
+
+/**
+ * Завершить тест и получить результаты
+ */
+export function completeTestSession(
+  sessionId: string
+): {
+  result: TestResult;
+  interpretation: any;
+} {
+  const context = testSessions.get(sessionId);
+  if (!context) {
+    throw new Error(`Test session not found: ${sessionId}`);
+  }
+
+  // Завершить тест и получить финальный уровень
+  const { finalLevel } = completeTest(context.state);
+
+  // Провести валидацию
+  const validationResult = validateTestResults(context.state.answers);
+
+  // Рассчитать результаты
+  const testResult = calculateTestResult(
+    sessionId,
+    context.state.answers,
+    validationResult.metrics,
+    context.userProfile.testMode,
+    context.userProfile.relationshipStatus
+  ) as TestResult;
+
+  // Добавить временные метаданные
+  testResult.createdAt = context.startTime;
+  testResult.updatedAt = Date.now();
+
+  // Сохранить результаты
+  completedResults.set(sessionId, testResult);
+
+  // Интерпретировать результаты
+  const interpretation = interpretResult(testResult);
+
+  return {
+    result: testResult,
+    interpretation,
+  };
+}
+
+/**
+ * Получить сохраненные результаты тестирования
+ */
+export function getTestResult(sessionId: string): TestResult | null {
+  return completedResults.get(sessionId) || null;
+}
+
+/**
+ * Сравнить результаты двух тестирований (для пар)
+ */
+export function compareTestResults(
+  sessionIdA: string,
+  sessionIdB: string
+): {
+  comparison: PartnerComparison;
+  interpretation: any;
+} {
+  const resultA = completedResults.get(sessionIdA);
+  const resultB = completedResults.get(sessionIdB);
+
+  if (!resultA || !resultB) {
+    throw new Error('One or both test results not found');
+  }
+
+  // Рассчитать разницу и совместимость
+  const gap = Math.abs(resultA.personalLevel - resultB.personalLevel);
+  const compatibility = calculateCompatibility(
+    resultA.personalLevel,
+    resultB.personalLevel
+  );
+
+  // Сгенерировать рекомендации для пары
+  const recommendations: string[] = [];
+  if (gap >= 2) {
+    recommendations.push(
+      'Рекомендуется работа с парным психологом или коучем для преодоления разницы в уровнях'
+    );
+  }
+  if (resultA.personalLevel <= 3 || resultB.personalLevel <= 3) {
+    recommendations.push(
+      'Сосредоточьтесь на создании безопасности и стабильности в отношениях'
+    );
+  }
+  if (resultA.personalLevel >= 7 && resultB.personalLevel >= 7) {
+    recommendations.push(
+      'Вы оба на психологически зрелом уровне - рассмотрите совместный проект служения'
+    );
+  }
+
+  const comparison: PartnerComparison = {
+    personASessionId: sessionIdA,
+    personBSessionId: sessionIdB,
+    gap,
+    compatibility,
+    recommendations,
+  };
+
+  // Создать ComparisonResult для интерпретации
+  const comparisonResult: any = {
+    ...resultA,
+    comparisonWith: resultB,
+    gap,
+    compatibility,
+    recommendations,
+  };
+
+  const interpretation = interpretPairComparison(comparisonResult);
+
+  return {
+    comparison,
+    interpretation,
+  };
+}
+
+/**
+ * Получить статус текущей сессии
+ */
+export function getSessionStatus(
+  sessionId: string
+): {
+  currentPhase: string;
+  questionsAnswered: number;
+  estimatedLevel?: number;
+  isComplete: boolean;
+} {
+  const context = testSessions.get(sessionId);
+  if (!context) {
+    throw new Error(`Test session not found: ${sessionId}`);
+  }
+
+  const isComplete = context.state.currentPhase === 'complete';
+  const estimatedLevel =
+    context.state.questionsAnswered > 0
+      ? getCurrentLevelDetection(context.state).detectedLevel
+      : undefined;
+
+  return {
+    currentPhase: context.state.currentPhase,
+    questionsAnswered: context.state.questionsAnswered,
+    estimatedLevel,
+    isComplete,
+  };
+}
+
+/**
+ * Удалить сессию (для очистки памяти)
+ */
+export function deleteTestSession(sessionId: string): void {
+  testSessions.delete(sessionId);
+  completedResults.delete(sessionId);
+}
+
+/**
+ * Получить все активные сессии (для отладки)
+ */
+export function getAllActiveSessions(): string[] {
+  return Array.from(testSessions.keys());
+}
+
+/**
+ * Получить все завершенные результаты (для отладки)
+ */
+export function getAllCompletedResults(): Map<string, TestResult> {
+  return new Map(completedResults);
+}
+
+// ============================================================================
+// ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+// ============================================================================
+
+/**
+ * Валидировать параметры теста
+ */
+function validateTestParameters(
+  testMode: TestMode,
+  relationshipStatus: RelationshipStatus
+): void {
+  const validModes: TestMode[] = ['self', 'partner_assessment', 'potential', 'pair_discussion'];
+  if (!validModes.includes(testMode)) {
+    throw new Error(
+      `Invalid test mode: ${testMode}. Must be one of: ${validModes.join(', ')}`
+    );
+  }
+
+  const validStatuses: RelationshipStatus[] = [
+    'in_relationship',
+    'single_past',
+    'single_potential',
+    'pair_together',
+  ];
+  if (!validStatuses.includes(relationshipStatus)) {
+    throw new Error(
+      `Invalid relationship status: ${relationshipStatus}. Must be one of: ${validStatuses.join(', ')}`
+    );
+  }
+}

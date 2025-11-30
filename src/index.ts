@@ -1,1 +1,44 @@
-/**\n * ГЛАВНЫЙ ЭКСПОРТ\n * \"Лестница союза\"\n *\n * Публичный API для использования в приложениях\n */\n\n// Типы\nexport * from './types';\n\n// Определения уровней\nexport { getLevelDefinition, getLevelName, getLevelIcon, getLevelColor } from './levels-definitions';\n\n// Вопросы\nexport { QUESTIONS, getQuestionById, getQuestionsByCategory, getQuestionsByTargetLevel, getValidationQuestions, getCriticalQuestions, getZoningQuestions, getRefinementQuestions } from './questions-database';\n\n// Адаптивный алгоритм\nexport { initializeAdaptiveTest, getNextQuestion, recordAnswer, getCurrentLevelDetection, completeTest } from './adaptive-algorithm';\n\n// Валидация\nexport { validateTestResults, getReliabilityMessage } from './validation-engine';\n\n// Действия\nexport { getActionPlan, getAllActionPlans, getActionById } from './action-library';\n\n// Расчеты\nexport { calculateLevelScores, applyValidationAdjustments, calculateTestResult, calculateCompatibility, calculateReliabilityScore, getReliabilityRecommendation, getLevelDistribution } from './score-calculation';\n\n// Интерпретация\nexport { interpretResult, interpretPairComparison } from './results-interpreter';\n\n// Оркестратор (главный API)\nexport {\n  initializeTestSession,\n  getNextTestQuestion,\n  submitTestAnswer,\n  completeTestSession,\n  getTestResult,\n  compareTestResults,\n  getSessionStatus,\n  deleteTestSession,\n  getAllActiveSessions,\n  getAllCompletedResults,\n} from './test-orchestrator';\n"
+/**
+ * ГЛАВНЫЙ ЭКСПОРТ
+ * "Лестница союза"
+ *
+ * Публичный API для использования в приложениях
+ */
+
+// Типы
+export * from './types';
+
+// Определения уровней
+export { getLevelDefinition, getLevelName, getLevelIcon, getLevelColor } from './levels-definitions';
+
+// Вопросы
+export { QUESTIONS, getQuestionById, getQuestionsByCategory, getQuestionsByTargetLevel, getValidationQuestions, getCriticalQuestions, getZoningQuestions, getRefinementQuestions } from './questions-database';
+
+// Адаптивный алгоритм
+export { initializeAdaptiveTest, getNextQuestion, recordAnswer, getCurrentLevelDetection, completeTest } from './adaptive-algorithm';
+
+// Валидация
+export { validateTestResults, getReliabilityMessage } from './validation-engine';
+
+// Действия
+export { getActionPlan, getAllActionPlans, getActionById } from './action-library';
+
+// Расчеты
+export { calculateLevelScores, applyValidationAdjustments, calculateTestResult, calculateCompatibility, calculateReliabilityScore, getReliabilityRecommendation, getLevelDistribution } from './score-calculation';
+
+// Интерпретация
+export { interpretResult, interpretPairComparison } from './results-interpreter';
+
+// Оркестратор (главный API)
+export {
+  initializeTestSession,
+  getNextTestQuestion,
+  submitTestAnswer,
+  completeTestSession,
+  getTestResult,
+  compareTestResults,
+  getSessionStatus,
+  deleteTestSession,
+  getAllActiveSessions,
+  getAllCompletedResults,
+} from './test-orchestrator';

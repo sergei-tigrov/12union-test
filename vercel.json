@@ -1,1 +1,13 @@
-{\n  \"name\": \"12union-test\",\n  \"version\": 2,\n  \"buildCommand\": \"npm run build\",\n  \"outputDirectory\": \"dist\",\n  \"env\": {},\n  \"functions\": {\n    \"src/**/*.ts\": {\n      \"memory\": 1024,\n      \"maxDuration\": 30\n    }\n  }\n}\n
+{
+  "name": "12union-test",
+  "version": 2,
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "env": {},
+  "functions": {
+    "src/**/*.ts": {
+      "memory": 1024,
+      "maxDuration": 30
+    }
+  }
+}

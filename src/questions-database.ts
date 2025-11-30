@@ -12,4 +12,1712 @@
  * - partner_assessment: оценка партнера
  * - potential: оценка потенциала (для одиноких)
  * - pair_discussion: совместное обсуждение (для пар)
- */\n\nimport { SmartQuestion, UnionLevel } from './types';\n\nexport const QUESTIONS: SmartQuestion[] = [\n  // ============================================================================\n  // БЛОК ЗОНИРОВАНИЯ (6 вопросов) - быстрое определение зоны 1-4, 5-8 или 9-12\n  // ============================================================================\n\n  {\n    id: 'zone-conflict-001',\n    text: {\n      self: 'Когда между вами возникает конфликт, вы обычно:',\n      partner: 'Когда возникает конфликт, мой партнер обычно:',\n      potential: 'В идеальных отношениях при конфликте я бы:',\n      pair_discussion: 'Когда между нами возникает конфликт, мы обычно:',\n    },\n    category: 'conflict',\n    options: [\n      {\n        id: 'zone-c-a',\n        text: 'Отступаю или ухожу, чтобы избежать боли',\n        level: 1,\n        indicators: ['avoidance', 'fear', 'pain-avoidance'],\n      },\n      {\n        id: 'zone-c-b',\n        text: 'Защищаюсь, доказываю свою правоту',\n        level: 4,\n        indicators: ['defensiveness', 'logic-based', 'control'],\n      },\n      {\n        id: 'zone-c-c',\n        text: 'Испытываю сильные эмоции, бросаю обвинения',\n        level: 5,\n        indicators: ['emotional-intensity', 'blame', 'passion'],\n      },\n      {\n        id: 'zone-c-d',\n        text: 'Говорю о своих чувствах и слушаю партнера',\n        level: 7,\n        indicators: ['vulnerability', 'listening', 'emotional-awareness'],\n      },\n      {\n        id: 'zone-c-e',\n        text: 'Стараюсь понять, что нужно партнеру, и высказываю свои границы',\n        level: 9,\n        indicators: ['empathy', 'boundaries', 'understanding'],\n      },\n    ],\n    targetLevels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],\n    priority: 1, // Критичный вопрос - различает все основные зоны\n  },\n\n  {\n    id: 'zone-safety-002',\n    text: {\n      self: 'Я остаюсь в отношениях даже если больно, потому что:',\n      partner: 'Мой партнер остается в отношениях, потому что:',\n      potential: 'Я бы был в отношениях только если бы:',\n      pair_discussion: 'Мы остаемся вместе, потому что:',\n    },\n    category: 'values',\n    options: [\n      {\n        id: 'zone-s-a',\n        text: 'Боюсь остаться один, это хуже чем боль',\n        level: 1,\n        indicators: ['fear-of-loneliness', 'desperation', 'no-choice'],\n      },\n      {\n        id: 'zone-s-b',\n        text: 'Не могу справиться без партнера, зависим экономически',\n        level: 3,\n        indicators: ['dependency', 'economic-fear', 'helplessness'],\n      },\n      {\n        id: 'zone-s-c',\n        text: 'Это удобно, стабильно, мне это нравится',\n        level: 4,\n        indicators: ['comfort-seeking', 'stability', 'pragmatism'],\n      },\n      {\n        id: 'zone-s-d',\n        text: 'Люблю эту интенсивность, это волнует',\n        level: 5,\n        indicators: ['emotional-intensity', 'passion-seeking', 'excitement'],\n      },\n      {\n        id: 'zone-s-e',\n        text: 'Это приносит удовлетворение, делает меня лучше',\n        level: 8,\n        indicators: ['growth', 'fulfillment', 'positive-influence'],\n      },\n      {\n        id: 'zone-s-f',\n        text: 'Это ощущается как высшая ценность, служу его развитию',\n        level: 11,\n        indicators: ['transcendence', 'purpose', 'service'],\n      },\n    ],\n    targetLevels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],\n    priority: 1,\n  },\n\n  {\n    id: 'zone-growth-003',\n    text: {\n      self: 'Мой партнер влияет на мое развитие:',\n      partner: 'Я влияю на развитие своего партнера:',\n      potential: 'Идеальный партнер бы помогал мне:',\n      pair_discussion: 'Мы помогаем друг другу развиваться:',\n    },\n    category: 'growth',\n    options: [\n      {\n        id: 'zone-g-a',\n        text: 'Нет, мне некогда думать о развитии, нужно выжить',\n        level: 1,\n        indicators: ['survival-mode', 'no-energy', 'trauma-focused'],\n      },\n      {\n        id: 'zone-g-b',\n        text: 'Влияет, но повторяя то, что было в семье',\n        level: 2,\n        indicators: ['karmic-patterns', 'unconscious', 'repetition'],\n      },\n      {\n        id: 'zone-g-c',\n        text: 'Не очень, мы живем рядом, но в своих мирах',\n        level: 3,\n        indicators: ['parallel-lives', 'disconnection', 'separate-worlds'],\n      },\n      {\n        id: 'zone-g-d',\n        text: 'Помогает практически, показывает пример',\n        level: 7,\n        indicators: ['modeling', 'practical-support', 'inspiration'],\n      },\n      {\n        id: 'zone-g-e',\n        text: 'Да, мы вместе растем, видим потенциал друг друга',\n        level: 9,\n        indicators: ['mutual-growth', 'recognition', 'shared-development'],\n      },\n      {\n        id: 'zone-g-f',\n        text: 'Абсолютно, вместе создаем новое и помогаем другим',\n        level: 11,\n        indicators: ['synergy', 'co-creation', 'service-to-others'],\n      },\n    ],\n    targetLevels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],\n    priority: 1,\n  },\n\n  {\n    id: 'zone-intimacy-004',\n    text: {\n      self: 'В интимной близости с партнером я чувствую:',\n      partner: 'Мой партнер в интимной близости показывает:',\n      potential: 'Я хотел бы чувствовать в интимной жизни:',\n      pair_discussion: 'В интимной жизни между нами:',\n    },\n    category: 'intimacy',\n    options: [\n      {\n        id: 'zone-i-a',\n        text: 'Страх, боль, небезопасность',\n        level: 1,\n        indicators: ['fear', 'pain', 'trauma-response'],\n      },\n      {\n        id: 'zone-i-b',\n        text: 'Нужно выполнять роль, обязательства',\n        level: 4,\n        indicators: ['duty', 'obligation', 'role-performance'],\n      },\n      {\n        id: 'zone-i-c',\n        text: 'Страсть и волнение, потом опустошение',\n        level: 5,\n        indicators: ['passion', 'intensity', 'emotional-rollercoaster'],\n      },\n      {\n        id: 'zone-i-d',\n        text: 'Близость, но без полной уязвимости',\n        level: 6,\n        indicators: ['facade', 'partial-connection', 'image-consciousness'],\n      },\n      {\n        id: 'zone-i-e',\n        text: 'Безопасность, доверие, полную себя',\n        level: 7,\n        indicators: ['safety', 'trust', 'authenticity'],\n      },\n      {\n        id: 'zone-i-f',\n        text: 'Служение и дарение, священное единство',\n        level: 12,\n        indicators: ['transcendence', 'service', 'spiritual-connection'],\n      },\n    ],\n    targetLevels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],\n    priority: 1,\n  },\n\n  {\n    id: 'zone-choice-005',\n    text: {\n      self: 'Я остался с этим партнером потому что:',\n      partner: 'Мой партнер со мной потому что:',\n      potential: 'В идеальных отношениях партнер выбирал бы меня:',\n      pair_discussion: 'Мы вместе потому что:',\n    },\n    category: 'values',\n    options: [\n      {\n        id: 'zone-ch-a',\n        text: 'Потому что не видел выхода, не было других вариантов',\n        level: 1,\n        indicators: ['no-choice', 'trapped', 'desperation'],\n      },\n      {\n        id: 'zone-ch-b',\n        text: 'Исторически так сложилось, трудно менять',\n        level: 2,\n        indicators: ['inertia', 'habituation', 'karmic'],\n      },\n      {\n        id: 'zone-ch-c',\n        text: 'Нужна экономическая поддержка и безопасность',\n        level: 3,\n        indicators: ['survival', 'economic-dependency', 'fear-of-loneliness'],\n      },\n      {\n        id: 'zone-ch-d',\n        text: 'Все работает хорошо, комфортно и привычно',\n        level: 4,\n        indicators: ['comfort', 'pragmatism', 'stability'],\n      },\n      {\n        id: 'zone-ch-e',\n        text: 'Потому что люблю, испытываю сильные чувства',\n        level: 5,\n        indicators: ['passion', 'emotional-attachment', 'intensity'],\n      },\n      {\n        id: 'zone-ch-f',\n        text: 'Потому что это подходит нашему имиджу и окружению',\n        level: 6,\n        indicators: ['social-status', 'facade', 'image'],\n      },\n      {\n        id: 'zone-ch-g',\n        text: 'Потому что нас дополняют и понимают друг друга',\n        level: 7,\n        indicators: ['understanding', 'complementarity', 'psychological-safety'],\n      },\n      {\n        id: 'zone-ch-h',\n        text: 'Потому что развиваюсь и становлюсь лучше, в отношениях',\n        level: 9,\n        indicators: ['growth', 'mutual-inspiration', 'positive-influence'],\n      },\n      {\n        id: 'zone-ch-i',\n        text: 'Потому что вместе создаем смысл и служим высшему',\n        level: 11,\n        indicators: ['purpose', 'co-creation', 'transcendence'],\n      },\n    ],\n    targetLevels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],\n    priority: 1,\n  },\n\n  {\n    id: 'zone-difference-006',\n    text: {\n      self: 'Когда партнер отличается от меня:',\n      partner: 'Когда я отличаюсь от партнера:',\n      potential: 'Я бы хотел, чтобы партнер:',\n      pair_discussion: 'Когда мы отличаемся друг от друга:',\n    },\n    category: 'acceptance',\n    options: [\n      {\n        id: 'zone-d-a',\n        text: 'Это угрожает безопасности, я боюсь потерять контроль',\n        level: 1,\n        indicators: ['fear', 'need-for-control', 'insecurity'],\n      },\n      {\n        id: 'zone-d-b',\n        text: 'Я повторяю попытки сделать его как я или как родитель',\n        level: 2,\n        indicators: ['unconscious-patterns', 'control-attempts', 'projection'],\n      },\n      {\n        id: 'zone-d-c',\n        text: 'Это немного напрягает, но нужно мириться для стабильности',\n        level: 3,\n        indicators: ['tolerance', 'resentment', 'survival-mode'],\n      },\n      {\n        id: 'zone-d-d',\n        text: 'Нужно его переделать, мы не совместимы',\n        level: 5,\n        indicators: ['criticism', 'control-needs', 'contempt'],\n      },\n      {\n        id: 'zone-d-e',\n        text: 'Это нормально, нужно соблюдать границы и уважать',\n        level: 7,\n        indicators: ['respect', 'boundaries', 'acceptance'],\n      },\n      {\n        id: 'zone-d-f',\n        text: 'Это обогащает нас, видим в этом потенциал друг друга',\n        level: 9,\n        indicators: ['appreciation', 'growth-mindset', 'complementarity'],\n      },\n      {\n        id: 'zone-d-g',\n        text: 'Это творчество и гармония, разные ноты в одной симфонии',\n        level: 11,\n        indicators: ['synergy', 'integration', 'co-creation'],\n      },\n    ],\n    targetLevels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],\n    priority: 1,\n  },\n\n  // ============================================================================\n  // БЛОК УТОЧНЕНИЯ (22 вопроса) - детальное определение уровня\n  // ============================================================================\n\n  {\n    id: 'level-detail-trauma-007',\n    text: {\n      self: 'В отношении к физическому насилию или угрозам:',\n      partner: 'По отношению к физическому насилию мой партнер:',\n      potential: 'Я совершенно не хочу:',\n      pair_discussion: 'У нас совершенно исключено:',\n    },\n    category: 'boundaries',\n    options: [\n      {\n        id: 'lvl-t-a',\n        text: 'Это происходит, и это нормально в отношениях',\n        level: 1,\n        indicators: ['trauma-normalization', 'violence-acceptance'],\n      },\n      {\n        id: 'lvl-t-b',\n        text: 'Это было, но я пытаюсь изменить ситуацию',\n        level: 2,\n        indicators: ['trauma-awareness', 'hope-for-change'],\n      },\n      {\n        id: 'lvl-t-c',\n        text: 'Нет, но я боюсь сказать об этом',\n        level: 3,\n        indicators: ['fear', 'boundaries-not-held'],\n      },\n      {\n        id: 'lvl-t-d',\n        text: 'Абсолютно исключено, это мои границы',\n        level: 7,\n        indicators: ['firm-boundaries', 'self-respect'],\n      },\n    ],\n    targetLevels: [1, 2, 3, 7],\n    priority: 2,\n  },\n\n  {\n    id: 'level-detail-emotion-008',\n    text: {\n      self: 'Когда я грущу, партнер обычно:',\n      partner: 'Когда партнер грустит, я обычно:',\n      potential: 'Я хотел бы, чтобы партнер:',\n      pair_discussion: 'Когда один из нас грустит, мы:',\n    },\n    category: 'communication',\n    options: [\n      {\n        id: 'lvl-e-a',\n        text: 'Раздражается или уходит, не слушает',\n        level: 1,\n        indicators: ['emotional-abandonment', 'unavailability'],\n      },\n      {\n        id: 'lvl-e-b',\n        text: 'Слушает, но потом возвращает разговор к себе',\n        level: 3,\n        indicators: ['emotional-unavailability', 'narcissism'],\n      },\n      {\n        id: 'lvl-e-c',\n        text: 'Слушает, но потом дает советы как решить',\n        level: 4,\n        indicators: ['problem-solving-focus', 'lack-of-empathy'],\n      },\n      {\n        id: 'lvl-e-d',\n        text: 'Рассказывает похожую историю, как пережил сам',\n        level: 5,\n        indicators: ['ego-focus', 'empathy-struggles', 'self-centeredness'],\n      },\n      {\n        id: 'lvl-e-e',\n        text: 'Слушает, пытается понять и поддержать',\n        level: 7,\n        indicators: ['empathy', 'emotional-attunement', 'support'],\n      },\n      {\n        id: 'lvl-e-f',\n        text: 'Слушает, поддерживает, верит в мою силу',\n        level: 8,\n        indicators: ['unconditional-support', 'empowerment'],\n      },\n    ],\n    targetLevels: [1, 3, 4, 5, 7, 8],\n    priority: 1,\n  },\n\n  {\n    id: 'level-detail-jealousy-009',\n    text: {\n      self: 'Ревность в отношениях - это:',\n      partner: 'Мой партнер относится к ревности как:',\n      potential: 'Я хотел бы, чтобы ревность была:',\n      pair_discussion: 'У нас с ревностью дело обстоит:',\n    },\n    category: 'communication',\n    options: [\n      {\n        id: 'lvl-j-a',\n        text: 'Доказательство любви, без ревности - не любит',\n        level: 5,\n        indicators: ['unhealthy-attachment', 'insecurity', 'possession'],\n      },\n      {\n        id: 'lvl-j-b',\n        text: 'Нужно скрывать, чтобы не конфликтовать',\n        level: 6,\n        indicators: ['facade', 'hidden-feelings', 'people-pleasing'],\n      },\n      {\n        id: 'lvl-j-c',\n        text: 'Естественное чувство, но не контролирует поведение',\n        level: 7,\n        indicators: ['emotional-awareness', 'self-regulation'],\n      },\n      {\n        id: 'lvl-j-d',\n        text: 'Редкое явление, я доверяю и честен',\n        level: 9,\n        indicators: ['secure-attachment', 'trust', 'transparency'],\n      },\n    ],\n    targetLevels: [5, 6, 7, 9],\n    priority: 2,\n  },\n\n  {\n    id: 'level-detail-money-010',\n    text: {\n      self: 'Деньги в отношениях - это:',\n      partner: 'Мой партнер смотрит на деньги как:',\n      potential: 'Я хотел бы, чтобы финансы были:',\n      pair_discussion: 'Финансовые вопросы между нами:',\n    },\n    category: 'values',\n    options: [\n      {\n        id: 'lvl-m-a',\n        text: 'Главное условие выживания и безопасности',\n        level: 3,\n        indicators: ['survival-anxiety', 'dependency', 'financial-fear'],\n      },\n      {\n        id: 'lvl-m-b',\n        text: 'Инструмент стабильности и комфорта',\n        level: 4,\n        indicators: ['pragmatism', 'resource-focus', 'stability-seeking'],\n      },\n      {\n        id: 'lvl-m-c',\n        text: 'Инструмент власти и статуса',\n        level: 6,\n        indicators: ['control-needs', 'status-consciousness', 'power-dynamics'],\n      },\n      {\n        id: 'lvl-m-d',\n        text: 'Ресурс, который делим справедливо и прозрачно',\n        level: 7,\n        indicators: ['transparency', 'fairness', 'partnership'],\n      },\n      {\n        id: 'lvl-m-e',\n        text: 'Инструмент для совместного создания и служения',\n        level: 11,\n        indicators: ['purpose-driven', 'co-creation', 'generosity'],\n      },\n    ],\n    targetLevels: [3, 4, 6, 7, 11],\n    priority: 2,\n  },\n\n  {\n    id: 'level-detail-authenticity-011',\n    text: {\n      self: 'С партнером я:',\n      partner: 'Со мной мой партнер:',\n      potential: 'Я хотел бы быть со своим партнером:',\n      pair_discussion: 'Между нами:',\n    },\n    category: 'acceptance',\n    options: [\n      {\n        id: 'lvl-au-a',\n        text: 'Стараюсь скрывать неловкие стороны и успехи',\n        level: 3,\n        indicators: ['shame', 'hiding', 'inauthenticity'],\n      },\n      {\n        id: 'lvl-au-b',\n        text: 'Показываю только лучшую версию себя',\n        level: 6,\n        indicators: ['facade', 'perfectionism', 'image-management'],\n      },\n      {\n        id: 'lvl-au-c',\n        text: 'Могу быть собой, но иногда стесняюсь слабостей',\n        level: 7,\n        indicators: ['growing-authenticity', 'selective-vulnerability'],\n      },\n      {\n        id: 'lvl-au-d',\n        text: 'Полностью аутентичен, могу быть любым',\n        level: 8,\n        indicators: ['full-authenticity', 'unconditional-acceptance'],\n      },\n      {\n        id: 'lvl-au-e',\n        text: 'Аутентичен и вдохновляю партнера быть собой',\n        level: 10,\n        indicators: ['modeling', 'mutual-authenticity', 'synergy'],\n      },\n    ],\n    targetLevels: [3, 6, 7, 8, 10],\n    priority: 2,\n  },\n\n  {\n    id: 'level-detail-repair-012',\n    text: {\n      self: 'После ссоры мы обычно:',\n      partner: 'После ссоры со мной мой партнер обычно:',\n      potential: 'Я хотел бы после ссоры:',\n      pair_discussion: 'После наших ссор мы обычно:',\n    },\n    category: 'conflict',\n    options: [\n      {\n        id: 'lvl-rp-a',\n        text: 'Замораживаем отношения на несколько дней',\n        level: 1,\n        indicators: ['conflict-avoidance', 'freeze-response', 'no-repair'],\n      },\n      {\n        id: 'lvl-rp-b',\n        text: 'Один извиняется, даже если прав, ради мира',\n        level: 3,\n        indicators: ['appeasement', 'false-reconciliation', 'self-abandonment'],\n      },\n      {\n        id: 'lvl-rp-c',\n        text: 'Спор переходит в привычку, но мы живем вместе',\n        level: 4,\n        indicators: ['unresolved-conflict', 'parallel-lives', 'emotional-distance'],\n      },\n      {\n        id: 'lvl-rp-d',\n        text: 'Один из нас идет на компромисс, второй побеждает',\n        level: 5,\n        indicators: ['power-dynamics', 'winner-loser', 'resentment'],\n      },\n      {\n        id: 'lvl-rp-e',\n        text: 'Обсуждаем, что произошло, и находим решение',\n        level: 7,\n        indicators: ['conflict-resolution', 'mutual-understanding', 'repair'],\n      },\n      {\n        id: 'lvl-rp-f',\n        text: 'Видим учение в конфликте, становимся ближе',\n        level: 9,\n        indicators: ['growth-from-conflict', 'deepening', 'resilience'],\n      },\n    ],\n    targetLevels: [1, 3, 4, 5, 7, 9],\n    priority: 1,\n  },\n\n  {\n    id: 'level-detail-external-013',\n    text: {\n      self: 'Когда люди говорят о наших отношениях:',\n      partner: 'Когда люди говорят о наших отношениях, я:',\n      potential: 'Мне хотелось бы, чтобы о моих отношениях:',\n      pair_discussion: 'Когда окружающие говорят о нас:',\n    },\n    category: 'values',\n    options: [\n      {\n        id: 'lvl-ex-a',\n        text: 'Я контролирую ответ, чтобы выглядеть хорошо',\n        level: 6,\n        indicators: ['image-management', 'people-pleasing', 'facade'],\n      },\n      {\n        id: 'lvl-ex-b',\n        text: 'Остаюсь честным, но немного беспокоюсь об имидже',\n        level: 7,\n        indicators: ['authenticity-with-caution', 'social-awareness'],\n      },\n      {\n        id: 'lvl-ex-c',\n        text: 'Не забочусь, рассказываю правду как есть',\n        level: 8,\n        indicators: ['authenticity', 'no-pretense', 'self-assurance'],\n      },\n      {\n        id: 'lvl-ex-d',\n        text: 'Меня вдохновляет помогать им увидеть лучшее в любви',\n        level: 10,\n        indicators: ['modeling', 'inspiration', 'service'],\n      },\n    ],\n    targetLevels: [6, 7, 8, 10],\n    priority: 2,\n  },\n\n  {\n    id: 'level-detail-sex-014',\n    text: {\n      self: 'Сексуальность в отношениях для меня это:',\n      partner: 'Мой партнер смотрит на сексуальность как:',\n      potential: 'Я хотел бы, чтобы секс был:',\n      pair_discussion: 'Секс между нами это:',\n    },\n    category: 'intimacy',\n    options: [\n      {\n        id: 'lvl-sx-a',\n        text: 'Источник боли и страха',\n        level: 1,\n        indicators: ['trauma', 'fear', 'aversion'],\n      },\n      {\n        id: 'lvl-sx-b',\n        text: 'Обязательство, которое нужно выполнять',\n        level: 4,\n        indicators: ['duty', 'obligation', 'disconnection'],\n      },\n      {\n        id: 'lvl-sx-c',\n        text: 'Главный способ быть близко, без разговоров',\n        level: 5,\n        indicators: ['sex-as-communication', 'avoidance-of-intimacy', 'intensity'],\n      },\n      {\n        id: 'lvl-sx-d',\n        text: 'Способ получить утешение и внимание',\n        level: 5,\n        indicators: ['emotional-need', 'external-validation'],\n      },\n      {\n        id: 'lvl-sx-e',\n        text: 'Деятельность с доверием и уязвимостью',\n        level: 7,\n        indicators: ['trust', 'vulnerability', 'emotional-safety'],\n      },\n      {\n        id: 'lvl-sx-f',\n        text: 'Священное соединение и служение друг другу',\n        level: 12,\n        indicators: ['sacredness', 'spiritual-connection', 'transcendence'],\n      },\n    ],\n    targetLevels: [1, 4, 5, 7, 12],\n    priority: 2,\n  },\n\n  {\n    id: 'level-detail-future-015',\n    text: {\n      self: 'О будущем с партнером я думаю:',\n      partner: 'Мой партнер о будущем со мной думает:',\n      potential: 'Я хотел бы, чтобы в будущем:',\n      pair_discussion: 'О нашем будущем вместе мы думаем:',\n    },\n    category: 'values',\n    options: [\n      {\n        id: 'lvl-fu-a',\n        text: 'Не думаю, это день за днем, выживаю',\n        level: 1,\n        indicators: ['no-hope', 'survival-mode', 'trauma-focus'],\n      },\n      {\n        id: 'lvl-fu-b',\n        text: 'Боюсь, что повторится история родителей',\n        level: 2,\n        indicators: ['karmic-fears', 'unconscious-patterns', 'hopelessness'],\n      },\n      {\n        id: 'lvl-fu-c',\n        text: 'Надеюсь, что будет стабильно и хорошо',\n        level: 3,\n        indicators: ['survival-hope', 'basic-security', 'limited-vision'],\n      },\n      {\n        id: 'lvl-fu-d',\n        text: 'Планируем дом, детей, пенсию',\n        level: 4,\n        indicators: ['practical-planning', 'stability-focus', 'linear-thinking'],\n      },\n      {\n        id: 'lvl-fu-e',\n        text: 'Мечтаем о приключениях и новых эмоциях',\n        level: 5,\n        indicators: ['passion-seeking', 'adventure-focus', 'excitement'],\n      },\n      {\n        id: 'lvl-fu-f',\n        text: 'Строим жизнь, которая будет выглядеть успешной',\n        level: 6,\n        indicators: ['image-focus', 'status-seeking', 'external-validation'],\n      },\n      {\n        id: 'lvl-fu-g',\n        text: 'Вместе растем и развиваемся как люди',\n        level: 8,\n        indicators: ['growth-focus', 'mutual-development', 'long-term-vision'],\n      },\n      {\n        id: 'lvl-fu-h',\n        text: 'Создаем что-то значимое вместе для мира',\n        level: 11,\n        indicators: ['purpose-driven', 'legacy-focus', 'service'],\n      },\n    ],\n    targetLevels: [1, 2, 3, 4, 5, 6, 8, 11],\n    priority: 1,\n  },\n\n  {\n    id: 'level-detail-freedom-016',\n    text: {\n      self: 'Моя личная свобода в отношениях:',\n      partner: 'Мой партнер дает мне свободу:',\n      potential: 'Я хотел бы, чтобы партнер:',\n      pair_discussion: 'В отношениях мы оба имеем свободу:',\n    },\n    category: 'boundaries',\n    options: [\n      {\n        id: 'lvl-fr-a',\n        text: 'Ограничена, я должен отчитываться, контролируюсь',\n        level: 1,\n        indicators: ['control', 'surveillance', 'coercion'],\n      },\n      {\n        id: 'lvl-fr-b',\n        text: 'Ограничена, но я это принял как норму',\n        level: 3,\n        indicators: ['learned-helplessness', 'resignation', 'accepted-limitation'],\n      },\n      {\n        id: 'lvl-fr-c',\n        text: 'Есть, но только если делаю \"правильное\"',\n        level: 5,\n        indicators: ['conditional-freedom', 'control-through-approval'],\n      },\n      {\n        id: 'lvl-fr-d',\n        text: 'Есть, но вызывает ревность и конфликты',\n        level: 5,\n        indicators: ['insecurity', 'jealousy-based-control'],\n      },\n      {\n        id: 'lvl-fr-e',\n        text: 'Полная, мы доверяем друг другу и честны',\n        level: 9,\n        indicators: ['trust', 'transparency', 'autonomy'],\n      },\n      {\n        id: 'lvl-fr-f',\n        text: 'Полная, и это укрепляет нашу связь',\n        level: 10,\n        indicators: ['secure-attachment', 'mature-relationship', 'synergy'],\n      },\n    ],\n    targetLevels: [1, 3, 5, 9, 10],\n    priority: 2,\n  },\n\n  {\n    id: 'level-detail-responsibility-017',\n    text: {\n      self: 'За проблемы в отношениях я считаю виноватым:',\n      partner: 'Когда возникают проблемы, мой партнер:',\n      potential: 'Я хотел бы, чтобы проблемы в отношениях:',\n      pair_discussion: 'Когда у нас возникают проблемы:',\n    },\n    category: 'communication',\n    options: [\n      {\n        id: 'lvl-resp-a',\n        text: 'Я, полностью, я во всем виноват',\n        level: 1,\n        indicators: ['self-blame', 'shame', 'internalized-criticism'],\n      },\n      {\n        id: 'lvl-resp-b',\n        text: 'Партнера, он такой, я это терпелю',\n        level: 3,\n        indicators: ['blame-external', 'victimhood', 'resentment'],\n      },\n      {\n        id: 'lvl-resp-c',\n        text: 'Меня или его, смотря как спросишь',\n        level: 5,\n        indicators: ['blame-shifting', 'defensiveness'],\n      },\n      {\n        id: 'lvl-resp-d',\n        text: 'Обоих - мы создаем эту динамику вместе',\n        level: 7,\n        indicators: ['shared-responsibility', 'systemic-thinking'],\n      },\n      {\n        id: 'lvl-resp-e',\n        text: 'Это возможность для обоих научиться',\n        level: 9,\n        indicators: ['growth-mindset', 'learning-orientation'],\n      },\n    ],\n    targetLevels: [1, 3, 5, 7, 9],\n    priority: 2,\n  },\n\n  {\n    id: 'level-detail-sacrifice-018',\n    text: {\n      self: 'Я готов ради отношений жертвовать:',\n      partner: 'Мой партнер ради отношений жертвует:',\n      potential: 'Я хотел бы для отношений:',\n      pair_discussion: 'Ради наших отношений мы готовы:',\n    },\n    category: 'values',\n    options: [\n      {\n        id: 'lvl-sac-a',\n        text: 'Всем - мечтами, друзьями, собой',\n        level: 2,\n        indicators: ['self-abandonment', 'enmeshment', 'loss-of-self'],\n      },\n      {\n        id: 'lvl-sac-b',\n        text: 'Многим, это естественно в отношениях',\n        level: 4,\n        indicators: ['role-sacrifice', 'duty-based', 'resentment-building'],\n      },\n      {\n        id: 'lvl-sac-c',\n        text: 'Многим, потому что люблю его сильнее чем себя',\n        level: 5,\n        indicators: ['love-as-sacrifice', 'unhealthy-attachment', 'dependency'],\n      },\n      {\n        id: 'lvl-sac-d',\n        text: 'Некоторым, но не основным мечтам',\n        level: 7,\n        indicators: ['boundaries', 'mutual-respect'],\n      },\n      {\n        id: 'lvl-sac-e',\n        text: 'Смешивать границы, но отстаивать свое развитие',\n        level: 8,\n        indicators: ['autonomy-within-connection', 'healthy-boundaries'],\n      },\n      {\n        id: 'lvl-sac-f',\n        text: 'Служить, потому что это приносит радость, не жертву',\n        level: 11,\n        indicators: ['service-not-sacrifice', 'joy-in-giving', 'transcendence'],\n      },\n    ],\n    targetLevels: [2, 4, 5, 7, 8, 11],\n    priority: 2,\n  },\n\n  {\n    id: 'level-detail-partners-emotion-019',\n    text: {\n      self: 'Когда партнер расстроен, я:',\n      partner: 'Когда я расстроена/расстроен, партнер:',\n      potential: 'Я хотел бы, чтобы партнер:',\n      pair_discussion: 'Когда один расстроен, другой:',\n    },\n    category: 'communication',\n    options: [\n      {\n        id: 'lvl-pe-a',\n        text: 'Становлюсь еще более тревожным или рассерженным',\n        level: 1,\n        indicators: ['emotional-contagion', 'dysregulation', 'lack-of-boundaries'],\n      },\n      {\n        id: 'lvl-pe-b',\n        text: 'Уходу, чтобы не испортить свое настроение',\n        level: 3,\n        indicators: ['avoidance', 'low-empathy', 'self-focus'],\n      },\n      {\n        id: 'lvl-pe-c',\n        text: 'Стараюсь исправить ситуацию, чтобы вернуть мир',\n        level: 4,\n        indicators: ['peace-seeking', 'problem-solving-focus'],\n      },\n      {\n        id: 'lvl-pe-d',\n        text: 'Слушаю, но фокусирую на его ошибках',\n        level: 5,\n        indicators: ['blame-focus', 'defensive-listening'],\n      },\n      {\n        id: 'lvl-pe-e',\n        text: 'Слушаю, стараюсь понять его мир',\n        level: 7,\n        indicators: ['empathy', 'presence', 'attunement'],\n      },\n      {\n        id: 'lvl-pe-f',\n        text: 'Слушаю, поддерживаю и верю в его способность измениться',\n        level: 8,\n        indicators: ['empowerment', 'faith', 'unconditional-support'],\n      },\n      {\n        id: 'lvl-pe-g',\n        text: 'Мы вместе изучаем, что стоит под его эмоциями',\n        level: 10,\n        indicators: ['mutual-exploration', 'depth', 'co-growth'],\n      },\n    ],\n    targetLevels: [1, 3, 4, 5, 7, 8, 10],\n    priority: 1,\n  },\n\n  {\n    id: 'level-detail-need-020',\n    text: {\n      self: 'В отношениях я главно нуждаюсь в:',\n      partner: 'Мой партнер главно нуждается в:',\n      potential: 'Я хотел бы нуждаться в отношениях в:',\n      pair_discussion: 'В отношениях мы главно нуждаемся в:',\n    },\n    category: 'values',\n    options: [\n      {\n        id: 'lvl-nd-a',\n        text: 'Выживании и безопасности',\n        level: 1,\n        indicators: ['survival-needs', 'safety-seeking'],\n      },\n      {\n        id: 'lvl-nd-b',\n        text: 'Стабильности и финансовой безопасности',\n        level: 3,\n        indicators: ['economic-security', 'stability'],\n      },\n      {\n        id: 'lvl-nd-c',\n        text: 'Комфорте и удобстве',\n        level: 4,\n        indicators: ['comfort-seeking', 'pleasure-seeking'],\n      },\n      {\n        id: 'lvl-nd-d',\n        text: 'Эмоциональной интенсивности и волнении',\n        level: 5,\n        indicators: ['excitement-seeking', 'emotional-intensity'],\n      },\n      {\n        id: 'lvl-nd-e',\n        text: 'Подтверждении статуса и признании',\n        level: 6,\n        indicators: ['validation-seeking', 'status-needs'],\n      },\n      {\n        id: 'lvl-nd-f',\n        text: 'Подлинной связи и понимании',\n        level: 7,\n        indicators: ['connection-seeking', 'emotional-intimacy'],\n      },\n      {\n        id: 'lvl-nd-g',\n        text: 'Росте и развитии вместе',\n        level: 9,\n        indicators: ['growth-seeking', 'development', 'mutual-evolution'],\n      },\n      {\n        id: 'lvl-nd-h',\n        text: 'Служении и создании смысла',\n        level: 11,\n        indicators: ['purpose-seeking', 'transcendence', 'service'],\n      },\n    ],\n    targetLevels: [1, 3, 4, 5, 6, 7, 9, 11],\n    priority: 2,\n  },\n\n  {\n    id: 'level-detail-influence-021',\n    text: {\n      self: 'Я пытаюсь переделать партнера:',\n      partner: 'Мой партнер пытается меня переделать:',\n      potential: 'В отношениях я хотел бы:',\n      pair_discussion: 'В нас с партнером принцип:',\n    },\n    category: 'acceptance',\n    options: [\n      {\n        id: 'lvl-inf-a',\n        text: 'Постоянно, это главное моего времени',\n        level: 2,\n        indicators: ['control', 'critical', 'change-focus'],\n      },\n      {\n        id: 'lvl-inf-b',\n        text: 'Да, но скрыто, через давление',\n        level: 5,\n        indicators: ['covert-control', 'manipulation'],\n      },\n      {\n        id: 'lvl-inf-c',\n        text: 'Иногда, я хотел бы его лучше',\n        level: 6,\n        indicators: ['perfectionism', 'subtle-criticism'],\n      },\n      {\n        id: 'lvl-inf-d',\n        text: 'Нет, я принимаю его таким как есть',\n        level: 8,\n        indicators: ['acceptance', 'non-judgmental', 'unconditional-love'],\n      },\n      {\n        id: 'lvl-inf-e',\n        text: 'Нет, я вижу его потенциал и верю в него',\n        level: 9,\n        indicators: ['faith-in-other', 'empowerment', 'growth-support'],\n      },\n    ],\n    targetLevels: [2, 5, 6, 8, 9],\n    priority: 2,\n  },\n\n  {\n    id: 'level-detail-standards-022',\n    text: {\n      self: 'В отношениях я придерживаюсь стандартов:',\n      partner: 'Мой партнер придерживается стандартов:',\n      potential: 'Я хотел бы в отношениях:',\n      pair_discussion: 'Мы в отношениях придерживаемся:',\n    },\n    category: 'values',\n    options: [\n      {\n        id: 'lvl-std-a',\n        text: 'Нет, только выживание',\n        level: 1,\n        indicators: ['no-standards', 'survival-mode'],\n      },\n      {\n        id: 'lvl-std-b',\n        text: 'Низких, главное чтобы не уходил',\n        level: 2,\n        indicators: ['low-expectations', 'desperation', 'acceptance'],\n      },\n      {\n        id: 'lvl-std-c',\n        text: 'Практических - выполняет роль и обязанности',\n        level: 4,\n        indicators: ['role-based', 'practical', 'functional'],\n      },\n      {\n        id: 'lvl-std-d',\n        text: 'Очень высоких, партнер должен быть идеальным',\n        level: 6,\n        indicators: ['perfectionism', 'unrealistic-expectations', 'criticism'],\n      },\n      {\n        id: 'lvl-std-e',\n        text: 'Честности, уважения и открытости',\n        level: 7,\n        indicators: ['integrity', 'mutual-respect', 'authenticity'],\n      },\n      {\n        id: 'lvl-std-f',\n        text: 'Взаимного роста и развития',\n        level: 9,\n        indicators: ['growth-standards', 'mutual-development'],\n      },\n    ],\n    targetLevels: [1, 2, 4, 6, 7, 9],\n    priority: 2,\n  },\n\n  {\n    id: 'level-detail-appreciation-023',\n    text: {\n      self: 'То хорошее, что делает партнер, я:',\n      partner: 'То хорошее, что я делаю, партнер:',\n      potential: 'Я хотел бы, чтобы мои усилия:',\n      pair_discussion: 'То хорошее, что мы делаем друг для друга:',\n    },\n    category: 'acceptance',\n    options: [\n      {\n        id: 'lvl-app-a',\n        text: 'Не вижу, зациклен на проблемах',\n        level: 1,\n        indicators: ['trauma-focus', 'negativity-bias'],\n      },\n      {\n        id: 'lvl-app-b',\n        text: 'Вижу, но воспринимаю как обязанность',\n        level: 4,\n        indicators: ['entitlement', 'no-gratitude'],\n      },\n      {\n        id: 'lvl-app-c',\n        text: 'Благодарен, но иногда забываю сказать',\n        level: 7,\n        indicators: ['selective-appreciation', 'awareness-gaps'],\n      },\n      {\n        id: 'lvl-app-d',\n        text: 'Выражаю благодарность регулярно',\n        level: 8,\n        indicators: ['gratitude-practice', 'acknowledgment', 'presence'],\n      },\n      {\n        id: 'lvl-app-e',\n        text: 'Замечаю и восхищаюсь трансформацией',\n        level: 10,\n        indicators: ['deep-appreciation', 'witnessing-growth', 'admiration'],\n      },\n    ],\n    targetLevels: [1, 4, 7, 8, 10],\n    priority: 2,\n  },\n\n  {\n    id: 'level-detail-alone-024',\n    text: {\n      self: 'Когда я один, я чувствую себя:',\n      partner: 'Когда мой партнер один, он чувствует себя:',\n      potential: 'Я хотел бы, чтобы в одиночестве:',\n      pair_discussion: 'Когда один из нас один, это для нас:',\n    },\n    category: 'boundaries',\n    options: [\n      {\n        id: 'lvl-al-a',\n        text: 'Потерянным, испуганным, панику',\n        level: 1,\n        indicators: ['fear-of-abandonment', 'panic', 'no-self'],\n      },\n      {\n        id: 'lvl-al-b',\n        text: 'Неполноценным, неживой',\n        level: 2,\n        indicators: ['low-self-worth', 'emptiness', 'self-abandonment'],\n      },\n      {\n        id: 'lvl-al-c',\n        text: 'Некомфортно, скучно, жду его',\n        level: 3,\n        indicators: ['dependency', 'boredom-intolerance'],\n      },\n      {\n        id: 'lvl-al-d',\n        text: 'Нормально, занимаюсь делами, думаю о нем',\n        level: 7,\n        indicators: ['autonomy', 'independence', 'secure-attachment'],\n      },\n      {\n        id: 'lvl-al-e',\n        text: 'Хорошо, развиваюсь, питаюсь',\n        level: 8,\n        indicators: ['self-sufficiency', 'self-nourishment', 'healthy-autonomy'],\n      },\n      {\n        id: 'lvl-al-f',\n        text: 'Отлично, медитирую, пишу, служу себе и другим',\n        level: 11,\n        indicators: ['spiritual-connection', 'self-development', 'purpose'],\n      },\n    ],\n    targetLevels: [1, 2, 3, 7, 8, 11],\n    priority: 2,\n  },\n\n  // ============================================================================\n  // БЛОК ВАЛИДАЦИИ (6 вопросов) - обнаружение противоречий и байпасов\n  // ============================================================================\n\n  {\n    id: 'validation-speed-025',\n    text: {\n      self: 'Я рассказываю о сложных чувствах, потому что:',\n      partner: 'Когда я рассказываю о себе, это происходит:',\n      potential: 'Я хотел бы говорить о чувствах:',\n      pair_discussion: 'Когда мы говорим о сложных чувствах:',\n    },\n    category: 'validation',\n    options: [\n      {\n        id: 'val-s-a',\n        text: 'Глубоко обдумав, честно, может занять время',\n        level: 7,\n        indicators: ['thoughtfulness', 'authenticity', 'processing-time'],\n      },\n      {\n        id: 'val-s-b',\n        text: 'Быстро, чтобы выглядеть хорошо, не совсем честно',\n        level: 6,\n        indicators: ['image-management', 'insincerity'],\n      },\n      {\n        id: 'val-s-c',\n        text: 'Спонтанно, в горячке, потом жалею',\n        level: 5,\n        indicators: ['impulsivity', 'emotional-reactivity'],\n      },\n      {\n        id: 'val-s-d',\n        text: 'Очень медленно, я не доверяю',\n        level: 1,\n        indicators: ['trauma-response', 'trust-issues'],\n      },\n    ],\n    targetLevels: [1, 5, 6, 7],\n    isValidation: true,\n    priority: 1,\n  },\n\n  {\n    id: 'validation-contradiction-026',\n    text: {\n      self: 'Я говорю, что люблю партнера, но:',\n      partner: 'Мой партнер говорит, что любит меня, но:',\n      potential: 'Я бы хотел, чтобы любовь проявлялась:',\n      pair_discussion: 'Мы говорим, что любим, но:',\n    },\n    category: 'validation',\n    options: [\n      {\n        id: 'val-c-a',\n        text: 'Мои действия это не подтверждают, я жестокий',\n        level: 1,\n        indicators: ['contradiction', 'trauma', 'abusive-patterns'],\n      },\n      {\n        id: 'val-c-b',\n        text: 'Постоянно критикую и пытаюсь менять',\n        level: 2,\n        indicators: ['contradiction', 'control', 'conditional-love'],\n      },\n      {\n        id: 'val-c-c',\n        text: 'Часто боюсь потерять или обижаюсь',\n        level: 5,\n        indicators: ['insecure-attachment', 'fear-based-love'],\n      },\n      {\n        id: 'val-c-d',\n        text: 'Мои действия это в основном подтверждают',\n        level: 8,\n        indicators: ['coherence', 'integrity', 'authentic-love'],\n      },\n    ],\n    targetLevels: [1, 2, 5, 8],\n    isValidation: true,\n    priority: 1,\n  },\n\n  {\n    id: 'validation-spiritual-bypass-027',\n    text: {\n      self: 'Я считаю нашу любовь очень высокой, духовной:',\n      partner: 'Мой партнер видит нашу любовь как очень духовную:',\n      potential: 'Высокая любовь означает для меня:',\n      pair_discussion: 'Мы верим, что наша любовь духовная и:',\n    },\n    category: 'validation',\n    options: [\n      {\n        id: 'val-sb-a',\n        text: 'Да, но при этом я часто критикую его поведение',\n        level: 6,\n        indicators: ['spiritual-bypass', 'mask-for-control', 'cognitive-dissonance'],\n        validation: 'Говоря о высокой духовности, видите ли вы свою жесткость?',\n      },\n      {\n        id: 'val-sb-b',\n        text: 'Да, но практически мы живем раздельными жизнями',\n        level: 5,\n        indicators: ['spiritual-bypass', 'disconnection', 'idealization'],\n        validation: 'Возможно, это избегание реальной близости?',\n      },\n      {\n        id: 'val-sb-c',\n        text: 'Да, и при этом я работаю над собой и слушаю',\n        level: 10,\n        indicators: ['authentic-spiritual-connection'],\n      },\n      {\n        id: 'val-sb-d',\n        text: 'Нет, мы думаем практическими категориями',\n        level: 4,\n        indicators: ['realistic', 'grounded'],\n      },\n    ],\n    targetLevels: [4, 5, 6, 10],\n    isValidation: true,\n    priority: 1,\n  },\n\n  {\n    id: 'validation-change-028',\n    text: {\n      self: 'За последний год в отношениях:',\n      partner: 'За последний год мой партнер:',\n      potential: 'Идеально я хотел бы:',\n      pair_discussion: 'За последний год в наших отношениях:',\n    },\n    category: 'validation',\n    options: [\n      {\n        id: 'val-ch-a',\n        text: 'Ничего не изменилось, все как было всегда',\n        level: 2,\n        indicators: ['stagnation', 'karmic-loop', 'no-growth'],\n      },\n      {\n        id: 'val-ch-b',\n        text: 'Я стараюсь, партнер не меняется',\n        level: 5,\n        indicators: ['one-sided-effort', 'victim-mentality'],\n      },\n      {\n        id: 'val-ch-c',\n        text: 'Оба стараемся, но медленно',\n        level: 7,\n        indicators: ['mutual-effort', 'gradual-growth'],\n      },\n      {\n        id: 'val-ch-d',\n        text: 'Мы трансформировались вместе, это очень видно',\n        level: 9,\n        indicators: ['mutual-growth', 'transformation'],\n      },\n    ],\n    targetLevels: [2, 5, 7, 9],\n    isValidation: true,\n    priority: 1,\n  },\n\n  {\n    id: 'validation-honesty-029',\n    text: {\n      self: 'В этом опросе я:',\n      partner: 'В описании наших отношений я:',\n      potential: 'Я хотел бы быть в опросе:',\n      pair_discussion: 'При заполнении этого опроса мы:',\n    },\n    category: 'validation',\n    options: [\n      {\n        id: 'val-h-a',\n        text: 'Полностью честен, даже если неудобно',\n        level: 8,\n        indicators: ['authenticity', 'integrity'],\n      },\n      {\n        id: 'val-h-b',\n        text: 'Стараюсь быть честен, но скрываю самое сложное',\n        level: 5,\n        indicators: ['partial-honesty', 'shame-based-hiding'],\n      },\n      {\n        id: 'val-h-c',\n        text: 'Выбираю ответы, чтобы выглядеть хорошо',\n        level: 6,\n        indicators: ['social-desirability-bias', 'image-management'],\n      },\n      {\n        id: 'val-h-d',\n        text: 'Выбираю ответы, которые партнер одобрит',\n        level: 3,\n        indicators: ['people-pleasing', 'external-locus-of-control'],\n      },\n    ],\n    targetLevels: [3, 5, 6, 8],\n    isValidation: true,\n    priority: 1,\n  },\n\n  {\n    id: 'validation-awareness-030',\n    text: {\n      self: 'Мой партнер думает обо мне следующее:',\n      partner: 'Я думаю о своем партнере следующее:',\n      potential: 'Идеально я хотел бы, чтобы партнер думал:',\n      pair_discussion: 'Мы думаем друг о друге:',\n    },\n    category: 'validation',\n    options: [\n      {\n        id: 'val-aw-a',\n        text: 'Я полностью соответствую его идеалам',\n        level: 6,\n        indicators: ['idealization', 'potential-gap', 'will-disappoint'],\n      },\n      {\n        id: 'val-aw-b',\n        text: 'Я хороший, но есть что улучшить',\n        level: 7,\n        indicators: ['realistic-view', 'growth-mindset'],\n      },\n      {\n        id: 'val-aw-c',\n        text: 'Я несовершенен, но он принимает это',\n        level: 8,\n        indicators: ['acceptance', 'unconditional-love'],\n      },\n      {\n        id: 'val-aw-d',\n        text: 'Он видит мой потенциал и вдохновляет его развивать',\n        level: 10,\n        indicators: ['mutual-empowerment', 'faith-in-other'],\n      },\n    ],\n    targetLevels: [6, 7, 8, 10],\n    isValidation: true,\n    priority: 2,\n  },\n\n  // ============================================================================\n  // ДОПОЛНИТЕЛЬНЫЕ ВОПРОСЫ (4 вопроса) - уточнение граничных случаев\n  // ============================================================================\n\n  {\n    id: 'boundary-maturity-031',\n    text: {\n      self: 'Я говорю \"нет\" партнеру:',\n      partner: 'Мой партнер мне говорит \"нет\":',\n      potential: 'Я хотел бы в отношениях иметь право:',\n      pair_discussion: 'Мы оба можем сказать друг другу \"нет\":',\n    },\n    category: 'boundaries',\n    options: [\n      {\n        id: 'bound-m-a',\n        text: 'Редко, боюсь его реакции',\n        level: 3,\n        indicators: ['fear-based-boundaries', 'people-pleasing'],\n      },\n      {\n        id: 'bound-m-b',\n        text: 'Иногда, но потом начинается конфликт',\n        level: 5,\n        indicators: ['weak-boundaries', 'conflict-aversion'],\n      },\n      {\n        id: 'bound-m-c',\n        text: 'Да, и он это принимает спокойно',\n        level: 7,\n        indicators: ['firm-boundaries', 'mutual-respect'],\n      },\n      {\n        id: 'bound-m-d',\n        text: 'Да, и мы оба видим в этом здоровье',\n        level: 9,\n        indicators: ['healthy-autonomy', 'boundary-respect'],\n      },\n    ],\n    targetLevels: [3, 5, 7, 9],\n    priority: 2,\n  },\n\n  {\n    id: 'autonomy-maturity-032',\n    text: {\n      self: 'Мою независимость в отношениях:',\n      partner: 'Независимость партнера я:',\n      potential: 'Я хотел бы нашу независимость:',\n      pair_discussion: 'Нашу независимость мы:',\n    },\n    category: 'growth',\n    options: [\n      {\n        id: 'auto-m-a',\n        text: 'Подавляю, я должен быть первым',\n        level: 5,\n        indicators: ['possessiveness', 'control-needs'],\n      },\n      {\n        id: 'auto-m-b',\n        text: 'Терплю, но с ревностью и недоверием',\n        level: 5,\n        indicators: ['insecurity', 'jealousy'],\n      },\n      {\n        id: 'auto-m-c',\n        text: 'Уважаю, это мой выбор',\n        level: 7,\n        indicators: ['trust', 'respect'],\n      },\n      {\n        id: 'auto-m-d',\n        text: 'Поддерживаю и вдохновляю развивать',\n        level: 9,\n        indicators: ['secure-attachment', 'empowerment'],\n      },\n      {\n        id: 'auto-m-e',\n        text: 'Видим как основу нашего союза',\n        level: 10,\n        indicators: ['interdependence-model', 'mature-autonomy'],\n      },\n    ],\n    targetLevels: [5, 7, 9, 10],\n    priority: 2,\n  },\n\n  {\n    id: 'understanding-depth-033',\n    text: {\n      self: 'Мой партнер знает обо мне:',\n      partner: 'Я знаю о своем партнере:',\n      potential: 'Я хотел бы, чтобы партнер знал:',\n      pair_discussion: 'Мы знаем друг о друге:',\n    },\n    category: 'intimacy',\n    options: [\n      {\n        id: 'und-d-a',\n        text: 'Только поверхностное, мы не говорим о глубоком',\n        level: 3,\n        indicators: ['surface-connection', 'emotional-distance'],\n      },\n      {\n        id: 'und-d-b',\n        text: 'Немного, я боюсь показать себя полностью',\n        level: 5,\n        indicators: ['selective-vulnerability', 'fear-of-rejection'],\n      },\n      {\n        id: 'und-d-c',\n        text: 'Многое, мы говорим о чувствах и снах',\n        level: 7,\n        indicators: ['emotional-intimacy', 'vulnerability'],\n      },\n      {\n        id: 'und-d-d',\n        text: 'Глубоко, включая раны, мечты и трансформацию',\n        level: 9,\n        indicators: ['deep-intimacy', 'mutual-disclosure'],\n      },\n      {\n        id: 'und-d-e',\n        text: 'На уровне видения и служения, миссии',\n        level: 11,\n        indicators: ['shared-purpose', 'spiritual-intimacy'],\n      },\n    ],\n    targetLevels: [3, 5, 7, 9, 11],\n    priority: 2,\n  },\n\n  {\n    id: 'hope-growth-034',\n    text: {\n      self: 'Верю ли я, что отношения станут лучше:',\n      partner: 'Мой партнер верит, что отношения улучшатся:',\n      potential: 'Я хотел бы верить в отношения:',\n      pair_discussion: 'Мы верим, что наши отношения:',\n    },\n    category: 'growth',\n    options: [\n      {\n        id: 'hope-g-a',\n        text: 'Нет, это только будет хуже',\n        level: 1,\n        indicators: ['hopelessness', 'despair', 'trauma-conviction'],\n      },\n      {\n        id: 'hope-g-b',\n        text: 'Слабо верю, это как история родителей',\n        level: 2,\n        indicators: ['learned-hopelessness', 'karmic-conviction'],\n      },\n      {\n        id: 'hope-g-c',\n        text: 'Надеюсь, но не вижу как',\n        level: 3,\n        indicators: ['passive-hope', 'helplessness'],\n      },\n      {\n        id: 'hope-g-d',\n        text: 'Верю, работаем над этим вместе',\n        level: 7,\n        indicators: ['agency', 'mutual-effort'],\n      },\n      {\n        id: 'hope-g-e',\n        text: 'Абсолютно уверен, это видно по результатам',\n        level: 9,\n        indicators: ['self-efficacy', 'evidence-based-hope'],\n      },\n      {\n        id: 'hope-g-f',\n        text: 'Верю, что это часть большой миссии',\n        level: 11,\n        indicators: ['transcendent-hope', 'purpose-alignment'],\n      },\n    ],\n    targetLevels: [1, 2, 3, 7, 9, 11],\n    priority: 1,\n  },\n];\n\n// ============================================================================\n// ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ\n// ============================================================================\n\n/**\n * Получить вопрос по ID\n */\nexport function getQuestionById(id: string): SmartQuestion | undefined {\n  return QUESTIONS.find((q) => q.id === id);\n}\n\n/**\n * Получить вопросы по категории\n */\nexport function getQuestionsByCategory(\n  category: SmartQuestion['category']\n): SmartQuestion[] {\n  return QUESTIONS.filter((q) => q.category === category);\n}\n\n/**\n * Получить вопросы по целевым уровням\n */\nexport function getQuestionsByTargetLevel(level: UnionLevel): SmartQuestion[] {\n  return QUESTIONS.filter((q) => q.targetLevels.includes(level));\n}\n\n/**\n * Получить вопросы валидации\n */\nexport function getValidationQuestions(): SmartQuestion[] {\n  return QUESTIONS.filter((q) => q.isValidation);\n}\n\n/**\n * Получить критичные вопросы (priority 1)\n */\nexport function getCriticalQuestions(): SmartQuestion[] {\n  return QUESTIONS.filter((q) => q.priority === 1);\n}\n\n/**\n * Получить вопросы для фазы зонирования\n * (быстрое определение приблизительной зоны 1-4, 5-8 или 9-12)\n */\nexport function getZoningQuestions(): SmartQuestion[] {\n  return QUESTIONS.filter(\n    (q) => ['zone-conflict-001', 'zone-safety-002', 'zone-growth-003', 'zone-intimacy-004', 'zone-choice-005', 'zone-difference-006'].includes(q.id)\n  );\n}\n\n/**\n * Получить вопросы для фазы уточнения\n */\nexport function getRefinementQuestions(): SmartQuestion[] {\n  return QUESTIONS.filter(\n    (q) => q.id.startsWith('level-detail-') || q.id.startsWith('boundary-') || q.id.startsWith('autonomy-') || q.id.startsWith('understanding-') || q.id.startsWith('hope-')\n  );\n}\n"
+ */
+
+import { SmartQuestion, UnionLevel } from './types';
+
+export const QUESTIONS: SmartQuestion[] = [
+  // ============================================================================
+  // БЛОК ЗОНИРОВАНИЯ (6 вопросов) - быстрое определение зоны 1-4, 5-8 или 9-12
+  // ============================================================================
+
+  {
+    id: 'zone-conflict-001',
+    text: {
+      self: 'Когда между вами возникает конфликт, вы обычно:',
+      partner: 'Когда возникает конфликт, мой партнер обычно:',
+      potential: 'В идеальных отношениях при конфликте я бы:',
+      pair_discussion: 'Когда между нами возникает конфликт, мы обычно:',
+    },
+    category: 'conflict',
+    options: [
+      {
+        id: 'zone-c-a',
+        text: 'Отступаю или ухожу, чтобы избежать боли',
+        level: 1,
+        indicators: ['avoidance', 'fear', 'pain-avoidance'],
+      },
+      {
+        id: 'zone-c-b',
+        text: 'Защищаюсь, доказываю свою правоту',
+        level: 4,
+        indicators: ['defensiveness', 'logic-based', 'control'],
+      },
+      {
+        id: 'zone-c-c',
+        text: 'Испытываю сильные эмоции, бросаю обвинения',
+        level: 5,
+        indicators: ['emotional-intensity', 'blame', 'passion'],
+      },
+      {
+        id: 'zone-c-d',
+        text: 'Говорю о своих чувствах и слушаю партнера',
+        level: 7,
+        indicators: ['vulnerability', 'listening', 'emotional-awareness'],
+      },
+      {
+        id: 'zone-c-e',
+        text: 'Стараюсь понять, что нужно партнеру, и высказываю свои границы',
+        level: 9,
+        indicators: ['empathy', 'boundaries', 'understanding'],
+      },
+    ],
+    targetLevels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    priority: 1, // Критичный вопрос - различает все основные зоны
+  },
+
+  {
+    id: 'zone-safety-002',
+    text: {
+      self: 'Я остаюсь в отношениях даже если больно, потому что:',
+      partner: 'Мой партнер остается в отношениях, потому что:',
+      potential: 'Я бы был в отношениях только если бы:',
+      pair_discussion: 'Мы остаемся вместе, потому что:',
+    },
+    category: 'values',
+    options: [
+      {
+        id: 'zone-s-a',
+        text: 'Боюсь остаться один, это хуже чем боль',
+        level: 1,
+        indicators: ['fear-of-loneliness', 'desperation', 'no-choice'],
+      },
+      {
+        id: 'zone-s-b',
+        text: 'Не могу справиться без партнера, зависим экономически',
+        level: 3,
+        indicators: ['dependency', 'economic-fear', 'helplessness'],
+      },
+      {
+        id: 'zone-s-c',
+        text: 'Это удобно, стабильно, мне это нравится',
+        level: 4,
+        indicators: ['comfort-seeking', 'stability', 'pragmatism'],
+      },
+      {
+        id: 'zone-s-d',
+        text: 'Люблю эту интенсивность, это волнует',
+        level: 5,
+        indicators: ['emotional-intensity', 'passion-seeking', 'excitement'],
+      },
+      {
+        id: 'zone-s-e',
+        text: 'Это приносит удовлетворение, делает меня лучше',
+        level: 8,
+        indicators: ['growth', 'fulfillment', 'positive-influence'],
+      },
+      {
+        id: 'zone-s-f',
+        text: 'Это ощущается как высшая ценность, служу его развитию',
+        level: 11,
+        indicators: ['transcendence', 'purpose', 'service'],
+      },
+    ],
+    targetLevels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    priority: 1,
+  },
+
+  {
+    id: 'zone-growth-003',
+    text: {
+      self: 'Мой партнер влияет на мое развитие:',
+      partner: 'Я влияю на развитие своего партнера:',
+      potential: 'Идеальный партнер бы помогал мне:',
+      pair_discussion: 'Мы помогаем друг другу развиваться:',
+    },
+    category: 'growth',
+    options: [
+      {
+        id: 'zone-g-a',
+        text: 'Нет, мне некогда думать о развитии, нужно выжить',
+        level: 1,
+        indicators: ['survival-mode', 'no-energy', 'trauma-focused'],
+      },
+      {
+        id: 'zone-g-b',
+        text: 'Влияет, но повторяя то, что было в семье',
+        level: 2,
+        indicators: ['karmic-patterns', 'unconscious', 'repetition'],
+      },
+      {
+        id: 'zone-g-c',
+        text: 'Не очень, мы живем рядом, но в своих мирах',
+        level: 3,
+        indicators: ['parallel-lives', 'disconnection', 'separate-worlds'],
+      },
+      {
+        id: 'zone-g-d',
+        text: 'Помогает практически, показывает пример',
+        level: 7,
+        indicators: ['modeling', 'practical-support', 'inspiration'],
+      },
+      {
+        id: 'zone-g-e',
+        text: 'Да, мы вместе растем, видим потенциал друг друга',
+        level: 9,
+        indicators: ['mutual-growth', 'recognition', 'shared-development'],
+      },
+      {
+        id: 'zone-g-f',
+        text: 'Абсолютно, вместе создаем новое и помогаем другим',
+        level: 11,
+        indicators: ['synergy', 'co-creation', 'service-to-others'],
+      },
+    ],
+    targetLevels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    priority: 1,
+  },
+
+  {
+    id: 'zone-intimacy-004',
+    text: {
+      self: 'В интимной близости с партнером я чувствую:',
+      partner: 'Мой партнер в интимной близости показывает:',
+      potential: 'Я хотел бы чувствовать в интимной жизни:',
+      pair_discussion: 'В интимной жизни между нами:',
+    },
+    category: 'intimacy',
+    options: [
+      {
+        id: 'zone-i-a',
+        text: 'Страх, боль, небезопасность',
+        level: 1,
+        indicators: ['fear', 'pain', 'trauma-response'],
+      },
+      {
+        id: 'zone-i-b',
+        text: 'Нужно выполнять роль, обязательства',
+        level: 4,
+        indicators: ['duty', 'obligation', 'role-performance'],
+      },
+      {
+        id: 'zone-i-c',
+        text: 'Страсть и волнение, потом опустошение',
+        level: 5,
+        indicators: ['passion', 'intensity', 'emotional-rollercoaster'],
+      },
+      {
+        id: 'zone-i-d',
+        text: 'Близость, но без полной уязвимости',
+        level: 6,
+        indicators: ['facade', 'partial-connection', 'image-consciousness'],
+      },
+      {
+        id: 'zone-i-e',
+        text: 'Безопасность, доверие, полную себя',
+        level: 7,
+        indicators: ['safety', 'trust', 'authenticity'],
+      },
+      {
+        id: 'zone-i-f',
+        text: 'Служение и дарение, священное единство',
+        level: 12,
+        indicators: ['transcendence', 'service', 'spiritual-connection'],
+      },
+    ],
+    targetLevels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    priority: 1,
+  },
+
+  {
+    id: 'zone-choice-005',
+    text: {
+      self: 'Я остался с этим партнером потому что:',
+      partner: 'Мой партнер со мной потому что:',
+      potential: 'В идеальных отношениях партнер выбирал бы меня:',
+      pair_discussion: 'Мы вместе потому что:',
+    },
+    category: 'values',
+    options: [
+      {
+        id: 'zone-ch-a',
+        text: 'Потому что не видел выхода, не было других вариантов',
+        level: 1,
+        indicators: ['no-choice', 'trapped', 'desperation'],
+      },
+      {
+        id: 'zone-ch-b',
+        text: 'Исторически так сложилось, трудно менять',
+        level: 2,
+        indicators: ['inertia', 'habituation', 'karmic'],
+      },
+      {
+        id: 'zone-ch-c',
+        text: 'Нужна экономическая поддержка и безопасность',
+        level: 3,
+        indicators: ['survival', 'economic-dependency', 'fear-of-loneliness'],
+      },
+      {
+        id: 'zone-ch-d',
+        text: 'Все работает хорошо, комфортно и привычно',
+        level: 4,
+        indicators: ['comfort', 'pragmatism', 'stability'],
+      },
+      {
+        id: 'zone-ch-e',
+        text: 'Потому что люблю, испытываю сильные чувства',
+        level: 5,
+        indicators: ['passion', 'emotional-attachment', 'intensity'],
+      },
+      {
+        id: 'zone-ch-f',
+        text: 'Потому что это подходит нашему имиджу и окружению',
+        level: 6,
+        indicators: ['social-status', 'facade', 'image'],
+      },
+      {
+        id: 'zone-ch-g',
+        text: 'Потому что нас дополняют и понимают друг друга',
+        level: 7,
+        indicators: ['understanding', 'complementarity', 'psychological-safety'],
+      },
+      {
+        id: 'zone-ch-h',
+        text: 'Потому что развиваюсь и становлюсь лучше, в отношениях',
+        level: 9,
+        indicators: ['growth', 'mutual-inspiration', 'positive-influence'],
+      },
+      {
+        id: 'zone-ch-i',
+        text: 'Потому что вместе создаем смысл и служим высшему',
+        level: 11,
+        indicators: ['purpose', 'co-creation', 'transcendence'],
+      },
+    ],
+    targetLevels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    priority: 1,
+  },
+
+  {
+    id: 'zone-difference-006',
+    text: {
+      self: 'Когда партнер отличается от меня:',
+      partner: 'Когда я отличаюсь от партнера:',
+      potential: 'Я бы хотел, чтобы партнер:',
+      pair_discussion: 'Когда мы отличаемся друг от друга:',
+    },
+    category: 'acceptance',
+    options: [
+      {
+        id: 'zone-d-a',
+        text: 'Это угрожает безопасности, я боюсь потерять контроль',
+        level: 1,
+        indicators: ['fear', 'need-for-control', 'insecurity'],
+      },
+      {
+        id: 'zone-d-b',
+        text: 'Я повторяю попытки сделать его как я или как родитель',
+        level: 2,
+        indicators: ['unconscious-patterns', 'control-attempts', 'projection'],
+      },
+      {
+        id: 'zone-d-c',
+        text: 'Это немного напрягает, но нужно мириться для стабильности',
+        level: 3,
+        indicators: ['tolerance', 'resentment', 'survival-mode'],
+      },
+      {
+        id: 'zone-d-d',
+        text: 'Нужно его переделать, мы не совместимы',
+        level: 5,
+        indicators: ['criticism', 'control-needs', 'contempt'],
+      },
+      {
+        id: 'zone-d-e',
+        text: 'Это нормально, нужно соблюдать границы и уважать',
+        level: 7,
+        indicators: ['respect', 'boundaries', 'acceptance'],
+      },
+      {
+        id: 'zone-d-f',
+        text: 'Это обогащает нас, видим в этом потенциал друг друга',
+        level: 9,
+        indicators: ['appreciation', 'growth-mindset', 'complementarity'],
+      },
+      {
+        id: 'zone-d-g',
+        text: 'Это творчество и гармония, разные ноты в одной симфонии',
+        level: 11,
+        indicators: ['synergy', 'integration', 'co-creation'],
+      },
+    ],
+    targetLevels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    priority: 1,
+  },
+
+  // ============================================================================
+  // БЛОК УТОЧНЕНИЯ (22 вопроса) - детальное определение уровня
+  // ============================================================================
+
+  {
+    id: 'level-detail-trauma-007',
+    text: {
+      self: 'В отношении к физическому насилию или угрозам:',
+      partner: 'По отношению к физическому насилию мой партнер:',
+      potential: 'Я совершенно не хочу:',
+      pair_discussion: 'У нас совершенно исключено:',
+    },
+    category: 'boundaries',
+    options: [
+      {
+        id: 'lvl-t-a',
+        text: 'Это происходит, и это нормально в отношениях',
+        level: 1,
+        indicators: ['trauma-normalization', 'violence-acceptance'],
+      },
+      {
+        id: 'lvl-t-b',
+        text: 'Это было, но я пытаюсь изменить ситуацию',
+        level: 2,
+        indicators: ['trauma-awareness', 'hope-for-change'],
+      },
+      {
+        id: 'lvl-t-c',
+        text: 'Нет, но я боюсь сказать об этом',
+        level: 3,
+        indicators: ['fear', 'boundaries-not-held'],
+      },
+      {
+        id: 'lvl-t-d',
+        text: 'Абсолютно исключено, это мои границы',
+        level: 7,
+        indicators: ['firm-boundaries', 'self-respect'],
+      },
+    ],
+    targetLevels: [1, 2, 3, 7],
+    priority: 2,
+  },
+
+  {
+    id: 'level-detail-emotion-008',
+    text: {
+      self: 'Когда я грущу, партнер обычно:',
+      partner: 'Когда партнер грустит, я обычно:',
+      potential: 'Я хотел бы, чтобы партнер:',
+      pair_discussion: 'Когда один из нас грустит, мы:',
+    },
+    category: 'communication',
+    options: [
+      {
+        id: 'lvl-e-a',
+        text: 'Раздражается или уходит, не слушает',
+        level: 1,
+        indicators: ['emotional-abandonment', 'unavailability'],
+      },
+      {
+        id: 'lvl-e-b',
+        text: 'Слушает, но потом возвращает разговор к себе',
+        level: 3,
+        indicators: ['emotional-unavailability', 'narcissism'],
+      },
+      {
+        id: 'lvl-e-c',
+        text: 'Слушает, но потом дает советы как решить',
+        level: 4,
+        indicators: ['problem-solving-focus', 'lack-of-empathy'],
+      },
+      {
+        id: 'lvl-e-d',
+        text: 'Рассказывает похожую историю, как пережил сам',
+        level: 5,
+        indicators: ['ego-focus', 'empathy-struggles', 'self-centeredness'],
+      },
+      {
+        id: 'lvl-e-e',
+        text: 'Слушает, пытается понять и поддержать',
+        level: 7,
+        indicators: ['empathy', 'emotional-attunement', 'support'],
+      },
+      {
+        id: 'lvl-e-f',
+        text: 'Слушает, поддерживает, верит в мою силу',
+        level: 8,
+        indicators: ['unconditional-support', 'empowerment'],
+      },
+    ],
+    targetLevels: [1, 3, 4, 5, 7, 8],
+    priority: 1,
+  },
+
+  {
+    id: 'level-detail-jealousy-009',
+    text: {
+      self: 'Ревность в отношениях - это:',
+      partner: 'Мой партнер относится к ревности как:',
+      potential: 'Я хотел бы, чтобы ревность была:',
+      pair_discussion: 'У нас с ревностью дело обстоит:',
+    },
+    category: 'communication',
+    options: [
+      {
+        id: 'lvl-j-a',
+        text: 'Доказательство любви, без ревности - не любит',
+        level: 5,
+        indicators: ['unhealthy-attachment', 'insecurity', 'possession'],
+      },
+      {
+        id: 'lvl-j-b',
+        text: 'Нужно скрывать, чтобы не конфликтовать',
+        level: 6,
+        indicators: ['facade', 'hidden-feelings', 'people-pleasing'],
+      },
+      {
+        id: 'lvl-j-c',
+        text: 'Естественное чувство, но не контролирует поведение',
+        level: 7,
+        indicators: ['emotional-awareness', 'self-regulation'],
+      },
+      {
+        id: 'lvl-j-d',
+        text: 'Редкое явление, я доверяю и честен',
+        level: 9,
+        indicators: ['secure-attachment', 'trust', 'transparency'],
+      },
+    ],
+    targetLevels: [5, 6, 7, 9],
+    priority: 2,
+  },
+
+  {
+    id: 'level-detail-money-010',
+    text: {
+      self: 'Деньги в отношениях - это:',
+      partner: 'Мой партнер смотрит на деньги как:',
+      potential: 'Я хотел бы, чтобы финансы были:',
+      pair_discussion: 'Финансовые вопросы между нами:',
+    },
+    category: 'values',
+    options: [
+      {
+        id: 'lvl-m-a',
+        text: 'Главное условие выживания и безопасности',
+        level: 3,
+        indicators: ['survival-anxiety', 'dependency', 'financial-fear'],
+      },
+      {
+        id: 'lvl-m-b',
+        text: 'Инструмент стабильности и комфорта',
+        level: 4,
+        indicators: ['pragmatism', 'resource-focus', 'stability-seeking'],
+      },
+      {
+        id: 'lvl-m-c',
+        text: 'Инструмент власти и статуса',
+        level: 6,
+        indicators: ['control-needs', 'status-consciousness', 'power-dynamics'],
+      },
+      {
+        id: 'lvl-m-d',
+        text: 'Ресурс, который делим справедливо и прозрачно',
+        level: 7,
+        indicators: ['transparency', 'fairness', 'partnership'],
+      },
+      {
+        id: 'lvl-m-e',
+        text: 'Инструмент для совместного создания и служения',
+        level: 11,
+        indicators: ['purpose-driven', 'co-creation', 'generosity'],
+      },
+    ],
+    targetLevels: [3, 4, 6, 7, 11],
+    priority: 2,
+  },
+
+  {
+    id: 'level-detail-authenticity-011',
+    text: {
+      self: 'С партнером я:',
+      partner: 'Со мной мой партнер:',
+      potential: 'Я хотел бы быть со своим партнером:',
+      pair_discussion: 'Между нами:',
+    },
+    category: 'acceptance',
+    options: [
+      {
+        id: 'lvl-au-a',
+        text: 'Стараюсь скрывать неловкие стороны и успехи',
+        level: 3,
+        indicators: ['shame', 'hiding', 'inauthenticity'],
+      },
+      {
+        id: 'lvl-au-b',
+        text: 'Показываю только лучшую версию себя',
+        level: 6,
+        indicators: ['facade', 'perfectionism', 'image-management'],
+      },
+      {
+        id: 'lvl-au-c',
+        text: 'Могу быть собой, но иногда стесняюсь слабостей',
+        level: 7,
+        indicators: ['growing-authenticity', 'selective-vulnerability'],
+      },
+      {
+        id: 'lvl-au-d',
+        text: 'Полностью аутентичен, могу быть любым',
+        level: 8,
+        indicators: ['full-authenticity', 'unconditional-acceptance'],
+      },
+      {
+        id: 'lvl-au-e',
+        text: 'Аутентичен и вдохновляю партнера быть собой',
+        level: 10,
+        indicators: ['modeling', 'mutual-authenticity', 'synergy'],
+      },
+    ],
+    targetLevels: [3, 6, 7, 8, 10],
+    priority: 2,
+  },
+
+  {
+    id: 'level-detail-repair-012',
+    text: {
+      self: 'После ссоры мы обычно:',
+      partner: 'После ссоры со мной мой партнер обычно:',
+      potential: 'Я хотел бы после ссоры:',
+      pair_discussion: 'После наших ссор мы обычно:',
+    },
+    category: 'conflict',
+    options: [
+      {
+        id: 'lvl-rp-a',
+        text: 'Замораживаем отношения на несколько дней',
+        level: 1,
+        indicators: ['conflict-avoidance', 'freeze-response', 'no-repair'],
+      },
+      {
+        id: 'lvl-rp-b',
+        text: 'Один извиняется, даже если прав, ради мира',
+        level: 3,
+        indicators: ['appeasement', 'false-reconciliation', 'self-abandonment'],
+      },
+      {
+        id: 'lvl-rp-c',
+        text: 'Спор переходит в привычку, но мы живем вместе',
+        level: 4,
+        indicators: ['unresolved-conflict', 'parallel-lives', 'emotional-distance'],
+      },
+      {
+        id: 'lvl-rp-d',
+        text: 'Один из нас идет на компромисс, второй побеждает',
+        level: 5,
+        indicators: ['power-dynamics', 'winner-loser', 'resentment'],
+      },
+      {
+        id: 'lvl-rp-e',
+        text: 'Обсуждаем, что произошло, и находим решение',
+        level: 7,
+        indicators: ['conflict-resolution', 'mutual-understanding', 'repair'],
+      },
+      {
+        id: 'lvl-rp-f',
+        text: 'Видим учение в конфликте, становимся ближе',
+        level: 9,
+        indicators: ['growth-from-conflict', 'deepening', 'resilience'],
+      },
+    ],
+    targetLevels: [1, 3, 4, 5, 7, 9],
+    priority: 1,
+  },
+
+  {
+    id: 'level-detail-external-013',
+    text: {
+      self: 'Когда люди говорят о наших отношениях:',
+      partner: 'Когда люди говорят о наших отношениях, я:',
+      potential: 'Мне хотелось бы, чтобы о моих отношениях:',
+      pair_discussion: 'Когда окружающие говорят о нас:',
+    },
+    category: 'values',
+    options: [
+      {
+        id: 'lvl-ex-a',
+        text: 'Я контролирую ответ, чтобы выглядеть хорошо',
+        level: 6,
+        indicators: ['image-management', 'people-pleasing', 'facade'],
+      },
+      {
+        id: 'lvl-ex-b',
+        text: 'Остаюсь честным, но немного беспокоюсь об имидже',
+        level: 7,
+        indicators: ['authenticity-with-caution', 'social-awareness'],
+      },
+      {
+        id: 'lvl-ex-c',
+        text: 'Не забочусь, рассказываю правду как есть',
+        level: 8,
+        indicators: ['authenticity', 'no-pretense', 'self-assurance'],
+      },
+      {
+        id: 'lvl-ex-d',
+        text: 'Меня вдохновляет помогать им увидеть лучшее в любви',
+        level: 10,
+        indicators: ['modeling', 'inspiration', 'service'],
+      },
+    ],
+    targetLevels: [6, 7, 8, 10],
+    priority: 2,
+  },
+
+  {
+    id: 'level-detail-sex-014',
+    text: {
+      self: 'Сексуальность в отношениях для меня это:',
+      partner: 'Мой партнер смотрит на сексуальность как:',
+      potential: 'Я хотел бы, чтобы секс был:',
+      pair_discussion: 'Секс между нами это:',
+    },
+    category: 'intimacy',
+    options: [
+      {
+        id: 'lvl-sx-a',
+        text: 'Источник боли и страха',
+        level: 1,
+        indicators: ['trauma', 'fear', 'aversion'],
+      },
+      {
+        id: 'lvl-sx-b',
+        text: 'Обязательство, которое нужно выполнять',
+        level: 4,
+        indicators: ['duty', 'obligation', 'disconnection'],
+      },
+      {
+        id: 'lvl-sx-c',
+        text: 'Главный способ быть близко, без разговоров',
+        level: 5,
+        indicators: ['sex-as-communication', 'avoidance-of-intimacy', 'intensity'],
+      },
+      {
+        id: 'lvl-sx-d',
+        text: 'Способ получить утешение и внимание',
+        level: 5,
+        indicators: ['emotional-need', 'external-validation'],
+      },
+      {
+        id: 'lvl-sx-e',
+        text: 'Деятельность с доверием и уязвимостью',
+        level: 7,
+        indicators: ['trust', 'vulnerability', 'emotional-safety'],
+      },
+      {
+        id: 'lvl-sx-f',
+        text: 'Священное соединение и служение друг другу',
+        level: 12,
+        indicators: ['sacredness', 'spiritual-connection', 'transcendence'],
+      },
+    ],
+    targetLevels: [1, 4, 5, 7, 12],
+    priority: 2,
+  },
+
+  {
+    id: 'level-detail-future-015',
+    text: {
+      self: 'О будущем с партнером я думаю:',
+      partner: 'Мой партнер о будущем со мной думает:',
+      potential: 'Я хотел бы, чтобы в будущем:',
+      pair_discussion: 'О нашем будущем вместе мы думаем:',
+    },
+    category: 'values',
+    options: [
+      {
+        id: 'lvl-fu-a',
+        text: 'Не думаю, это день за днем, выживаю',
+        level: 1,
+        indicators: ['no-hope', 'survival-mode', 'trauma-focus'],
+      },
+      {
+        id: 'lvl-fu-b',
+        text: 'Боюсь, что повторится история родителей',
+        level: 2,
+        indicators: ['karmic-fears', 'unconscious-patterns', 'hopelessness'],
+      },
+      {
+        id: 'lvl-fu-c',
+        text: 'Надеюсь, что будет стабильно и хорошо',
+        level: 3,
+        indicators: ['survival-hope', 'basic-security', 'limited-vision'],
+      },
+      {
+        id: 'lvl-fu-d',
+        text: 'Планируем дом, детей, пенсию',
+        level: 4,
+        indicators: ['practical-planning', 'stability-focus', 'linear-thinking'],
+      },
+      {
+        id: 'lvl-fu-e',
+        text: 'Мечтаем о приключениях и новых эмоциях',
+        level: 5,
+        indicators: ['passion-seeking', 'adventure-focus', 'excitement'],
+      },
+      {
+        id: 'lvl-fu-f',
+        text: 'Строим жизнь, которая будет выглядеть успешной',
+        level: 6,
+        indicators: ['image-focus', 'status-seeking', 'external-validation'],
+      },
+      {
+        id: 'lvl-fu-g',
+        text: 'Вместе растем и развиваемся как люди',
+        level: 8,
+        indicators: ['growth-focus', 'mutual-development', 'long-term-vision'],
+      },
+      {
+        id: 'lvl-fu-h',
+        text: 'Создаем что-то значимое вместе для мира',
+        level: 11,
+        indicators: ['purpose-driven', 'legacy-focus', 'service'],
+      },
+    ],
+    targetLevels: [1, 2, 3, 4, 5, 6, 8, 11],
+    priority: 1,
+  },
+
+  {
+    id: 'level-detail-freedom-016',
+    text: {
+      self: 'Моя личная свобода в отношениях:',
+      partner: 'Мой партнер дает мне свободу:',
+      potential: 'Я хотел бы, чтобы партнер:',
+      pair_discussion: 'В отношениях мы оба имеем свободу:',
+    },
+    category: 'boundaries',
+    options: [
+      {
+        id: 'lvl-fr-a',
+        text: 'Ограничена, я должен отчитываться, контролируюсь',
+        level: 1,
+        indicators: ['control', 'surveillance', 'coercion'],
+      },
+      {
+        id: 'lvl-fr-b',
+        text: 'Ограничена, но я это принял как норму',
+        level: 3,
+        indicators: ['learned-helplessness', 'resignation', 'accepted-limitation'],
+      },
+      {
+        id: 'lvl-fr-c',
+        text: 'Есть, но только если делаю "правильное"',
+        level: 5,
+        indicators: ['conditional-freedom', 'control-through-approval'],
+      },
+      {
+        id: 'lvl-fr-d',
+        text: 'Есть, но вызывает ревность и конфликты',
+        level: 5,
+        indicators: ['insecurity', 'jealousy-based-control'],
+      },
+      {
+        id: 'lvl-fr-e',
+        text: 'Полная, мы доверяем друг другу и честны',
+        level: 9,
+        indicators: ['trust', 'transparency', 'autonomy'],
+      },
+      {
+        id: 'lvl-fr-f',
+        text: 'Полная, и это укрепляет нашу связь',
+        level: 10,
+        indicators: ['secure-attachment', 'mature-relationship', 'synergy'],
+      },
+    ],
+    targetLevels: [1, 3, 5, 9, 10],
+    priority: 2,
+  },
+
+  {
+    id: 'level-detail-responsibility-017',
+    text: {
+      self: 'За проблемы в отношениях я считаю виноватым:',
+      partner: 'Когда возникают проблемы, мой партнер:',
+      potential: 'Я хотел бы, чтобы проблемы в отношениях:',
+      pair_discussion: 'Когда у нас возникают проблемы:',
+    },
+    category: 'communication',
+    options: [
+      {
+        id: 'lvl-resp-a',
+        text: 'Я, полностью, я во всем виноват',
+        level: 1,
+        indicators: ['self-blame', 'shame', 'internalized-criticism'],
+      },
+      {
+        id: 'lvl-resp-b',
+        text: 'Партнера, он такой, я это терпелю',
+        level: 3,
+        indicators: ['blame-external', 'victimhood', 'resentment'],
+      },
+      {
+        id: 'lvl-resp-c',
+        text: 'Меня или его, смотря как спросишь',
+        level: 5,
+        indicators: ['blame-shifting', 'defensiveness'],
+      },
+      {
+        id: 'lvl-resp-d',
+        text: 'Обоих - мы создаем эту динамику вместе',
+        level: 7,
+        indicators: ['shared-responsibility', 'systemic-thinking'],
+      },
+      {
+        id: 'lvl-resp-e',
+        text: 'Это возможность для обоих научиться',
+        level: 9,
+        indicators: ['growth-mindset', 'learning-orientation'],
+      },
+    ],
+    targetLevels: [1, 3, 5, 7, 9],
+    priority: 2,
+  },
+
+  {
+    id: 'level-detail-sacrifice-018',
+    text: {
+      self: 'Я готов ради отношений жертвовать:',
+      partner: 'Мой партнер ради отношений жертвует:',
+      potential: 'Я хотел бы для отношений:',
+      pair_discussion: 'Ради наших отношений мы готовы:',
+    },
+    category: 'values',
+    options: [
+      {
+        id: 'lvl-sac-a',
+        text: 'Всем - мечтами, друзьями, собой',
+        level: 2,
+        indicators: ['self-abandonment', 'enmeshment', 'loss-of-self'],
+      },
+      {
+        id: 'lvl-sac-b',
+        text: 'Многим, это естественно в отношениях',
+        level: 4,
+        indicators: ['role-sacrifice', 'duty-based', 'resentment-building'],
+      },
+      {
+        id: 'lvl-sac-c',
+        text: 'Многим, потому что люблю его сильнее чем себя',
+        level: 5,
+        indicators: ['love-as-sacrifice', 'unhealthy-attachment', 'dependency'],
+      },
+      {
+        id: 'lvl-sac-d',
+        text: 'Некоторым, но не основным мечтам',
+        level: 7,
+        indicators: ['boundaries', 'mutual-respect'],
+      },
+      {
+        id: 'lvl-sac-e',
+        text: 'Смешивать границы, но отстаивать свое развитие',
+        level: 8,
+        indicators: ['autonomy-within-connection', 'healthy-boundaries'],
+      },
+      {
+        id: 'lvl-sac-f',
+        text: 'Служить, потому что это приносит радость, не жертву',
+        level: 11,
+        indicators: ['service-not-sacrifice', 'joy-in-giving', 'transcendence'],
+      },
+    ],
+    targetLevels: [2, 4, 5, 7, 8, 11],
+    priority: 2,
+  },
+
+  {
+    id: 'level-detail-partners-emotion-019',
+    text: {
+      self: 'Когда партнер расстроен, я:',
+      partner: 'Когда я расстроена/расстроен, партнер:',
+      potential: 'Я хотел бы, чтобы партнер:',
+      pair_discussion: 'Когда один расстроен, другой:',
+    },
+    category: 'communication',
+    options: [
+      {
+        id: 'lvl-pe-a',
+        text: 'Становлюсь еще более тревожным или рассерженным',
+        level: 1,
+        indicators: ['emotional-contagion', 'dysregulation', 'lack-of-boundaries'],
+      },
+      {
+        id: 'lvl-pe-b',
+        text: 'Уходу, чтобы не испортить свое настроение',
+        level: 3,
+        indicators: ['avoidance', 'low-empathy', 'self-focus'],
+      },
+      {
+        id: 'lvl-pe-c',
+        text: 'Стараюсь исправить ситуацию, чтобы вернуть мир',
+        level: 4,
+        indicators: ['peace-seeking', 'problem-solving-focus'],
+      },
+      {
+        id: 'lvl-pe-d',
+        text: 'Слушаю, но фокусирую на его ошибках',
+        level: 5,
+        indicators: ['blame-focus', 'defensive-listening'],
+      },
+      {
+        id: 'lvl-pe-e',
+        text: 'Слушаю, стараюсь понять его мир',
+        level: 7,
+        indicators: ['empathy', 'presence', 'attunement'],
+      },
+      {
+        id: 'lvl-pe-f',
+        text: 'Слушаю, поддерживаю и верю в его способность измениться',
+        level: 8,
+        indicators: ['empowerment', 'faith', 'unconditional-support'],
+      },
+      {
+        id: 'lvl-pe-g',
+        text: 'Мы вместе изучаем, что стоит под его эмоциями',
+        level: 10,
+        indicators: ['mutual-exploration', 'depth', 'co-growth'],
+      },
+    ],
+    targetLevels: [1, 3, 4, 5, 7, 8, 10],
+    priority: 1,
+  },
+
+  {
+    id: 'level-detail-need-020',
+    text: {
+      self: 'В отношениях я главно нуждаюсь в:',
+      partner: 'Мой партнер главно нуждается в:',
+      potential: 'Я хотел бы нуждаться в отношениях в:',
+      pair_discussion: 'В отношениях мы главно нуждаемся в:',
+    },
+    category: 'values',
+    options: [
+      {
+        id: 'lvl-nd-a',
+        text: 'Выживании и безопасности',
+        level: 1,
+        indicators: ['survival-needs', 'safety-seeking'],
+      },
+      {
+        id: 'lvl-nd-b',
+        text: 'Стабильности и финансовой безопасности',
+        level: 3,
+        indicators: ['economic-security', 'stability'],
+      },
+      {
+        id: 'lvl-nd-c',
+        text: 'Комфорте и удобстве',
+        level: 4,
+        indicators: ['comfort-seeking', 'pleasure-seeking'],
+      },
+      {
+        id: 'lvl-nd-d',
+        text: 'Эмоциональной интенсивности и волнении',
+        level: 5,
+        indicators: ['excitement-seeking', 'emotional-intensity'],
+      },
+      {
+        id: 'lvl-nd-e',
+        text: 'Подтверждении статуса и признании',
+        level: 6,
+        indicators: ['validation-seeking', 'status-needs'],
+      },
+      {
+        id: 'lvl-nd-f',
+        text: 'Подлинной связи и понимании',
+        level: 7,
+        indicators: ['connection-seeking', 'emotional-intimacy'],
+      },
+      {
+        id: 'lvl-nd-g',
+        text: 'Росте и развитии вместе',
+        level: 9,
+        indicators: ['growth-seeking', 'development', 'mutual-evolution'],
+      },
+      {
+        id: 'lvl-nd-h',
+        text: 'Служении и создании смысла',
+        level: 11,
+        indicators: ['purpose-seeking', 'transcendence', 'service'],
+      },
+    ],
+    targetLevels: [1, 3, 4, 5, 6, 7, 9, 11],
+    priority: 2,
+  },
+
+  {
+    id: 'level-detail-influence-021',
+    text: {
+      self: 'Я пытаюсь переделать партнера:',
+      partner: 'Мой партнер пытается меня переделать:',
+      potential: 'В отношениях я хотел бы:',
+      pair_discussion: 'В нас с партнером принцип:',
+    },
+    category: 'acceptance',
+    options: [
+      {
+        id: 'lvl-inf-a',
+        text: 'Постоянно, это главное моего времени',
+        level: 2,
+        indicators: ['control', 'critical', 'change-focus'],
+      },
+      {
+        id: 'lvl-inf-b',
+        text: 'Да, но скрыто, через давление',
+        level: 5,
+        indicators: ['covert-control', 'manipulation'],
+      },
+      {
+        id: 'lvl-inf-c',
+        text: 'Иногда, я хотел бы его лучше',
+        level: 6,
+        indicators: ['perfectionism', 'subtle-criticism'],
+      },
+      {
+        id: 'lvl-inf-d',
+        text: 'Нет, я принимаю его таким как есть',
+        level: 8,
+        indicators: ['acceptance', 'non-judgmental', 'unconditional-love'],
+      },
+      {
+        id: 'lvl-inf-e',
+        text: 'Нет, я вижу его потенциал и верю в него',
+        level: 9,
+        indicators: ['faith-in-other', 'empowerment', 'growth-support'],
+      },
+    ],
+    targetLevels: [2, 5, 6, 8, 9],
+    priority: 2,
+  },
+
+  {
+    id: 'level-detail-standards-022',
+    text: {
+      self: 'В отношениях я придерживаюсь стандартов:',
+      partner: 'Мой партнер придерживается стандартов:',
+      potential: 'Я хотел бы в отношениях:',
+      pair_discussion: 'Мы в отношениях придерживаемся:',
+    },
+    category: 'values',
+    options: [
+      {
+        id: 'lvl-std-a',
+        text: 'Нет, только выживание',
+        level: 1,
+        indicators: ['no-standards', 'survival-mode'],
+      },
+      {
+        id: 'lvl-std-b',
+        text: 'Низких, главное чтобы не уходил',
+        level: 2,
+        indicators: ['low-expectations', 'desperation', 'acceptance'],
+      },
+      {
+        id: 'lvl-std-c',
+        text: 'Практических - выполняет роль и обязанности',
+        level: 4,
+        indicators: ['role-based', 'practical', 'functional'],
+      },
+      {
+        id: 'lvl-std-d',
+        text: 'Очень высоких, партнер должен быть идеальным',
+        level: 6,
+        indicators: ['perfectionism', 'unrealistic-expectations', 'criticism'],
+      },
+      {
+        id: 'lvl-std-e',
+        text: 'Честности, уважения и открытости',
+        level: 7,
+        indicators: ['integrity', 'mutual-respect', 'authenticity'],
+      },
+      {
+        id: 'lvl-std-f',
+        text: 'Взаимного роста и развития',
+        level: 9,
+        indicators: ['growth-standards', 'mutual-development'],
+      },
+    ],
+    targetLevels: [1, 2, 4, 6, 7, 9],
+    priority: 2,
+  },
+
+  {
+    id: 'level-detail-appreciation-023',
+    text: {
+      self: 'То хорошее, что делает партнер, я:',
+      partner: 'То хорошее, что я делаю, партнер:',
+      potential: 'Я хотел бы, чтобы мои усилия:',
+      pair_discussion: 'То хорошее, что мы делаем друг для друга:',
+    },
+    category: 'acceptance',
+    options: [
+      {
+        id: 'lvl-app-a',
+        text: 'Не вижу, зациклен на проблемах',
+        level: 1,
+        indicators: ['trauma-focus', 'negativity-bias'],
+      },
+      {
+        id: 'lvl-app-b',
+        text: 'Вижу, но воспринимаю как обязанность',
+        level: 4,
+        indicators: ['entitlement', 'no-gratitude'],
+      },
+      {
+        id: 'lvl-app-c',
+        text: 'Благодарен, но иногда забываю сказать',
+        level: 7,
+        indicators: ['selective-appreciation', 'awareness-gaps'],
+      },
+      {
+        id: 'lvl-app-d',
+        text: 'Выражаю благодарность регулярно',
+        level: 8,
+        indicators: ['gratitude-practice', 'acknowledgment', 'presence'],
+      },
+      {
+        id: 'lvl-app-e',
+        text: 'Замечаю и восхищаюсь трансформацией',
+        level: 10,
+        indicators: ['deep-appreciation', 'witnessing-growth', 'admiration'],
+      },
+    ],
+    targetLevels: [1, 4, 7, 8, 10],
+    priority: 2,
+  },
+
+  {
+    id: 'level-detail-alone-024',
+    text: {
+      self: 'Когда я один, я чувствую себя:',
+      partner: 'Когда мой партнер один, он чувствует себя:',
+      potential: 'Я хотел бы, чтобы в одиночестве:',
+      pair_discussion: 'Когда один из нас один, это для нас:',
+    },
+    category: 'boundaries',
+    options: [
+      {
+        id: 'lvl-al-a',
+        text: 'Потерянным, испуганным, панику',
+        level: 1,
+        indicators: ['fear-of-abandonment', 'panic', 'no-self'],
+      },
+      {
+        id: 'lvl-al-b',
+        text: 'Неполноценным, неживой',
+        level: 2,
+        indicators: ['low-self-worth', 'emptiness', 'self-abandonment'],
+      },
+      {
+        id: 'lvl-al-c',
+        text: 'Некомфортно, скучно, жду его',
+        level: 3,
+        indicators: ['dependency', 'boredom-intolerance'],
+      },
+      {
+        id: 'lvl-al-d',
+        text: 'Нормально, занимаюсь делами, думаю о нем',
+        level: 7,
+        indicators: ['autonomy', 'independence', 'secure-attachment'],
+      },
+      {
+        id: 'lvl-al-e',
+        text: 'Хорошо, развиваюсь, питаюсь',
+        level: 8,
+        indicators: ['self-sufficiency', 'self-nourishment', 'healthy-autonomy'],
+      },
+      {
+        id: 'lvl-al-f',
+        text: 'Отлично, медитирую, пишу, служу себе и другим',
+        level: 11,
+        indicators: ['spiritual-connection', 'self-development', 'purpose'],
+      },
+    ],
+    targetLevels: [1, 2, 3, 7, 8, 11],
+    priority: 2,
+  },
+
+  // ============================================================================
+  // БЛОК ВАЛИДАЦИИ (6 вопросов) - обнаружение противоречий и байпасов
+  // ============================================================================
+
+  {
+    id: 'validation-speed-025',
+    text: {
+      self: 'Я рассказываю о сложных чувствах, потому что:',
+      partner: 'Когда я рассказываю о себе, это происходит:',
+      potential: 'Я хотел бы говорить о чувствах:',
+      pair_discussion: 'Когда мы говорим о сложных чувствах:',
+    },
+    category: 'validation',
+    options: [
+      {
+        id: 'val-s-a',
+        text: 'Глубоко обдумав, честно, может занять время',
+        level: 7,
+        indicators: ['thoughtfulness', 'authenticity', 'processing-time'],
+      },
+      {
+        id: 'val-s-b',
+        text: 'Быстро, чтобы выглядеть хорошо, не совсем честно',
+        level: 6,
+        indicators: ['image-management', 'insincerity'],
+      },
+      {
+        id: 'val-s-c',
+        text: 'Спонтанно, в горячке, потом жалею',
+        level: 5,
+        indicators: ['impulsivity', 'emotional-reactivity'],
+      },
+      {
+        id: 'val-s-d',
+        text: 'Очень медленно, я не доверяю',
+        level: 1,
+        indicators: ['trauma-response', 'trust-issues'],
+      },
+    ],
+    targetLevels: [1, 5, 6, 7],
+    isValidation: true,
+    priority: 1,
+  },
+
+  {
+    id: 'validation-contradiction-026',
+    text: {
+      self: 'Я говорю, что люблю партнера, но:',
+      partner: 'Мой партнер говорит, что любит меня, но:',
+      potential: 'Я бы хотел, чтобы любовь проявлялась:',
+      pair_discussion: 'Мы говорим, что любим, но:',
+    },
+    category: 'validation',
+    options: [
+      {
+        id: 'val-c-a',
+        text: 'Мои действия это не подтверждают, я жестокий',
+        level: 1,
+        indicators: ['contradiction', 'trauma', 'abusive-patterns'],
+      },
+      {
+        id: 'val-c-b',
+        text: 'Постоянно критикую и пытаюсь менять',
+        level: 2,
+        indicators: ['contradiction', 'control', 'conditional-love'],
+      },
+      {
+        id: 'val-c-c',
+        text: 'Часто боюсь потерять или обижаюсь',
+        level: 5,
+        indicators: ['insecure-attachment', 'fear-based-love'],
+      },
+      {
+        id: 'val-c-d',
+        text: 'Мои действия это в основном подтверждают',
+        level: 8,
+        indicators: ['coherence', 'integrity', 'authentic-love'],
+      },
+    ],
+    targetLevels: [1, 2, 5, 8],
+    isValidation: true,
+    priority: 1,
+  },
+
+  {
+    id: 'validation-spiritual-bypass-027',
+    text: {
+      self: 'Я считаю нашу любовь очень высокой, духовной:',
+      partner: 'Мой партнер видит нашу любовь как очень духовную:',
+      potential: 'Высокая любовь означает для меня:',
+      pair_discussion: 'Мы верим, что наша любовь духовная и:',
+    },
+    category: 'validation',
+    options: [
+      {
+        id: 'val-sb-a',
+        text: 'Да, но при этом я часто критикую его поведение',
+        level: 6,
+        indicators: ['spiritual-bypass', 'mask-for-control', 'cognitive-dissonance'],
+        validation: 'Говоря о высокой духовности, видите ли вы свою жесткость?',
+      },
+      {
+        id: 'val-sb-b',
+        text: 'Да, но практически мы живем раздельными жизнями',
+        level: 5,
+        indicators: ['spiritual-bypass', 'disconnection', 'idealization'],
+        validation: 'Возможно, это избегание реальной близости?',
+      },
+      {
+        id: 'val-sb-c',
+        text: 'Да, и при этом я работаю над собой и слушаю',
+        level: 10,
+        indicators: ['authentic-spiritual-connection'],
+      },
+      {
+        id: 'val-sb-d',
+        text: 'Нет, мы думаем практическими категориями',
+        level: 4,
+        indicators: ['realistic', 'grounded'],
+      },
+    ],
+    targetLevels: [4, 5, 6, 10],
+    isValidation: true,
+    priority: 1,
+  },
+
+  {
+    id: 'validation-change-028',
+    text: {
+      self: 'За последний год в отношениях:',
+      partner: 'За последний год мой партнер:',
+      potential: 'Идеально я хотел бы:',
+      pair_discussion: 'За последний год в наших отношениях:',
+    },
+    category: 'validation',
+    options: [
+      {
+        id: 'val-ch-a',
+        text: 'Ничего не изменилось, все как было всегда',
+        level: 2,
+        indicators: ['stagnation', 'karmic-loop', 'no-growth'],
+      },
+      {
+        id: 'val-ch-b',
+        text: 'Я стараюсь, партнер не меняется',
+        level: 5,
+        indicators: ['one-sided-effort', 'victim-mentality'],
+      },
+      {
+        id: 'val-ch-c',
+        text: 'Оба стараемся, но медленно',
+        level: 7,
+        indicators: ['mutual-effort', 'gradual-growth'],
+      },
+      {
+        id: 'val-ch-d',
+        text: 'Мы трансформировались вместе, это очень видно',
+        level: 9,
+        indicators: ['mutual-growth', 'transformation'],
+      },
+    ],
+    targetLevels: [2, 5, 7, 9],
+    isValidation: true,
+    priority: 1,
+  },
+
+  {
+    id: 'validation-honesty-029',
+    text: {
+      self: 'В этом опросе я:',
+      partner: 'В описании наших отношений я:',
+      potential: 'Я хотел бы быть в опросе:',
+      pair_discussion: 'При заполнении этого опроса мы:',
+    },
+    category: 'validation',
+    options: [
+      {
+        id: 'val-h-a',
+        text: 'Полностью честен, даже если неудобно',
+        level: 8,
+        indicators: ['authenticity', 'integrity'],
+      },
+      {
+        id: 'val-h-b',
+        text: 'Стараюсь быть честен, но скрываю самое сложное',
+        level: 5,
+        indicators: ['partial-honesty', 'shame-based-hiding'],
+      },
+      {
+        id: 'val-h-c',
+        text: 'Выбираю ответы, чтобы выглядеть хорошо',
+        level: 6,
+        indicators: ['social-desirability-bias', 'image-management'],
+      },
+      {
+        id: 'val-h-d',
+        text: 'Выбираю ответы, которые партнер одобрит',
+        level: 3,
+        indicators: ['people-pleasing', 'external-locus-of-control'],
+      },
+    ],
+    targetLevels: [3, 5, 6, 8],
+    isValidation: true,
+    priority: 1,
+  },
+
+  {
+    id: 'validation-awareness-030',
+    text: {
+      self: 'Мой партнер думает обо мне следующее:',
+      partner: 'Я думаю о своем партнере следующее:',
+      potential: 'Идеально я хотел бы, чтобы партнер думал:',
+      pair_discussion: 'Мы думаем друг о друге:',
+    },
+    category: 'validation',
+    options: [
+      {
+        id: 'val-aw-a',
+        text: 'Я полностью соответствую его идеалам',
+        level: 6,
+        indicators: ['idealization', 'potential-gap', 'will-disappoint'],
+      },
+      {
+        id: 'val-aw-b',
+        text: 'Я хороший, но есть что улучшить',
+        level: 7,
+        indicators: ['realistic-view', 'growth-mindset'],
+      },
+      {
+        id: 'val-aw-c',
+        text: 'Я несовершенен, но он принимает это',
+        level: 8,
+        indicators: ['acceptance', 'unconditional-love'],
+      },
+      {
+        id: 'val-aw-d',
+        text: 'Он видит мой потенциал и вдохновляет его развивать',
+        level: 10,
+        indicators: ['mutual-empowerment', 'faith-in-other'],
+      },
+    ],
+    targetLevels: [6, 7, 8, 10],
+    isValidation: true,
+    priority: 2,
+  },
+
+  // ============================================================================
+  // ДОПОЛНИТЕЛЬНЫЕ ВОПРОСЫ (4 вопроса) - уточнение граничных случаев
+  // ============================================================================
+
+  {
+    id: 'boundary-maturity-031',
+    text: {
+      self: 'Я говорю "нет" партнеру:',
+      partner: 'Мой партнер мне говорит "нет":',
+      potential: 'Я хотел бы в отношениях иметь право:',
+      pair_discussion: 'Мы оба можем сказать друг другу "нет":',
+    },
+    category: 'boundaries',
+    options: [
+      {
+        id: 'bound-m-a',
+        text: 'Редко, боюсь его реакции',
+        level: 3,
+        indicators: ['fear-based-boundaries', 'people-pleasing'],
+      },
+      {
+        id: 'bound-m-b',
+        text: 'Иногда, но потом начинается конфликт',
+        level: 5,
+        indicators: ['weak-boundaries', 'conflict-aversion'],
+      },
+      {
+        id: 'bound-m-c',
+        text: 'Да, и он это принимает спокойно',
+        level: 7,
+        indicators: ['firm-boundaries', 'mutual-respect'],
+      },
+      {
+        id: 'bound-m-d',
+        text: 'Да, и мы оба видим в этом здоровье',
+        level: 9,
+        indicators: ['healthy-autonomy', 'boundary-respect'],
+      },
+    ],
+    targetLevels: [3, 5, 7, 9],
+    priority: 2,
+  },
+
+  {
+    id: 'autonomy-maturity-032',
+    text: {
+      self: 'Мою независимость в отношениях:',
+      partner: 'Независимость партнера я:',
+      potential: 'Я хотел бы нашу независимость:',
+      pair_discussion: 'Нашу независимость мы:',
+    },
+    category: 'growth',
+    options: [
+      {
+        id: 'auto-m-a',
+        text: 'Подавляю, я должен быть первым',
+        level: 5,
+        indicators: ['possessiveness', 'control-needs'],
+      },
+      {
+        id: 'auto-m-b',
+        text: 'Терплю, но с ревностью и недоверием',
+        level: 5,
+        indicators: ['insecurity', 'jealousy'],
+      },
+      {
+        id: 'auto-m-c',
+        text: 'Уважаю, это мой выбор',
+        level: 7,
+        indicators: ['trust', 'respect'],
+      },
+      {
+        id: 'auto-m-d',
+        text: 'Поддерживаю и вдохновляю развивать',
+        level: 9,
+        indicators: ['secure-attachment', 'empowerment'],
+      },
+      {
+        id: 'auto-m-e',
+        text: 'Видим как основу нашего союза',
+        level: 10,
+        indicators: ['interdependence-model', 'mature-autonomy'],
+      },
+    ],
+    targetLevels: [5, 7, 9, 10],
+    priority: 2,
+  },
+
+  {
+    id: 'understanding-depth-033',
+    text: {
+      self: 'Мой партнер знает обо мне:',
+      partner: 'Я знаю о своем партнере:',
+      potential: 'Я хотел бы, чтобы партнер знал:',
+      pair_discussion: 'Мы знаем друг о друге:',
+    },
+    category: 'intimacy',
+    options: [
+      {
+        id: 'und-d-a',
+        text: 'Только поверхностное, мы не говорим о глубоком',
+        level: 3,
+        indicators: ['surface-connection', 'emotional-distance'],
+      },
+      {
+        id: 'und-d-b',
+        text: 'Немного, я боюсь показать себя полностью',
+        level: 5,
+        indicators: ['selective-vulnerability', 'fear-of-rejection'],
+      },
+      {
+        id: 'und-d-c',
+        text: 'Многое, мы говорим о чувствах и снах',
+        level: 7,
+        indicators: ['emotional-intimacy', 'vulnerability'],
+      },
+      {
+        id: 'und-d-d',
+        text: 'Глубоко, включая раны, мечты и трансформацию',
+        level: 9,
+        indicators: ['deep-intimacy', 'mutual-disclosure'],
+      },
+      {
+        id: 'und-d-e',
+        text: 'На уровне видения и служения, миссии',
+        level: 11,
+        indicators: ['shared-purpose', 'spiritual-intimacy'],
+      },
+    ],
+    targetLevels: [3, 5, 7, 9, 11],
+    priority: 2,
+  },
+
+  {
+    id: 'hope-growth-034',
+    text: {
+      self: 'Верю ли я, что отношения станут лучше:',
+      partner: 'Мой партнер верит, что отношения улучшатся:',
+      potential: 'Я хотел бы верить в отношения:',
+      pair_discussion: 'Мы верим, что наши отношения:',
+    },
+    category: 'growth',
+    options: [
+      {
+        id: 'hope-g-a',
+        text: 'Нет, это только будет хуже',
+        level: 1,
+        indicators: ['hopelessness', 'despair', 'trauma-conviction'],
+      },
+      {
+        id: 'hope-g-b',
+        text: 'Слабо верю, это как история родителей',
+        level: 2,
+        indicators: ['learned-hopelessness', 'karmic-conviction'],
+      },
+      {
+        id: 'hope-g-c',
+        text: 'Надеюсь, но не вижу как',
+        level: 3,
+        indicators: ['passive-hope', 'helplessness'],
+      },
+      {
+        id: 'hope-g-d',
+        text: 'Верю, работаем над этим вместе',
+        level: 7,
+        indicators: ['agency', 'mutual-effort'],
+      },
+      {
+        id: 'hope-g-e',
+        text: 'Абсолютно уверен, это видно по результатам',
+        level: 9,
+        indicators: ['self-efficacy', 'evidence-based-hope'],
+      },
+      {
+        id: 'hope-g-f',
+        text: 'Верю, что это часть большой миссии',
+        level: 11,
+        indicators: ['transcendent-hope', 'purpose-alignment'],
+      },
+    ],
+    targetLevels: [1, 2, 3, 7, 9, 11],
+    priority: 1,
+  },
+];
+
+// ============================================================================
+// ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+// ============================================================================
+
+/**
+ * Получить вопрос по ID
+ */
+export function getQuestionById(id: string): SmartQuestion | undefined {
+  return QUESTIONS.find((q) => q.id === id);
+}
+
+/**
+ * Получить вопросы по категории
+ */
+export function getQuestionsByCategory(
+  category: SmartQuestion['category']
+): SmartQuestion[] {
+  return QUESTIONS.filter((q) => q.category === category);
+}
+
+/**
+ * Получить вопросы по целевым уровням
+ */
+export function getQuestionsByTargetLevel(level: UnionLevel): SmartQuestion[] {
+  return QUESTIONS.filter((q) => q.targetLevels.includes(level));
+}
+
+/**
+ * Получить вопросы валидации
+ */
+export function getValidationQuestions(): SmartQuestion[] {
+  return QUESTIONS.filter((q) => q.isValidation);
+}
+
+/**
+ * Получить критичные вопросы (priority 1)
+ */
+export function getCriticalQuestions(): SmartQuestion[] {
+  return QUESTIONS.filter((q) => q.priority === 1);
+}
+
+/**
+ * Получить вопросы для фазы зонирования
+ * (быстрое определение приблизительной зоны 1-4, 5-8 или 9-12)
+ */
+export function getZoningQuestions(): SmartQuestion[] {
+  return QUESTIONS.filter(
+    (q) => ['zone-conflict-001', 'zone-safety-002', 'zone-growth-003', 'zone-intimacy-004', 'zone-choice-005', 'zone-difference-006'].includes(q.id)
+  );
+}
+
+/**
+ * Получить вопросы для фазы уточнения
+ */
+export function getRefinementQuestions(): SmartQuestion[] {
+  return QUESTIONS.filter(
+    (q) => q.id.startsWith('level-detail-') || q.id.startsWith('boundary-') || q.id.startsWith('autonomy-') || q.id.startsWith('understanding-') || q.id.startsWith('hope-')
+  );
+}

@@ -11,7 +11,7 @@ export type TestMode = 'self' | 'partner_assessment' | 'potential' | 'pair_discu
 export type RelationshipStatus = 'in_relationship' | 'single_past' | 'single_potential' | 'pair_together';
 export type RelationshipType = 'heterosexual_pair'; // Только м/ж пары
 
-export type UnionLevel = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
+export type UnionLevel = number; // 1-12 levels
 
 export interface UserProfile {
   sessionId: string;

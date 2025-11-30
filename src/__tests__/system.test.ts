@@ -1,1 +1,437 @@
-/**\n * ТЕСТИРОВАНИЕ СИСТЕМЫ\n * \"Лестница союза\"\n *\n * Комплексное тестирование психологической точности и функциональности\n */\n\nimport {\n  initializeTestSession,\n  getNextTestQuestion,\n  submitTestAnswer,\n  completeTestSession,\n  getSessionStatus,\n  compareTestResults,\n  QUESTIONS,\n  getLevelDefinition,\n  getActionPlan,\n} from '../index';\n\n// ============================================================================\n// ТЕСТ 1: Одиночка анализирует прошлые отношения (Уровень 3)\n// ============================================================================\n\nfunction testScenario1_SinglePastLevel3() {\n  console.log('\\n\\n=== ТЕСТ 1: Одиночка анализирует ПРОШЛЫЕ отношения (Уровень 3) ===\\n');\n\n  const sessionId = 'test-1-single-past-level-3';\n\n  // Инициализировать сессию\n  const context = initializeTestSession(\n    sessionId,\n    'self',\n    'single_past',\n    'heterosexual_pair'\n  );\n\n  console.log('✓ Сессия инициализирована');\n  console.log(`  Режим: ${context.userProfile.testMode}`);\n  console.log(`  Статус: ${context.userProfile.relationshipStatus}`);\n\n  // Симулировать ответы которые указывают на уровень 3\n  // (Выживание - страх одиночества, экономическая зависимость)\n  const responses = [\n    // Зонирование\n    { qId: 'zone-conflict-001', optId: 'zone-c-a' }, // Отступаю/ухожу (уровень 1)\n    { qId: 'zone-safety-002', optId: 'zone-s-b' }, // Не могу справиться без партнера (уровень 3)\n    { qId: 'zone-growth-003', optId: 'zone-g-c' }, // Не очень влияет (уровень 3)\n    { qId: 'zone-intimacy-004', optId: 'zone-i-b' }, // Обязательства (уровень 4)\n    { qId: 'zone-choice-005', optId: 'zone-ch-c' }, // Экономическая поддержка (уровень 3)\n    { qId: 'zone-difference-006', optId: 'zone-d-c' }, // Терпелю для стабильности (уровень 3)\n\n    // Уточнение для зоны 3\n    { qId: 'level-detail-trauma-007', optId: 'lvl-t-c' }, // Нет, но боюсь сказать (уровень 3)\n    { qId: 'level-detail-emotion-008', optId: 'lvl-e-b' }, // Не слушает (уровень 3)\n    { qId: 'level-detail-jealousy-009', optId: 'lvl-j-c' }, // Естественное чувство (уровень 7)\n    { qId: 'boundary-maturity-031', optId: 'bound-m-a' }, // Редко говорю нет (уровень 3)\n\n    // Валидация\n    { qId: 'validation-speed-025', optId: 'val-s-d' }, // Медленно, не доверяю (уровень 1)\n    { qId: 'validation-honesty-029', optId: 'val-h-d' }, // Выбираю ответы для одобрения (уровень 3)\n  ];\n\n  let questionCount = 0;\n  responses.forEach((resp) => {\n    const question = getNextTestQuestion(sessionId);\n    if (!question) {\n      console.error(`❌ Ошибка: вопрос не получен после ${questionCount} ответов`);\n      return;\n    }\n\n    submitTestAnswer(sessionId, resp.qId, resp.optId, Math.random() * 3000 + 1000);\n    questionCount++;\n    process.stdout.write('.');\n  });\n\n  console.log(`\\n✓ Ответы записаны (${questionCount} вопросов)`);\n\n  // Завершить тест\n  const { result, interpretation } = completeTestSession(sessionId);\n\n  console.log('\\n✓ Тест завершен');\n  console.log(`\\nРЕЗУЛЬТАТЫ:`);\n  console.log(`  Личный уровень: ${result.personalLevel.toFixed(1)}`); // Должно быть ~3.0\n  console.log(`  Уровень отношений: ${result.relationshipLevel.toFixed(1)}`);\n  console.log(`  Надежность: ${result.validation.reliability}`);\n  console.log(`  Скоро ответов: ${result.validation.responseSpeedAnomaly ? 'ЕСТЬ АНОМАЛИЯ' : 'Нормально'}`);\n\n  console.log(`\\nИНТЕРПРЕТАЦИЯ:`);\n  console.log(`  ${interpretation.heroMessage}`);\n  console.log(`  ${interpretation.mainInsight}`);\n\n  // Проверка психологической точности\n  const expectedLevel = 3;\n  const levelDiff = Math.abs(result.personalLevel - expectedLevel);\n\n  if (levelDiff <= 1.0) {\n    console.log(`\\n✅ ПСИХОЛОГИЧЕСКАЯ ТОЧНОСТЬ: ПРОШЛА (разница ${levelDiff.toFixed(1)} от ожидаемого)`);\n  } else {\n    console.log(`\\n⚠️  ПСИХОЛОГИЧЕСКАЯ ТОЧНОСТЬ: ВНИМАНИЕ (разница ${levelDiff.toFixed(1)} от ожидаемого)`);\n  }\n}\n\n// ============================================================================\n// ТЕСТ 2: Человек в отношениях (Уровень 7)\n// ============================================================================\n\nfunction testScenario2_InRelationshipLevel7() {\n  console.log('\\n\\n=== ТЕСТ 2: Человек в ЗДОРОВЫХ отношениях (Уровень 7) ===\\n');\n\n  const sessionId = 'test-2-in-relationship-level-7';\n\n  const context = initializeTestSession(\n    sessionId,\n    'self',\n    'in_relationship',\n    'heterosexual_pair'\n  );\n\n  console.log('✓ Сессия инициализирована');\n\n  // Ответы указывающие на уровень 7 (Психологическая связь)\n  const responses = [\n    { qId: 'zone-conflict-001', optId: 'zone-c-d' }, // Говорю о чувствах (уровень 7)\n    { qId: 'zone-safety-002', optId: 'zone-s-e' }, // Приносит удовлетворение (уровень 8)\n    { qId: 'zone-growth-003', optId: 'zone-g-d' }, // Помогает практически (уровень 7)\n    { qId: 'zone-intimacy-004', optId: 'zone-i-e' }, // Безопасность, доверие (уровень 7)\n    { qId: 'zone-choice-005', optId: 'zone-ch-g' }, // Дополняют и понимают (уровень 7)\n    { qId: 'zone-difference-006', optId: 'zone-d-e' }, // Видим в этом потенциал (уровень 9)\n\n    { qId: 'level-detail-emotion-008', optId: 'lvl-e-e' }, // Слушает и понимает (уровень 7)\n    { qId: 'level-detail-jealousy-009', optId: 'lvl-j-c' }, // Естественное чувство (уровень 7)\n    { qId: 'level-detail-money-010', optId: 'lvl-m-d' }, // Справедливо и прозрачно (уровень 7)\n    { qId: 'level-detail-authenticity-011', optId: 'lvl-au-c' }, // Собой, иногда стесняюсь (уровень 7)\n    { qId: 'level-detail-repair-012', optId: 'lvl-rp-e' }, // Обсуждаем и находим решение (уровень 7)\n    { qId: 'validation-honesty-029', optId: 'val-h-a' }, // Полностью честен (уровень 8)\n  ];\n\n  let questionCount = 0;\n  responses.forEach((resp) => {\n    const question = getNextTestQuestion(sessionId);\n    if (question) {\n      submitTestAnswer(sessionId, resp.qId, resp.optId, Math.random() * 3000 + 2000);\n      questionCount++;\n      process.stdout.write('.');\n    }\n  });\n\n  console.log(`\\n✓ Ответы записаны (${questionCount} вопросов)`);\n\n  const { result, interpretation } = completeTestSession(sessionId);\n\n  console.log('\\nРЕЗУЛЬТАТЫ:');\n  console.log(`  Личный уровень: ${result.personalLevel.toFixed(1)}`);\n  console.log(`  Надежность: ${result.validation.reliability}`);\n\n  console.log(`\\nИНТЕРПРЕТАЦИЯ:`);\n  console.log(`  ${interpretation.heroMessage}`);\n\n  const expectedLevel = 7;\n  const levelDiff = Math.abs(result.personalLevel - expectedLevel);\n\n  if (levelDiff <= 1.0) {\n    console.log(`\\n✅ ПСИХОЛОГИЧЕСКАЯ ТОЧНОСТЬ: ПРОШЛА (разница ${levelDiff.toFixed(1)})`);\n  } else {\n    console.log(`\\n⚠️  ПСИХОЛОГИЧЕСКАЯ ТОЧНОСТЬ: ВНИМАНИЕ (разница ${levelDiff.toFixed(1)})`);\n  }\n}\n\n// ============================================================================\n// ТЕСТ 3: Травма и насилие (Уровень 1)\n// ============================================================================\n\nfunction testScenario3_TraumaLevel1() {\n  console.log('\\n\\n=== ТЕСТ 3: Травма и разрушение (Уровень 1) ===\\n');\n\n  const sessionId = 'test-3-trauma-level-1';\n\n  const context = initializeTestSession(\n    sessionId,\n    'self',\n    'single_past',\n    'heterosexual_pair'\n  );\n\n  const responses = [\n    { qId: 'zone-conflict-001', optId: 'zone-c-a' }, // Отступаю (уровень 1)\n    { qId: 'zone-safety-002', optId: 'zone-s-a' }, // Боюсь остаться один (уровень 1)\n    { qId: 'zone-growth-003', optId: 'zone-g-a' }, // Нет времени думать о развитии (уровень 1)\n    { qId: 'zone-intimacy-004', optId: 'zone-i-a' }, // Страх, боль (уровень 1)\n    { qId: 'zone-choice-005', optId: 'zone-ch-a' }, // Не видел выхода (уровень 1)\n    { qId: 'zone-difference-006', optId: 'zone-d-a' }, // Угрожает безопасности (уровень 1)\n\n    { qId: 'level-detail-trauma-007', optId: 'lvl-t-a' }, // Это происходит (уровень 1)\n    { qId: 'level-detail-freedom-016', optId: 'lvl-fr-a' }, // Ограничена, контролируюсь (уровень 1)\n    { qId: 'validation-honesty-029', optId: 'val-h-b' }, // Скрываю самое сложное (уровень 5)\n  ];\n\n  let questionCount = 0;\n  responses.forEach((resp) => {\n    const question = getNextTestQuestion(sessionId);\n    if (question) {\n      submitTestAnswer(sessionId, resp.qId, resp.optId, Math.random() * 2000 + 500);\n      questionCount++;\n      process.stdout.write('.');\n    }\n  });\n\n  console.log(`\\n✓ Ответы записаны (${questionCount} вопросов)`);\n\n  const { result, interpretation } = completeTestSession(sessionId);\n\n  console.log('\\nРЕЗУЛЬТАТЫ:');\n  console.log(`  Личный уровень: ${result.personalLevel.toFixed(1)}`);\n  console.log(`  Надежность: ${result.validation.reliability}`);\n  console.log(`  ⚠️  РЕКОМЕНДАЦИЯ: Срочно обратиться к психологу специалисту в травме`);\n\n  console.log(`\\nИНТЕРПРЕТАЦИЯ:`);\n  console.log(`  ${interpretation.heroMessage}`);\n  console.log(`  Действия: ${interpretation.recommendations[0]}`);\n\n  const expectedLevel = 1;\n  const levelDiff = Math.abs(result.personalLevel - expectedLevel);\n\n  if (levelDiff <= 1.5) {\n    console.log(`\\n✅ ПСИХОЛОГИЧЕСКАЯ ТОЧНОСТЬ: ПРОШЛА`);\n  } else {\n    console.log(`\\n⚠️  ПСИХОЛОГИЧЕСКАЯ ТОЧНОСТЬ: ВНИМАНИЕ`);\n  }\n}\n\n// ============================================================================\n// ТЕСТ 4: Пара сравнивает себя\n// ============================================================================\n\nfunction testScenario4_PairComparison() {\n  console.log('\\n\\n=== ТЕСТ 4: ПАРА сравнивает свою зрелость ===\\n');\n\n  // Человек A (уровень 7)\n  const sessionA = 'test-4-pair-a';\n  initializeTestSession(sessionA, 'self', 'pair_together');\n\n  const responsesA = [\n    { qId: 'zone-conflict-001', optId: 'zone-c-d' },\n    { qId: 'zone-safety-002', optId: 'zone-s-e' },\n    { qId: 'zone-growth-003', optId: 'zone-g-d' },\n    { qId: 'zone-intimacy-004', optId: 'zone-i-e' },\n    { qId: 'zone-choice-005', optId: 'zone-ch-g' },\n    { qId: 'zone-difference-006', optId: 'zone-d-e' },\n    { qId: 'level-detail-emotion-008', optId: 'lvl-e-e' },\n    { qId: 'validation-honesty-029', optId: 'val-h-a' },\n  ];\n\n  responsesA.forEach((resp) => {\n    const q = getNextTestQuestion(sessionA);\n    if (q) {\n      submitTestAnswer(sessionA, resp.qId, resp.optId, 2500);\n      process.stdout.write('.');\n    }\n  });\n\n  const { result: resultA } = completeTestSession(sessionA);\n  console.log(`\\n✓ Персона A завершена (уровень ${resultA.personalLevel.toFixed(1)})`);\n\n  // Человек B (уровень 5 - эмоциональный)\n  const sessionB = 'test-4-pair-b';\n  initializeTestSession(sessionB, 'self', 'pair_together');\n\n  const responsesB = [\n    { qId: 'zone-conflict-001', optId: 'zone-c-c' }, // Испытываю эмоции (5)\n    { qId: 'zone-safety-002', optId: 'zone-s-d' }, // Люблю эту интенсивность (5)\n    { qId: 'zone-growth-003', optId: 'zone-g-d' }, // Помогает практически (7)\n    { qId: 'zone-intimacy-004', optId: 'zone-i-c' }, // Страсть и волнение (5)\n    { qId: 'zone-choice-005', optId: 'zone-ch-e' }, // Люблю (5)\n    { qId: 'zone-difference-006', optId: 'zone-d-d' }, // Это нормально (7)\n    { qId: 'level-detail-emotion-008', optId: 'lvl-e-d' }, // Рассказывает похожую историю (5)\n    { qId: 'validation-honesty-029', optId: 'val-h-b' }, // Скрываю сложное (5)\n  ];\n\n  responsesB.forEach((resp) => {\n    const q = getNextTestQuestion(sessionB);\n    if (q) {\n      submitTestAnswer(sessionB, resp.qId, resp.optId, 2000);\n      process.stdout.write('.');\n    }\n  });\n\n  const { result: resultB } = completeTestSession(sessionB);\n  console.log(`\\n✓ Персона B завершена (уровень ${resultB.personalLevel.toFixed(1)})`);\n\n  // Сравнить результаты\n  const { comparison, interpretation } = compareTestResults(sessionA, sessionB);\n\n  console.log(`\\nСРАВНЕНИЕ ПАРЫ:`);\n  console.log(`  Разница уровней: ${comparison.gap.toFixed(1)}`);\n  console.log(`  Совместимость: ${comparison.compatibility}%`);\n  console.log(`  Сообщение совместимости: ${interpretation.compatibilityMessage}`);\n\n  console.log(`\\nРЕКОМЕНДАЦИИ:`);\n  interpretation.growthRecommendations.forEach((rec, i) => {\n    console.log(`  ${i + 1}. ${rec}`);\n  });\n\n  console.log(`\\n✅ СЦЕНАРИЙ ПАРЫ: ПРОШЕЛ`);\n}\n\n// ============================================================================\n// ТЕСТ 5: Валидация обнаруживает духовный байпас\n// ============================================================================\n\nfunction testScenario5_SpiritualBypassDetection() {\n  console.log('\\n\\n=== ТЕСТ 5: Обнаружение ДУХОВНОГО БАЙПАСА ===\\n');\n\n  const sessionId = 'test-5-spiritual-bypass';\n  initializeTestSession(sessionId, 'self', 'in_relationship');\n\n  // Ответы которые должны вызвать флаг духовного байпаса\n  const responses = [\n    { qId: 'zone-conflict-001', optId: 'zone-c-a' }, // Отступаю (уровень 1)\n    { qId: 'zone-safety-002', optId: 'zone-s-f' }, // Служу развитию (11)\n    { qId: 'zone-growth-003', optId: 'zone-g-f' }, // Высокий уровень (11)\n    { qId: 'zone-intimacy-004', optId: 'zone-i-f' }, // Священное единство (12)\n    { qId: 'zone-choice-005', optId: 'zone-ch-i' }, // Служение (11)\n    { qId: 'zone-difference-006', optId: 'zone-d-g' }, // Гармония (11)\n\n    { qId: 'level-detail-emotion-008', optId: 'lvl-e-a' }, // Не слушает (1)\n    { qId: 'level-detail-influence-021', optId: 'lvl-inf-b' }, // Скрыто переделываю (5)\n    { qId: 'validation-spiritual-bypass-027', optId: 'val-sb-a' }, // Духовна но критикую (6)\n    { qId: 'validation-honesty-029', optId: 'val-h-c' }, // Выбираю социально желательные (6)\n  ];\n\n  let bypassCount = 0;\n  responses.forEach((resp) => {\n    const q = getNextTestQuestion(sessionId);\n    if (q) {\n      submitTestAnswer(sessionId, resp.qId, resp.optId, 1500);\n      process.stdout.write('.');\n    }\n  });\n\n  const { result, interpretation } = completeTestSession(sessionId);\n\n  console.log(`\\n✓ Тест завершен`);\n  console.log(`\\nРЕЗУЛЬТАТЫ ВАЛИДАЦИИ:`);\n  console.log(`  Уровень духовного байпаса: ${(result.validation.spiritualBypassScore * 100).toFixed(0)}%`);\n  console.log(`  Противоречия: ${result.validation.contradictionFlags.length}`);\n  result.validation.contradictionFlags.forEach((flag) => {\n    console.log(`    - ${flag}`);\n  });\n  console.log(`  Надежность: ${result.validation.reliability}`);\n\n  if (result.validation.spiritualBypassScore > 0.5) {\n    console.log(`\\n✅ ОБНАРУЖЕН ДУХОВНЫЙ БАЙПАС: системе удалось его выявить`);\n  } else {\n    console.log(`\\n⚠️  ДУХОВНЫЙ БАЙПАС НЕ ОБНАРУЖЕН: может быть ложный отрицательный`);\n  }\n}\n\n// ============================================================================\n// ГЛАВНАЯ ФУНКЦИЯ ЗАПУСКА\n// ============================================================================\n\nexport function runAllTests() {\n  console.log('\\n');\n  console.log('╔════════════════════════════════════════════════════════════════╗');\n  console.log('║   КОМПЛЕКСНОЕ ТЕСТИРОВАНИЕ СИСТЕМЫ \"Лестница союза\"         ║');\n  console.log('║   Психологическая валидация и функциональность                 ║');\n  console.log('╚════════════════════════════════════════════════════════════════╝');\n\n  try {\n    testScenario1_SinglePastLevel3();\n    testScenario2_InRelationshipLevel7();\n    testScenario3_TraumaLevel1();\n    testScenario4_PairComparison();\n    testScenario5_SpiritualBypassDetection();\n\n    console.log('\\n');\n    console.log('╔════════════════════════════════════════════════════════════════╗');\n    console.log('║                    ИТОГИ ТЕСТИРОВАНИЯ                          ║');\n    console.log('╚════════════════════════════════════════════════════════════════╝');\n    console.log('\\n✅ ВСЕ ТЕСТЫ ПРОЙДЕНЫ УСПЕШНО\\n');\n    console.log('Система готова к использованию в production\\n');\n  } catch (error) {\n    console.error('\\n❌ ОШИБКА ТЕСТИРОВАНИЯ:', error);\n    throw error;\n  }\n}\n\n// Запустить если файл запущен напрямую\nif (require.main === module) {\n  runAllTests();\n}\n"
+/**
+ * ТЕСТИРОВАНИЕ СИСТЕМЫ
+ * "Лестница союза"
+ *
+ * Комплексное тестирование психологической точности и функциональности
+ */
+
+import {
+  initializeTestSession,
+  getNextTestQuestion,
+  submitTestAnswer,
+  completeTestSession,
+  getSessionStatus,
+  compareTestResults,
+  QUESTIONS,
+  getLevelDefinition,
+  getActionPlan,
+} from '../index';
+
+// ============================================================================
+// ТЕСТ 1: Одиночка анализирует прошлые отношения (Уровень 3)
+// ============================================================================
+
+function testScenario1_SinglePastLevel3() {
+  console.log(`\
+\
+=== ТЕСТ 1: Одиночка анализирует ПРОШЛЫЕ отношения (Уровень 3) ===\
+`);
+
+  const sessionId = 'test-1-single-past-level-3';
+
+  // Инициализировать сессию
+  const context = initializeTestSession(
+    sessionId,
+    'self',
+    'single_past',
+    'heterosexual_pair'
+  );
+
+  console.log('✓ Сессия инициализирована');
+  console.log(`  Режим: ${context.userProfile.testMode}`);
+  console.log(`  Статус: ${context.userProfile.relationshipStatus}`);
+
+  // Симулировать ответы которые указывают на уровень 3
+  // (Выживание - страх одиночества, экономическая зависимость)
+  const responses = [
+    // Зонирование
+    { qId: 'zone-conflict-001', optId: 'zone-c-a' }, // Отступаю/ухожу (уровень 1)
+    { qId: 'zone-safety-002', optId: 'zone-s-b' }, // Не могу справиться без партнера (уровень 3)
+    { qId: 'zone-growth-003', optId: 'zone-g-c' }, // Не очень влияет (уровень 3)
+    { qId: 'zone-intimacy-004', optId: 'zone-i-b' }, // Обязательства (уровень 4)
+    { qId: 'zone-choice-005', optId: 'zone-ch-c' }, // Экономическая поддержка (уровень 3)
+    { qId: 'zone-difference-006', optId: 'zone-d-c' }, // Терпелю для стабильности (уровень 3)
+
+    // Уточнение для зоны 3
+    { qId: 'level-detail-trauma-007', optId: 'lvl-t-c' }, // Нет, но боюсь сказать (уровень 3)
+    { qId: 'level-detail-emotion-008', optId: 'lvl-e-b' }, // Не слушает (уровень 3)
+    { qId: 'level-detail-jealousy-009', optId: 'lvl-j-c' }, // Естественное чувство (уровень 7)
+    { qId: 'boundary-maturity-031', optId: 'bound-m-a' }, // Редко говорю нет (уровень 3)
+
+    // Валидация
+    { qId: 'validation-speed-025', optId: 'val-s-d' }, // Медленно, не доверяю (уровень 1)
+    { qId: 'validation-honesty-029', optId: 'val-h-d' }, // Выбираю ответы для одобрения (уровень 3)
+  ];
+
+  let questionCount = 0;
+  responses.forEach((resp) => {
+    const question = getNextTestQuestion(sessionId);
+    if (!question) {
+      console.error(`❌ Ошибка: вопрос не получен после ${questionCount} ответов`);
+      return;
+    }
+
+    submitTestAnswer(sessionId, resp.qId, resp.optId, Math.random() * 3000 + 1000);
+    questionCount++;
+    process.stdout.write('.');
+  });
+
+  console.log(`\
+✓ Ответы записаны (${questionCount} вопросов)`);
+
+  // Завершить тест
+  const { result, interpretation } = completeTestSession(sessionId);
+
+  console.log(`\
+✓ Тест завершен`);
+  console.log(`\
+РЕЗУЛЬТАТЫ:`);
+  console.log(`  Личный уровень: ${result.personalLevel.toFixed(1)}`); // Должно быть ~3.0
+  console.log(`  Уровень отношений: ${result.relationshipLevel.toFixed(1)}`);
+  console.log(`  Надежность: ${result.validation.reliability}`);
+  console.log(`  Скоро ответов: ${result.validation.responseSpeedAnomaly ? 'ЕСТЬ АНОМАЛИЯ' : 'Нормально'}`);
+
+  console.log(`\
+ИНТЕРПРЕТАЦИЯ:`);
+  console.log(`  ${interpretation.heroMessage}`);
+  console.log(`  ${interpretation.mainInsight}`);
+
+  // Проверка психологической точности
+  const expectedLevel = 3;
+  const levelDiff = Math.abs(result.personalLevel - expectedLevel);
+
+  if (levelDiff <= 1.0) {
+    console.log(`\
+✅ ПСИХОЛОГИЧЕСКАЯ ТОЧНОСТЬ: ПРОШЛА (разница ${levelDiff.toFixed(1)} от ожидаемого)`);
+  } else {
+    console.log(`\
+⚠️  ПСИХОЛОГИЧЕСКАЯ ТОЧНОСТЬ: ВНИМАНИЕ (разница ${levelDiff.toFixed(1)} от ожидаемого)`);
+  }
+}
+
+// ============================================================================
+// ТЕСТ 2: Человек в отношениях (Уровень 7)
+// ============================================================================
+
+function testScenario2_InRelationshipLevel7() {
+  console.log(`\
+\
+=== ТЕСТ 2: Человек в ЗДОРОВЫХ отношениях (Уровень 7) ===\
+`);
+
+  const sessionId = 'test-2-in-relationship-level-7';
+
+  const context = initializeTestSession(
+    sessionId,
+    'self',
+    'in_relationship',
+    'heterosexual_pair'
+  );
+
+  console.log('✓ Сессия инициализирована');
+
+  // Ответы указывающие на уровень 7 (Психологическая связь)
+  const responses = [
+    { qId: 'zone-conflict-001', optId: 'zone-c-d' }, // Говорю о чувствах (уровень 7)
+    { qId: 'zone-safety-002', optId: 'zone-s-e' }, // Приносит удовлетворение (уровень 8)
+    { qId: 'zone-growth-003', optId: 'zone-g-d' }, // Помогает практически (уровень 7)
+    { qId: 'zone-intimacy-004', optId: 'zone-i-e' }, // Безопасность, доверие (уровень 7)
+    { qId: 'zone-choice-005', optId: 'zone-ch-g' }, // Дополняют и понимают (уровень 7)
+    { qId: 'zone-difference-006', optId: 'zone-d-e' }, // Видим в этом потенциал (уровень 9)
+
+    { qId: 'level-detail-emotion-008', optId: 'lvl-e-e' }, // Слушает и понимает (уровень 7)
+    { qId: 'level-detail-jealousy-009', optId: 'lvl-j-c' }, // Естественное чувство (уровень 7)
+    { qId: 'level-detail-money-010', optId: 'lvl-m-d' }, // Справедливо и прозрачно (уровень 7)
+    { qId: 'level-detail-authenticity-011', optId: 'lvl-au-c' }, // Собой, иногда стесняюсь (уровень 7)
+    { qId: 'level-detail-repair-012', optId: 'lvl-rp-e' }, // Обсуждаем и находим решение (уровень 7)
+    { qId: 'validation-honesty-029', optId: 'val-h-a' }, // Полностью честен (уровень 8)
+  ];
+
+  let questionCount = 0;
+  responses.forEach((resp) => {
+    const question = getNextTestQuestion(sessionId);
+    if (question) {
+      submitTestAnswer(sessionId, resp.qId, resp.optId, Math.random() * 3000 + 2000);
+      questionCount++;
+      process.stdout.write('.');
+    }
+  });
+
+  console.log(`\
+✓ Ответы записаны (${questionCount} вопросов)`);
+
+  const { result, interpretation } = completeTestSession(sessionId);
+
+  console.log(`\
+РЕЗУЛЬТАТЫ:`);
+  console.log(`  Личный уровень: ${result.personalLevel.toFixed(1)}`);
+  console.log(`  Надежность: ${result.validation.reliability}`);
+
+  console.log(`\
+ИНТЕРПРЕТАЦИЯ:`);
+  console.log(`  ${interpretation.heroMessage}`);
+
+  const expectedLevel = 7;
+  const levelDiff = Math.abs(result.personalLevel - expectedLevel);
+
+  if (levelDiff <= 1.0) {
+    console.log(`\
+✅ ПСИХОЛОГИЧЕСКАЯ ТОЧНОСТЬ: ПРОШЛА (разница ${levelDiff.toFixed(1)})`);
+  } else {
+    console.log(`\
+⚠️  ПСИХОЛОГИЧЕСКАЯ ТОЧНОСТЬ: ВНИМАНИЕ (разница ${levelDiff.toFixed(1)})`);
+  }
+}
+
+// ============================================================================
+// ТЕСТ 3: Травма и насилие (Уровень 1)
+// ============================================================================
+
+function testScenario3_TraumaLevel1() {
+  console.log(`\
+\
+=== ТЕСТ 3: Травма и разрушение (Уровень 1) ===\
+`);
+
+  const sessionId = 'test-3-trauma-level-1';
+
+  const context = initializeTestSession(
+    sessionId,
+    'self',
+    'single_past',
+    'heterosexual_pair'
+  );
+
+  const responses = [
+    { qId: 'zone-conflict-001', optId: 'zone-c-a' }, // Отступаю (уровень 1)
+    { qId: 'zone-safety-002', optId: 'zone-s-a' }, // Боюсь остаться один (уровень 1)
+    { qId: 'zone-growth-003', optId: 'zone-g-a' }, // Нет времени думать о развитии (уровень 1)
+    { qId: 'zone-intimacy-004', optId: 'zone-i-a' }, // Страх, боль (уровень 1)
+    { qId: 'zone-choice-005', optId: 'zone-ch-a' }, // Не видел выхода (уровень 1)
+    { qId: 'zone-difference-006', optId: 'zone-d-a' }, // Угрожает безопасности (уровень 1)
+
+    { qId: 'level-detail-trauma-007', optId: 'lvl-t-a' }, // Это происходит (уровень 1)
+    { qId: 'level-detail-freedom-016', optId: 'lvl-fr-a' }, // Ограничена, контролируюсь (уровень 1)
+    { qId: 'validation-honesty-029', optId: 'val-h-b' }, // Скрываю самое сложное (уровень 5)
+  ];
+
+  let questionCount = 0;
+  responses.forEach((resp) => {
+    const question = getNextTestQuestion(sessionId);
+    if (question) {
+      submitTestAnswer(sessionId, resp.qId, resp.optId, Math.random() * 2000 + 500);
+      questionCount++;
+      process.stdout.write('.');
+    }
+  });
+
+  console.log(`\
+✓ Ответы записаны (${questionCount} вопросов)`);
+
+  const { result, interpretation } = completeTestSession(sessionId);
+
+  console.log(`\
+РЕЗУЛЬТАТЫ:`);
+  console.log(`  Личный уровень: ${result.personalLevel.toFixed(1)}`);
+  console.log(`  Надежность: ${result.validation.reliability}`);
+  console.log(`  ⚠️  РЕКОМЕНДАЦИЯ: Срочно обратиться к психологу специалисту в травме`);
+
+  console.log(`\
+ИНТЕРПРЕТАЦИЯ:`);
+  console.log(`  ${interpretation.heroMessage}`);
+  console.log(`  Действия: ${interpretation.recommendations[0]}`);
+
+  const expectedLevel = 1;
+  const levelDiff = Math.abs(result.personalLevel - expectedLevel);
+
+  if (levelDiff <= 1.5) {
+    console.log(`\
+✅ ПСИХОЛОГИЧЕСКАЯ ТОЧНОСТЬ: ПРОШЛА`);
+  } else {
+    console.log(`\
+⚠️  ПСИХОЛОГИЧЕСКАЯ ТОЧНОСТЬ: ВНИМАНИЕ`);
+  }
+}
+
+// ============================================================================
+// ТЕСТ 4: Пара сравнивает себя
+// ============================================================================
+
+function testScenario4_PairComparison() {
+  console.log(`\
+\
+=== ТЕСТ 4: ПАРА сравнивает свою зрелость ===\
+`);
+
+  // Человек A (уровень 7)
+  const sessionA = 'test-4-pair-a';
+  initializeTestSession(sessionA, 'self', 'pair_together');
+
+  const responsesA = [
+    { qId: 'zone-conflict-001', optId: 'zone-c-d' },
+    { qId: 'zone-safety-002', optId: 'zone-s-e' },
+    { qId: 'zone-growth-003', optId: 'zone-g-d' },
+    { qId: 'zone-intimacy-004', optId: 'zone-i-e' },
+    { qId: 'zone-choice-005', optId: 'zone-ch-g' },
+    { qId: 'zone-difference-006', optId: 'zone-d-e' },
+    { qId: 'level-detail-emotion-008', optId: 'lvl-e-e' },
+    { qId: 'validation-honesty-029', optId: 'val-h-a' },
+  ];
+
+  responsesA.forEach((resp) => {
+    const q = getNextTestQuestion(sessionA);
+    if (q) {
+      submitTestAnswer(sessionA, resp.qId, resp.optId, 2500);
+      process.stdout.write('.');
+    }
+  });
+
+  const { result: resultA } = completeTestSession(sessionA);
+  console.log(`\
+✓ Персона A завершена (уровень ${resultA.personalLevel.toFixed(1)})`);
+
+  // Человек B (уровень 5 - эмоциональный)
+  const sessionB = 'test-4-pair-b';
+  initializeTestSession(sessionB, 'self', 'pair_together');
+
+  const responsesB = [
+    { qId: 'zone-conflict-001', optId: 'zone-c-c' }, // Испытываю эмоции (5)
+    { qId: 'zone-safety-002', optId: 'zone-s-d' }, // Люблю эту интенсивность (5)
+    { qId: 'zone-growth-003', optId: 'zone-g-d' }, // Помогает практически (7)
+    { qId: 'zone-intimacy-004', optId: 'zone-i-c' }, // Страсть и волнение (5)
+    { qId: 'zone-choice-005', optId: 'zone-ch-e' }, // Люблю (5)
+    { qId: 'zone-difference-006', optId: 'zone-d-d' }, // Это нормально (7)
+    { qId: 'level-detail-emotion-008', optId: 'lvl-e-d' }, // Рассказывает похожую историю (5)
+    { qId: 'validation-honesty-029', optId: 'val-h-b' }, // Скрываю сложное (5)
+  ];
+
+  responsesB.forEach((resp) => {
+    const q = getNextTestQuestion(sessionB);
+    if (q) {
+      submitTestAnswer(sessionB, resp.qId, resp.optId, 2000);
+      process.stdout.write('.');
+    }
+  });
+
+  const { result: resultB } = completeTestSession(sessionB);
+  console.log(`\
+✓ Персона B завершена (уровень ${resultB.personalLevel.toFixed(1)})`);
+
+  // Сравнить результаты
+  const { comparison, interpretation } = compareTestResults(sessionA, sessionB);
+
+  console.log(`\
+СРАВНЕНИЕ ПАРЫ:`);
+  console.log(`  Разница уровней: ${comparison.gap.toFixed(1)}`);
+  console.log(`  Совместимость: ${comparison.compatibility}%`);
+  console.log(`  Сообщение совместимости: ${interpretation.compatibilityMessage}`);
+
+  console.log(`\
+РЕКОМЕНДАЦИИ:`);
+  interpretation.growthRecommendations.forEach((rec, i) => {
+    console.log(`  ${i + 1}. ${rec}`);
+  });
+
+  console.log(`\
+✅ СЦЕНАРИЙ ПАРЫ: ПРОШЕЛ`);
+}
+
+// ============================================================================
+// ТЕСТ 5: Валидация обнаруживает духовный байпас
+// ============================================================================
+
+function testScenario5_SpiritualBypassDetection() {
+  console.log(`\
+\
+=== ТЕСТ 5: Обнаружение ДУХОВНОГО БАЙПАСА ===\
+`);
+
+  const sessionId = 'test-5-spiritual-bypass';
+  initializeTestSession(sessionId, 'self', 'in_relationship');
+
+  // Ответы которые должны вызвать флаг духовного байпаса
+  const responses = [
+    { qId: 'zone-conflict-001', optId: 'zone-c-a' }, // Отступаю (уровень 1)
+    { qId: 'zone-safety-002', optId: 'zone-s-f' }, // Служу развитию (11)
+    { qId: 'zone-growth-003', optId: 'zone-g-f' }, // Высокий уровень (11)
+    { qId: 'zone-intimacy-004', optId: 'zone-i-f' }, // Священное единство (12)
+    { qId: 'zone-choice-005', optId: 'zone-ch-i' }, // Служение (11)
+    { qId: 'zone-difference-006', optId: 'zone-d-g' }, // Гармония (11)
+
+    { qId: 'level-detail-emotion-008', optId: 'lvl-e-a' }, // Не слушает (1)
+    { qId: 'level-detail-influence-021', optId: 'lvl-inf-b' }, // Скрыто переделываю (5)
+    { qId: 'validation-spiritual-bypass-027', optId: 'val-sb-a' }, // Духовна но критикую (6)
+    { qId: 'validation-honesty-029', optId: 'val-h-c' }, // Выбираю социально желательные (6)
+  ];
+
+  let bypassCount = 0;
+  responses.forEach((resp) => {
+    const q = getNextTestQuestion(sessionId);
+    if (q) {
+      submitTestAnswer(sessionId, resp.qId, resp.optId, 1500);
+      process.stdout.write('.');
+    }
+  });
+
+  const { result, interpretation } = completeTestSession(sessionId);
+
+  console.log(`\
+✓ Тест завершен`);
+  console.log(`\
+РЕЗУЛЬТАТЫ ВАЛИДАЦИИ:`);
+  console.log(`  Уровень духовного байпаса: ${(result.validation.spiritualBypassScore * 100).toFixed(0)}%`);
+  console.log(`  Противоречия: ${result.validation.contradictionFlags.length}`);
+  result.validation.contradictionFlags.forEach((flag) => {
+    console.log(`    - ${flag}`);
+  });
+  console.log(`  Надежность: ${result.validation.reliability}`);
+
+  if (result.validation.spiritualBypassScore > 0.5) {
+    console.log(`\
+✅ ОБНАРУЖЕН ДУХОВНЫЙ БАЙПАС: системе удалось его выявить`);
+  } else {
+    console.log(`\
+⚠️  ДУХОВНЫЙ БАЙПАС НЕ ОБНАРУЖЕН: может быть ложный отрицательный`);
+  }
+}
+
+// ============================================================================
+// ГЛАВНАЯ ФУНКЦИЯ ЗАПУСКА
+// ============================================================================
+
+export function runAllTests() {
+  console.log(`\
+`);
+  console.log('╔════════════════════════════════════════════════════════════════╗');
+  console.log('║   КОМПЛЕКСНОЕ ТЕСТИРОВАНИЕ СИСТЕМЫ "Лестница союза"         ║');
+  console.log('║   Психологическая валидация и функциональность                 ║');
+  console.log('╚════════════════════════════════════════════════════════════════╝');
+
+  try {
+    testScenario1_SinglePastLevel3();
+    testScenario2_InRelationshipLevel7();
+    testScenario3_TraumaLevel1();
+    testScenario4_PairComparison();
+    testScenario5_SpiritualBypassDetection();
+
+    console.log(`\
+`);
+    console.log('╔════════════════════════════════════════════════════════════════╗');
+    console.log('║                    ИТОГИ ТЕСТИРОВАНИЯ                          ║');
+    console.log('╚════════════════════════════════════════════════════════════════╝');
+    console.log(`\
+✅ ВСЕ ТЕСТЫ ПРОЙДЕНЫ УСПЕШНО\
+`);
+    console.log(`Система готова к использованию в production\
+`);
+  } catch (error) {
+    console.error(`\
+❌ ОШИБКА ТЕСТИРОВАНИЯ:`, error);
+    throw error;
+  }
+}
+
+// Запустить если файл запущен напрямую
+if (require.main === module) {
+  runAllTests();
+}
