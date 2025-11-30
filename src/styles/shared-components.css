@@ -1,0 +1,281 @@
+/* Общие стили для красивых блоков */
+.beautiful-section {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.beautiful-section:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Адаптивные отступы */
+@media (max-width: 768px) {
+  .beautiful-section {
+    padding: 16px;
+    margin-bottom: 16px;
+    border-radius: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .beautiful-section {
+    padding: 12px;
+    margin-bottom: 12px;
+    border-radius: 12px;
+  }
+}
+
+/* Стили для сетки блоков */
+.results-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+/* Убираем адаптивную многоколоночность для единообразия */
+/* @media (min-width: 768px) {
+  .results-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1200px) {
+  .results-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+} */
+
+/* Стили для заголовков разделов */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+@media (max-width: 768px) {
+  .section-header {
+    margin-bottom: 16px;
+    font-size: 1.125rem;
+  }
+}
+
+/* Стили для карточек результатов */
+.result-card {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 16px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+  padding: 20px;
+  text-align: center;
+  transition: all 0.3s ease;
+  border-left: 4px solid;
+  margin-bottom: 8px;
+}
+
+.result-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+.result-card--personal {
+  border-left-color: #3b82f6;
+}
+
+.result-card--relationship {
+  border-left-color: #8b5cf6;
+}
+
+.result-card--potential {
+  border-left-color: #6366f1;
+}
+
+.result-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.result-value--personal {
+  color: #3b82f6;
+}
+
+.result-value--relationship {
+  color: #8b5cf6;
+}
+
+.result-value--potential {
+  color: #6366f1;
+}
+
+.result-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 6px;
+}
+
+.result-description {
+  font-size: 0.8rem;
+  color: #64748b;
+  line-height: 1.3;
+  margin-bottom: 0;
+}
+
+/* Адаптивность для карточек результатов */
+@media (max-width: 768px) {
+  .result-card {
+    padding: 16px;
+    border-radius: 14px;
+  }
+  
+  .result-value {
+    font-size: 1.5rem;
+  }
+  
+  .result-title {
+    font-size: 0.95rem;
+  }
+  
+  .result-description {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .result-card {
+    padding: 14px;
+    border-radius: 12px;
+  }
+  
+  .result-value {
+    font-size: 1.3rem;
+  }
+  
+  .result-title {
+    font-size: 0.85rem;
+  }
+  
+  .result-description {
+    font-size: 0.7rem;
+  }
+}
+
+/* Стили для статистики */
+.stats-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+}
+
+@media (min-width: 1200px) {
+  .stats-container {
+    grid-template-columns: 1fr 1.5fr;
+  }
+}
+
+/* Стили для волнового графика */
+.wave-chart-container {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden; /* Убираем горизонтальную прокрутку */
+  border-radius: 12px;
+}
+
+.wave-chart-container svg {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  display: block;
+}
+
+/* Мобильная адаптивность */
+@media (max-width: 768px) {
+  .wave-chart-container {
+    padding: 8px;
+    margin: 0 -8px; /* Компенсируем отступы контейнера */
+  }
+  
+  .wave-chart-container svg {
+    width: 100%;
+    height: 250px; /* Немного уменьшаем высоту на планшетах */
+  }
+}
+
+@media (max-width: 480px) {
+  .wave-chart-container {
+    padding: 4px;
+    margin: 0 -12px; /* Еще больше компенсируем на мобильных */
+    border-radius: 8px;
+  }
+  
+  .wave-chart-container svg {
+    width: 100%;
+    height: 200px; /* Уменьшаем высоту на мобильных */
+  }
+}
+
+/* Улучшенные кнопки */
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+@media (max-width: 480px) {
+  .action-buttons {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .action-buttons .btn {
+    width: 100%;
+    max-width: 280px;
+  }
+}
+
+/* Анимации */
+@keyframes gentle-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.pulse-animation {
+  animation: gentle-pulse 2s ease-in-out infinite;
+}
+
+/* Улучшенная типографика для мобильных */
+@media (max-width: 768px) {
+  .main-title {
+    font-size: 2.5rem !important;
+  }
+  
+  .main-subtitle {
+    font-size: 1rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-title {
+    font-size: 2rem !important;
+  }
+  
+  .main-subtitle {
+    font-size: 0.9rem !important;
+  }
+}

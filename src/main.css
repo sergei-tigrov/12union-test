@@ -1,0 +1,43 @@
+/* Импорт существующих стилей */
+@import './styles/index.css';
+@import './styles/design-system.css';
+@import "tailwindcss";
+
+/* Дополнительные базовые стили */
+body {
+  font-family: 'Montserrat', 'Raleway', 'Roboto', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Утилитарные классы */
+.btn-primary {
+  background-color: rgb(37 99 235);
+  color: white;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.btn-primary:hover {
+  background-color: rgb(29 78 216);
+}
+
+.card-stats {
+  background-color: rgb(249 250 251);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  text-align: center;
+}
+
+.level-card {
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  transition: all 0.3s ease-in-out;
+}
+
+.level-card:hover {
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+}

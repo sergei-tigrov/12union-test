@@ -1,0 +1,578 @@
+/**
+ * Глобальная система дизайна для 12Union
+ * Содержит CSS-переменные для цветов, типографики, отступов и других элементов дизайна
+ */
+
+:root {
+  /* 🎯 Цветовая палитра */
+  --primary-50: #f8fafc;
+  --primary-100: #f1f5f9;
+  --primary-200: #e2e8f0;
+  --primary-300: #cbd5e1;
+  --primary-400: #94a3b8;
+  --primary-500: #64748b;
+  --primary-600: #475569;
+  --primary-700: #334155;
+  --primary-800: #1e293b;
+  --primary-900: #0f172a;
+
+  /* 💙 Акцентные цвета */
+  --accent-blue: #3b82f6;
+  --accent-blue-light: #dbeafe;
+  --accent-purple: #8b5cf6;
+  --accent-purple-light: #ede9fe;
+  --accent-green: #10b981;
+  --accent-green-light: #d1fae5;
+  --accent-pink: #ec4899;
+  --accent-pink-light: #fce7f3;
+  --accent-orange: #f59e0b;
+  --accent-orange-light: #fef3c7;
+
+  /* 🎭 Семантические цвета */
+  --success: #10b981;
+  --success-light: #d1fae5;
+  --warning: #f59e0b;
+  --warning-light: #fef3c7;
+  --error: #ef4444;
+  --error-light: #fecaca;
+  --info: #3b82f6;
+  --info-light: #dbeafe;
+
+  /* 📝 Цвета текста */
+  --color-text: var(--primary-800);
+  --color-text-muted: var(--primary-500);
+  --color-text-light: var(--primary-400);
+  --color-background: var(--primary-50);
+
+  /* 📝 Типографика */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  --text-xs: 0.75rem;     /* 12px */
+  --text-sm: 0.875rem;    /* 14px */
+  --text-base: 1rem;      /* 16px */
+  --text-lg: 1.125rem;    /* 18px */
+  --text-xl: 1.25rem;     /* 20px */
+  --text-2xl: 1.5rem;     /* 24px */
+  --text-3xl: 1.875rem;   /* 30px */
+  --text-4xl: 2.25rem;    /* 36px */
+
+  --font-light: 300;
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.75;
+
+  /* 📐 Spacing & Layout */
+  --space-1: 0.25rem;   /* 4px */
+  --space-2: 0.5rem;    /* 8px */
+  --space-3: 0.75rem;   /* 12px */
+  --space-4: 1rem;      /* 16px */
+  --space-5: 1.25rem;   /* 20px */
+  --space-6: 1.5rem;    /* 24px */
+  --space-8: 2rem;      /* 32px */
+  --space-10: 2.5rem;   /* 40px */
+  --space-12: 3rem;     /* 48px */
+  --space-16: 4rem;     /* 64px */
+
+  /* 🔄 Border Radius */
+  --radius-sm: 0.375rem;  /* 6px */
+  --radius-md: 0.5rem;    /* 8px */
+  --radius-lg: 0.75rem;   /* 12px */
+  --radius-xl: 1rem;      /* 16px */
+  --radius-2xl: 1.5rem;   /* 24px */
+  --radius-3xl: 2rem;     /* 32px */
+
+  /* 🌟 Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+  /* 🎬 Transitions */
+  --transition-fast: 150ms ease-out;
+  --transition-normal: 300ms ease-out;
+  --transition-slow: 500ms ease-out;
+
+  /* 🎨 Beautiful Gradients - Modern Glass Style */
+  --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 25%, #ec4899 50%, #10b981 75%, #f59e0b 100%);
+  --gradient-secondary: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 75%, #f5576c 100%);
+  --gradient-hero: linear-gradient(135deg, #ffecd2 0%, #fcb69f 25%, #667eea 75%, #764ba2 100%);
+  --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.3) 100%);
+  --gradient-surface: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+  
+  /* Анимируемые градиенты */
+  --gradient-animated-1: linear-gradient(45deg, #ff9a9e, #fecfef, #a8edea);
+  --gradient-animated-2: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
+  --gradient-hover: linear-gradient(135deg, #ff6b9d 0%, #c44569 25%, #6c5ce7 75%, #a29bfe 100%);
+  
+  /* Нежные пастельные градиенты для текстовых блоков */
+  --gradient-hover-soft: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(139, 92, 246, 0.08) 25%, rgba(236, 72, 153, 0.06) 50%, rgba(16, 185, 129, 0.07) 75%, rgba(255, 255, 255, 0.15) 100%);
+  --gradient-card-hover-soft: linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(248, 250, 252, 0.9) 25%, rgba(241, 245, 249, 0.8) 50%, rgba(255, 255, 255, 0.7) 75%, rgba(255, 255, 255, 0.6) 100%);
+  --gradient-icon-bg: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(139, 92, 246, 0.12) 50%, rgba(236, 72, 153, 0.08) 100%);
+  
+  /* Размеры для анимаций */
+  --gradient-size: 300% 300%;
+
+  /* 📱 Breakpoints (for CSS) */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+}
+
+/* 🌓 Dark mode support - ОТКЛЮЧЕН для единого стиля */
+/* Закомментировано для единообразия дизайна
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primary-50: #0f172a;
+    --primary-100: #1e293b;
+    --primary-200: #334155;
+    --primary-300: #475569;
+    --primary-400: #64748b;
+    --primary-500: #94a3b8;
+    --primary-600: #cbd5e1;
+    --primary-700: #e2e8f0;
+    --primary-800: #f1f5f9;
+    --primary-900: #f8fafc;
+
+    --gradient-surface: linear-gradient(135deg, #1e293b, #334155);
+  }
+}
+*/
+
+/* 🎯 Utility Classes */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.focus-visible-only {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.focus-visible-only:focus-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* 📐 Layout Utilities */
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 var(--space-4);
+}
+
+@media (min-width: 768px) {
+  .container {
+    padding: 0 var(--space-6);
+  }
+}
+
+.grid-responsive {
+  display: grid;
+  gap: var(--space-6);
+}
+
+@media (min-width: 768px) {
+  .grid-responsive {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid-responsive {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* 🎨 Modern Card System */
+.modern-card {
+  background: white;
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--primary-200);
+  padding: var(--space-6);
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.modern-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--gradient-primary);
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+}
+
+.modern-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl);
+}
+
+.modern-card:hover::before {
+  opacity: 1;
+}
+
+/* 🎯 Card Variants */
+.modern-card--primary {
+  border-color: var(--accent-blue-light);
+}
+
+.modern-card--primary::before {
+  background: var(--accent-blue);
+}
+
+.modern-card--success {
+  border-color: var(--accent-green-light);
+}
+
+.modern-card--success::before {
+  background: var(--accent-green);
+}
+
+.modern-card--warning {
+  border-color: var(--accent-orange-light);
+}
+
+.modern-card--warning::before {
+  background: var(--accent-orange);
+}
+
+.modern-card--purple {
+  border-color: var(--accent-purple-light);
+}
+
+.modern-card--purple::before {
+  background: var(--accent-purple);
+}
+
+/* 📱 Mobile optimizations */
+@media (max-width: 768px) {
+  .modern-card {
+    padding: var(--space-4);
+    border-radius: var(--radius-xl);
+  }
+  
+  .modern-card:hover {
+    transform: none;
+  }
+}
+
+/* 🎭 Typography Classes */
+.heading-1 {
+  font-size: var(--text-4xl);
+  font-weight: var(--font-bold);
+  line-height: var(--leading-tight);
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.heading-2 {
+  font-size: var(--text-3xl);
+  font-weight: var(--font-bold);
+  line-height: var(--leading-tight);
+  color: var(--primary-800);
+}
+
+.heading-3 {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-semibold);
+  line-height: var(--leading-tight);
+  color: var(--primary-700);
+}
+
+.text-primary {
+  color: var(--primary-800);
+}
+
+.text-secondary {
+  color: var(--primary-600);
+}
+
+.text-muted {
+  color: var(--primary-500);
+}
+
+/* 🎨 Badge System */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  white-space: nowrap;
+}
+
+.badge--primary {
+  background: var(--accent-blue-light);
+  color: var(--accent-blue);
+}
+
+.badge--success {
+  background: var(--accent-green-light);
+  color: var(--accent-green);
+}
+
+.badge--warning {
+  background: var(--accent-orange-light);
+  color: var(--accent-orange);
+}
+
+.badge--purple {
+  background: var(--accent-purple-light);
+  color: var(--accent-purple);
+}
+
+/* 🎯 Animation Utilities */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.animate-pulse {
+  animation: pulse 2s infinite;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.4s ease-out;
+}
+
+/* ✨ Градиентные анимации */
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes gradientPulse {
+  0%, 100% { 
+    background-size: 100% 100%; 
+    opacity: 0.8;
+  }
+  50% { 
+    background-size: 120% 120%; 
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0%; }
+  100% { background-position: 200% 0%; }
+}
+
+@keyframes gradientFloat {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  33% { transform: translateY(-10px) scale(1.02); }
+  66% { transform: translateY(5px) scale(0.98); }
+}
+
+/* 🎨 Градиентные классы */
+.gradient-bg {
+  background: var(--gradient-primary);
+  background-size: var(--gradient-size);
+  animation: gradientShift 8s ease infinite;
+}
+
+.gradient-bg-hero {
+  background: linear-gradient(135deg, #fafbff 0%, #f0f4ff 25%, #f8fafc 75%, #ffffff 100%);
+  background-size: 200% 200%;
+  animation: gradientShift 15s ease infinite;
+}
+
+.gradient-bg-soft {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #f1f5f9 100%);
+}
+
+.gradient-card {
+  background: white;
+  border: 1px solid var(--primary-200);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.gradient-card:hover {
+  background: rgba(248, 250, 252, 0.8);
+  border: 1px solid var(--primary-300);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.gradient-button {
+  background: var(--gradient-primary);
+  background-size: var(--gradient-size);
+  border: none;
+  color: white;
+  font-weight: var(--font-semibold);
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.gradient-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.6s;
+}
+
+.gradient-button:hover {
+  background: var(--gradient-hover);
+  animation: gradientShift 2s ease infinite;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.gradient-button:hover::before {
+  left: 100%;
+}
+
+.gradient-button:active {
+  transform: translateY(0px);
+  animation: gradientPulse 0.3s ease;
+}
+
+.gradient-text {
+  background: var(--gradient-primary);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: var(--gradient-size);
+  animation: gradientShift 6s ease infinite;
+}
+
+.gradient-border {
+  position: relative;
+  background: white;
+  border-radius: var(--radius-xl);
+  padding: 2px;
+}
+
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 2px;
+  background: var(--gradient-primary);
+  background-size: var(--gradient-size);
+  border-radius: inherit;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: subtract;
+  animation: gradientShift 4s ease infinite;
+}
+
+/* 🎯 Icon-Text Perfect Alignment System */
+.icon-text-aligned {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  line-height: 1;
+}
+
+.icon-text-aligned > *:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.icon-text-aligned > *:last-child {
+  display: flex;
+  align-items: center;
+  line-height: 1.2;
+}
+
+/* Варианты для разных размеров */
+.icon-text-aligned-sm {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  line-height: 1;
+}
+
+.icon-text-aligned-sm > *:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.icon-text-aligned-sm > *:last-child {
+  display: flex;
+  align-items: center;
+  line-height: 1.1;
+}
+
+.icon-text-aligned-lg {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  line-height: 1;
+}
+
+.icon-text-aligned-lg > *:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.icon-text-aligned-lg > *:last-child {
+  display: flex;
+  align-items: center;
+  line-height: 1.3;
+}

@@ -1,0 +1,146 @@
+/* 🎨 ОПТИМИЗИРОВАННЫЕ СТИЛИ СТРАНИЦЫ РЕЗУЛЬТАТОВ */
+
+/* Кнопки действий */
+.action-buttons {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0 auto;
+  width: fit-content;
+}
+
+.compact-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1875rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 400;
+  border-radius: 0.25rem;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  text-decoration: none;
+  outline: none;
+  line-height: 1.1;
+  background: white;
+  color: #64748b;
+  height: 1.5rem;
+  box-sizing: border-box;
+}
+
+.compact-btn:focus {
+  outline: 1px solid #cbd5e1;
+  outline-offset: 1px;
+}
+
+.compact-btn--primary {
+  background: #e2e8f0;
+  color: #475569;
+  border-color: #cbd5e1;
+}
+
+.compact-btn--primary:hover {
+  background: #cbd5e1;
+  color: #334155;
+  border-color: #94a3b8;
+}
+
+.compact-btn--outline {
+  background: white;
+  color: #64748b;
+  border-color: #e2e8f0;
+}
+
+.compact-btn--outline:hover {
+  background: #f1f5f9;
+  color: #475569;
+  border-color: #cbd5e1;
+}
+
+.compact-btn--outline:active {
+  background: #e2e8f0;
+}
+
+/* PDF Export режим */
+.pdf-export-mode .overflow-hidden {
+  overflow: visible;
+}
+
+.pdf-export-mode div[style*="height: 0"] {
+  height: auto;
+}
+
+.pdf-export-mode div[style*="opacity: 0"] {
+  opacity: 1;
+}
+
+.pdf-export-mode [class*="AnimatePresence"] > div {
+  display: block;
+  opacity: 1;
+  height: auto;
+}
+
+/* Секции результатов с приоритетами */
+.results-section--critical {
+  border-left: 4px solid #ef4444;
+  background: linear-gradient(to right, #fef2f2, white);
+}
+
+.results-section--important {
+  border-left: 4px solid #f59e0b;
+  background: linear-gradient(to right, #fffbeb, white);
+}
+
+.results-section--normal {
+  border-left: 4px solid #10b981;
+  background: linear-gradient(to right, #f0fdf4, white);
+}
+
+/* Оптимизированные анимации */
+@media (prefers-reduced-motion: reduce) {
+  .motion-safe\:animate-none {
+    animation: none;
+  }
+  
+  .motion-safe\:transition-none {
+    transition: none;
+  }
+}
+
+/* Улучшенная доступность */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Улучшенные фокус-состояния */
+.focus-visible\:ring-2:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Мобильные оптимизации */
+@media (max-width: 768px) {
+  .action-buttons {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .compact-btn {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.75rem;
+    height: auto;
+  }
+} 
