@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎯 Лестница союза - Психологический тест</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      padding: 40px;
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+
+    .section {
+      display: none;
+      animation: fadeIn 0.3s ease-in;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .button-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin: 30px 0;
+    }
+
+    button {
+      padding: 15px 25px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: 600;
+    }
+
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-secondary {
+      background: #e0e7ff;
+      color: #667eea;
+    }
+
+    .btn-secondary:hover {
+      background: #c7d2fd;
+    }
+
+    .question-container {
+      background: #f8f9fa;
+      padding: 25px;
+      border-radius: 8px;
+      margin-bottom: 25px;
+    }
+
+    .question-text {
+      font-size: 18px;
+      color: #333;
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
+
+    .answer-option {
+      background: white;
+      padding: 15px;
+      margin-bottom: 10px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .answer-option:hover {
+      border-color: #667eea;
+      background: #f0f4ff;
+    }
+
+    .answer-option input[type="radio"] {
+      margin-right: 10px;
+    }
+
+    .progress-bar {
+      background: #e0e0e0;
+      height: 6px;
+      border-radius: 3px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      background: #667eea;
+      height: 100%;
+      transition: width 0.3s;
+    }
+
+    .result-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .level-name {
+      font-size: 32px;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+
+    .level-number {
+      font-size: 48px;
+      font-weight: bold;
+      opacity: 0.9;
+    }
+
+    .interpretation {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+      line-height: 1.6;
+    }
+
+    .action-item {
+      background: white;
+      padding: 15px;
+      margin: 10px 0;
+      border-left: 4px solid #667eea;
+      border-radius: 4px;
+    }
+
+    .action-title {
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 5px;
+    }
+
+    .action-description {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #667eea;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      border: 4px solid #e0e7ff;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .home-buttons {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 15px;
+    }
+
+    .home-buttons button {
+      padding: 20px;
+      font-size: 18px;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Главная страница -->
+    <div id="home" class="section active">
+      <h1>🎯 Лестница союза</h1>
+      <p class="subtitle">Определи свой уровень психологической зрелости в отношениях за 15 минут</p>
+
+      <div class="interpretation" style="margin: 30px 0;">
+        <p>12 уровней развития - от травмы до духовного союза</p>
+        <p style="margin-top: 10px; font-size: 14px; opacity: 0.9;">Адаптивный тест с 34 вопросами и 4-слойной системой валидации</p>
+      </div>
+
+      <div class="home-buttons">
+        <button class="btn-primary" onclick="startTest('self', 'in_relationship')">
+          💑 Я в отношениях
+        </button>
+        <button class="btn-primary" onclick="startTest('self', 'single_past')">
+          👤 Одиночка (анализ прошлого)
+        </button>
+        <button class="btn-primary" onclick="startTest('self', 'single_potential')">
+          🌟 Одиночка (планирование)
+        </button>
+        <button class="btn-secondary" onclick="showAbout()">
+          ℹ️ О тесте
+        </button>
+      </div>
+    </div>
+
+    <!-- Вопросы -->
+    <div id="test" class="section">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress" style="width: 0%"></div>
+      </div>
+
+      <div id="questionContainer" class="question-container">
+        <div class="question-text" id="questionText"></div>
+        <div id="answersContainer"></div>
+      </div>
+
+      <div style="display: flex; gap: 10px;">
+        <button class="btn-primary" onclick="nextQuestion()" style="flex: 1;">
+          Далее →
+        </button>
+        <button class="btn-secondary" onclick="goHome()">
+          Выход
+        </button>
+      </div>
+    </div>
+
+    <!-- Результаты -->
+    <div id="results" class="section">
+      <div class="result-card">
+        <div>Ваш уровень</div>
+        <div class="level-number" id="levelNumber">8</div>
+        <div class="level-name" id="levelName">Уровень</div>
+      </div>
+
+      <div class="interpretation" id="interpretation"></div>
+
+      <h3 style="margin: 20px 0;">Рекомендованные действия:</h3>
+      <div id="actionsContainer"></div>
+
+      <button class="btn-primary" onclick="goHome()" style="width: 100%; margin-top: 20px;">
+        ← Вернуться на главную
+      </button>
+    </div>
+
+    <!-- О тесте -->
+    <div id="about" class="section">
+      <h2>О тесте "Лестница союза"</h2>
+      <div class="interpretation" style="margin: 20px 0;">
+        <h3 style="margin-bottom: 10px;">Что это?</h3>
+        <p>Психологический тест определения уровня зрелости в отношениях на основе теории привязанности и моделей развития отношений.</p>
+
+        <h3 style="margin-top: 20px; margin-bottom: 10px;">12 уровней:</h3>
+        <p>От уровня 1 (травма и разрушение) до уровня 12 (духовный союз)</p>
+
+        <h3 style="margin-top: 20px; margin-bottom: 10px;">Преимущества:</h3>
+        <ul style="margin-left: 20px; margin-top: 10px;">
+          <li>⚡ Быстро: 15-20 минут вместо традиционных 60+</li>
+          <li>🎯 Точно: 34 адаптивных вопроса</li>
+          <li>🔍 Честно: 4-слойная система валидации</li>
+          <li>💡 Практично: конкретные действия для развития</li>
+        </ul>
+      </div>
+
+      <button class="btn-primary" onclick="goHome()" style="width: 100%;">
+        ← Вернуться
+      </button>
+    </div>
+  </div>
+
+  <script src="../dist/index.js"></script>
+  <script>
+    let currentSessionId = null;
+    let currentTestMode = 'self';
+    let currentRelationshipStatus = 'in_relationship';
+    let questionCount = 0;
+
+    function showSection(sectionId) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById(sectionId).classList.add('active');
+    }
+
+    function goHome() {
+      showSection('home');
+    }
+
+    function showAbout() {
+      showSection('about');
+    }
+
+    function startTest(mode, status) {
+      currentTestMode = mode;
+      currentRelationshipStatus = status;
+
+      try {
+        const context = window.API.initializeTestSession(
+          `session-${Date.now()}`,
+          mode,
+          status
+        );
+        currentSessionId = context.sessionId;
+        questionCount = 0;
+        showSection('test');
+        nextQuestion();
+      } catch (error) {
+        alert('Ошибка: ' + error.message);
+      }
+    }
+
+    function nextQuestion() {
+      try {
+        const question = window.API.getNextTestQuestion(currentSessionId);
+
+        if (!question) {
+          completeTest();
+          return;
+        }
+
+        questionCount++;
+        updateProgress();
+        displayQuestion(question);
+      } catch (error) {
+        alert('Ошибка: ' + error.message);
+      }
+    }
+
+    function displayQuestion(question) {
+      const textVariant = currentTestMode;
+      const questionText = question.text[textVariant] || question.text.self;
+
+      document.getElementById('questionText').innerText = questionText;
+
+      const answersHtml = question.options
+        .map((opt, idx) => `
+          <label class="answer-option">
+            <input
+              type="radio"
+              name="answer"
+              value="${opt.id}"
+              onchange="selectAnswer('${question.id}', '${opt.id}')"
+            >
+            <span>${opt.text}</span>
+          </label>
+        `)
+        .join('');
+
+      document.getElementById('answersContainer').innerHTML = answersHtml;
+    }
+
+    function selectAnswer(questionId, optionId) {
+      try {
+        window.API.submitTestAnswer(currentSessionId, questionId, optionId, 5000);
+      } catch (error) {
+        console.error('Error submitting answer:', error);
+      }
+    }
+
+    function updateProgress() {
+      const progress = (questionCount / 20) * 100;
+      document.getElementById('progress').style.width = Math.min(progress, 95) + '%';
+    }
+
+    function completeTest() {
+      try {
+        const result = window.API.completeTestSession(currentSessionId);
+        displayResults(result.result, result.interpretation);
+        showSection('results');
+      } catch (error) {
+        alert('Ошибка: ' + error.message);
+      }
+    }
+
+    function displayResults(result, interpretation) {
+      const level = Math.round(result.personalLevel);
+      const levelDef = window.API.getLevelDefinition(level);
+
+      document.getElementById('levelNumber').innerText = level;
+      document.getElementById('levelName').innerText = levelDef.name;
+
+      const interpretationHtml = `
+        <strong>${interpretation.mainInsight}</strong>
+        <p style="margin-top: 10px;">${levelDef.fullDescription}</p>
+        <p style="margin-top: 10px;"><strong>Основной вызов:</strong> ${interpretation.currentChallenge}</p>
+        <p style="margin-top: 10px;"><strong>Путь развития:</strong> ${interpretation.growthPath}</p>
+      `;
+      document.getElementById('interpretation').innerHTML = interpretationHtml;
+
+      const actionsHtml = interpretation.recommendations
+        .map(action => `
+          <div class="action-item">
+            <div class="action-title">✓ ${action}</div>
+          </div>
+        `)
+        .join('');
+      document.getElementById('actionsContainer').innerHTML = actionsHtml;
+    }
+
+    // Инициализация
+    window.API = window;
+    console.log('API готов к использованию');
+  </script>
+</body>
+</html>

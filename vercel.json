@@ -2,6 +2,12 @@
   "name": "12union-test",
   "version": 2,
   "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "public": false
+  "outputDirectory": "public",
+  "public": true,
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/index.html"
+    }
+  ]
 }
