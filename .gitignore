@@ -1,1 +1,38 @@
-# Dependencies\nnode_modules/\npackage-lock.json\nyarn.lock\n\n# Build output\ndist/\nbuild/\n*.tsbuildinfo\n\n# IDE\n.vscode/\n.idea/\n*.swp\n*.swo\n*~\n.DS_Store\n\n# Environment\n.env\n.env.local\n.env.*.local\n\n# Logs\n*.log\nnpm-debug.log*\nyarn-debug.log*\nyarn-error.log*\n\n# Runtime data\npids/\n*.pid\n*.seed\n*.pid.lock\n\n# Testing\n.nyc_output/\ncoverage/\n
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Testing
+.nyc_output/
+coverage/
