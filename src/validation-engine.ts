@@ -245,7 +245,7 @@ function calculateCoherence(
     if (!categoryLevels.has(question.category)) {
       categoryLevels.set(question.category, []);
     }
-    categoryLevels.get(question.category).push(answer.selectedLevel);
+    categoryLevels.get(question.category)!.push(answer.selectedLevel);
   });
 
   // Рассчитать стандартное отклонение для каждой категории
@@ -365,7 +365,6 @@ function detectSpiritualBypass(
   }
 
   // ИНДИКАТОР 4: Все хорошо в отношениях + очень высокий уровень
-  const q7 = answerMap.get('validation-change-028');
   const q8 = answerMap.get('validation-spiritual-bypass-027');
 
   if (q8 && q8.selectedLevel >= 11) {

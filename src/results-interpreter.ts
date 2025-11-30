@@ -60,9 +60,6 @@ export function interpretResult(
     );
   }
 
-  // Определить мод тестирования для контекста
-  const context = getTestModeContext(result.testMode, result.relationshipStatus);
-
   // Генерировать сообщения
   const heroMessage = generateHeroMessage(
     roundedLevel,
@@ -72,18 +69,15 @@ export function interpretResult(
 
   const mainInsight = generateMainInsight(
     roundedLevel,
-    result.testMode,
     levelDef.shortDescription
   );
 
   const currentChallenge = generateChallenge(
-    roundedLevel,
-    result.testMode
+    roundedLevel
   );
 
   const growthPath = generateGrowthPath(
-    roundedLevel,
-    result.testMode
+    roundedLevel
   );
 
   const nextLevelDef =
@@ -163,7 +157,6 @@ function generateHeroMessage(
  */
 function generateMainInsight(
   level: number,
-  mode: TestMode,
   shortDescription: string
 ): string {
   const levelInt = Math.round(level);
@@ -207,8 +200,7 @@ function generateMainInsight(
  * Генерировать описание текущего вызова
  */
 function generateChallenge(
-  level: number,
-  mode: TestMode
+  level: number
 ): string {
   const levelInt = Math.round(level);
 
@@ -234,8 +226,7 @@ function generateChallenge(
  * Генерировать путь развития
  */
 function generateGrowthPath(
-  level: number,
-  mode: TestMode
+  level: number
 ): string {
   const levelInt = Math.round(level);
 
@@ -313,7 +304,7 @@ export function interpretPairComparison(
 
   // Рассчитать сообщение о разнице
   const gap = result.gap || 0;
-  const gapMessage = generateGapMessage(result.personalLevel, gap, result.testMode);
+  const gapMessage = generateGapMessage(gap);
 
   // Найти точки согласия и конфликта
   const agreementPoints = findAgreementPoints(
@@ -355,9 +346,7 @@ export function interpretPairComparison(
  * Генерировать сообщение о разнице уровней
  */
 function generateGapMessage(
-  personalLevel: number,
-  gap: number,
-  mode: TestMode
+  gap: number
 ): string {
   if (Math.abs(gap) < 0.5) {
     return 'Вы находитесь практически на одном уровне развития - это хороший знак для пары.';
@@ -523,21 +512,3 @@ function generateCompatibilityMessage(score: number): string {
   }
 }
 
-// ============================================================================
-// КОНТЕКСТ РЕЖИМА ТЕСТИРОВАНИЯ
-// ============================================================================
-
-function getTestModeContext(
-  mode: TestMode,
-  status: RelationshipStatus
-): string {
-  if (mode === 'self') {
-    if (status === 'single_past') return 'анализ прошлых отношений';
-    if (status === 'single_potential') return 'оценка своего потенциала';
-    return 'самооценка в текущих отношениях';
-  }
-  if (mode === 'partner_assessment') return 'оценка партнера';
-  if (mode === 'potential') return 'оценка потенциала';
-  if (mode === 'pair_discussion') return 'совместное обсуждение';
-  return 'оценка';
-}

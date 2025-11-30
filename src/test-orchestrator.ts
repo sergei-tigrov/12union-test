@@ -28,12 +28,10 @@ import {
 } from './adaptive-algorithm';
 import {
   validateTestResults,
-  ValidationResult,
 } from './validation-engine';
 import {
   calculateTestResult,
   calculateCompatibility,
-  calculateReliabilityScore,
 } from './score-calculation';
 import { interpretResult, interpretPairComparison } from './results-interpreter';
 
@@ -235,8 +233,8 @@ export function completeTestSession(
     throw new Error(`Test session not found: ${sessionId}`);
   }
 
-  // Завершить тест и получить финальный уровень
-  const { finalLevel } = completeTest(context.state);
+  // Завершить тест
+  completeTest(context.state);
 
   // Провести валидацию
   const validationResult = validateTestResults(context.state.answers);
@@ -396,29 +394,3 @@ export function getAllCompletedResults(): Map<string, TestResult> {
 // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
 // ============================================================================
 
-/**
- * Валидировать параметры теста
- */
-function validateTestParameters(
-  testMode: TestMode,
-  relationshipStatus: RelationshipStatus
-): void {
-  const validModes: TestMode[] = ['self', 'partner_assessment', 'potential', 'pair_discussion'];
-  if (!validModes.includes(testMode)) {
-    throw new Error(
-      `Invalid test mode: ${testMode}. Must be one of: ${validModes.join(', ')}`
-    );
-  }
-
-  const validStatuses: RelationshipStatus[] = [
-    'in_relationship',
-    'single_past',
-    'single_potential',
-    'pair_together',
-  ];
-  if (!validStatuses.includes(relationshipStatus)) {
-    throw new Error(
-      `Invalid relationship status: ${relationshipStatus}. Must be one of: ${validStatuses.join(', ')}`
-    );
-  }
-}

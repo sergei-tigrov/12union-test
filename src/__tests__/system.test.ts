@@ -10,11 +10,7 @@ import {
   getNextTestQuestion,
   submitTestAnswer,
   completeTestSession,
-  getSessionStatus,
   compareTestResults,
-  QUESTIONS,
-  getLevelDefinition,
-  getActionPlan,
 } from '../index';
 
 // ============================================================================
@@ -121,7 +117,7 @@ function testScenario2_InRelationshipLevel7() {
 
   const sessionId = 'test-2-in-relationship-level-7';
 
-  const context = initializeTestSession(
+  initializeTestSession(
     sessionId,
     'self',
     'in_relationship',
@@ -195,7 +191,7 @@ function testScenario3_TraumaLevel1() {
 
   const sessionId = 'test-3-trauma-level-1';
 
-  const context = initializeTestSession(
+  initializeTestSession(
     sessionId,
     'self',
     'single_past',
@@ -328,7 +324,7 @@ function testScenario4_PairComparison() {
 
   console.log(`\
 РЕКОМЕНДАЦИИ:`);
-  interpretation.growthRecommendations.forEach((rec, i) => {
+  interpretation.growthRecommendations.forEach((rec: string, i: number) => {
     console.log(`  ${i + 1}. ${rec}`);
   });
 
@@ -364,7 +360,6 @@ function testScenario5_SpiritualBypassDetection() {
     { qId: 'validation-honesty-029', optId: 'val-h-c' }, // Выбираю социально желательные (6)
   ];
 
-  let bypassCount = 0;
   responses.forEach((resp) => {
     const q = getNextTestQuestion(sessionId);
     if (q) {
@@ -373,7 +368,7 @@ function testScenario5_SpiritualBypassDetection() {
     }
   });
 
-  const { result, interpretation } = completeTestSession(sessionId);
+  const { result } = completeTestSession(sessionId);
 
   console.log(`\
 ✓ Тест завершен`);

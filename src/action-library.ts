@@ -6,7 +6,7 @@
  * Адаптированы для разных сценариев (одиночка, в отношениях, пара)
  */
 
-import { ActionStep, ActionPlan, UnionLevel, TestMode } from './types';
+import { ActionStep, ActionPlan, UnionLevel } from './types';
 
 // ============================================================================
 // УРОВЕНЬ 1 - ТРАВМА И РАЗРУШЕНИЕ

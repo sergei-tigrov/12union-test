@@ -83,7 +83,6 @@ export function calculateLevelScores(
   // Рассчитать средний уровень для каждого уровня
   const levelScores: LevelScore[] = [];
   let maxScore = 0;
-  let topLevel: UnionLevel = 6;
 
   // Рассчитать средние оценки
   const levelAverages = new Map<UnionLevel, number>();
@@ -114,7 +113,6 @@ export function calculateLevelScores(
 
     if (percentage > maxScore) {
       maxScore = percentage;
-      topLevel = level;
     }
   }
 

@@ -13,10 +13,6 @@ n *
 import { SmartQuestion, UnionLevel, UserAnswer } from './types';
 import {
   QUESTIONS,
-  getZoningQuestions,
-  getRefinementQuestions,
-  getValidationQuestions,
-  getQuestionsByTargetLevel,
 } from './questions-database';
 
 // ============================================================================
@@ -66,21 +62,6 @@ export function initializeAdaptiveTest(sessionId: string): AdaptiveTestState {
     levelScores: new Map(),
     testStartTime: Date.now(),
   };
-}
-
-/**
- * Определить зону по ответам зонирования
- * Возвращает наиболее вероятную зону (low=1-4, middle=5-8, high=9-12)
- */
-function detectZone(
-  zoneAnswers: Map<string, UnionLevel>
-): 'low' | 'middle' | 'high' {
-  const levels: UnionLevel[] = Array.from(zoneAnswers.values());
-  const avgLevel = levels.reduce((a, b) => a + b, 0) / levels.length;
-
-  if (avgLevel <= 4.5) return 'low';
-  if (avgLevel <= 8.5) return 'middle';
-  return 'high';
 }
 
 /**
@@ -257,9 +238,6 @@ function selectNextQuestion(
       targetLevelRange = [9, 10, 11, 12];
     }
 
-    // Получить текущее определение уровня
-    const detection = detectCurrentLevel(state.answers, allQuestions);
-
     // Выбрать вопрос, который лучше всего разделяет уровни в целевом диапазоне
     const refinementQuestions = availableQuestions.filter((q) => {
       // Вопрос должен быть о уточнении, не о зонировании, не о валидации
@@ -374,10 +352,10 @@ export function getNextQuestion(
       return null; // Нет больше вопросов
     }
 
-    return createQuestionSelection(state, nextQuestionRetry, questionsMap);
+    return createQuestionSelection(state, nextQuestionRetry);
   }
 
-  return createQuestionSelection(state, nextQuestion, questionsMap);
+  return createQuestionSelection(state, nextQuestion);
 }
 
 /**
@@ -438,8 +416,7 @@ export function completeTest(
  */
 function createQuestionSelection(
   state: AdaptiveTestState,
-  question: SmartQuestion,
-  questionsMap: Map<string, SmartQuestion>
+  question: SmartQuestion
 ): QuestionSelection {
   const estimatedLevel =
     state.questionsAnswered > 0
