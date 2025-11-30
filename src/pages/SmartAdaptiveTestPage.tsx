@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Brain, Target, Zap, Clock, Sparkles } from 'lucide-react';
 
 // UI компоненты
@@ -8,59 +8,28 @@ import { SmartAdaptiveTest } from '../components/adaptive/SmartAdaptiveTest';
 import ModernAdaptiveResults from '../components/adaptive/ModernAdaptiveResults';
 
 // Типы и утилиты
-import { SmartTestResult, SmartAdaptiveEngine } from '../utils/smart-adaptive-engine';
+import type { TestResult } from '../types';
 
 // Стили
 import '../styles/design-system.css';
 
 export const SmartAdaptiveTestPage: React.FC = () => {
   const [testStarted, setTestStarted] = useState(false);
-  const [testResult, setTestResult] = useState<SmartTestResult | null>(null);
+  const [testResult, setTestResult] = useState<TestResult | null>(null);
 
-  // Проверяем сохраненные результаты при загрузке страницы
-  useEffect(() => {
-    const savedResults = SmartAdaptiveEngine.loadSavedResults();
-    if (savedResults) {
-      console.log('🔄 SmartAdaptiveTestPage: Найдены сохраненные результаты при загрузке страницы');
-      setTestResult(savedResults);
-    }
-  }, []);
-
-  const handleTestComplete = (result: SmartTestResult) => {
+  const handleTestComplete = (result: TestResult) => {
     console.log('🔥 SmartAdaptiveTestPage: handleTestComplete called with result:', result);
     setTestResult(result);
     console.log('🔥 SmartAdaptiveTestPage: testResult state updated, should render results now');
-    // Сохраняем результат в localStorage для совместимости
-    const adaptiveResult = {
-      personalMaturity: result.personalMaturity,
-      relationshipMaturity: result.relationshipMaturity,
-      relationshipTrend: result.relationshipTrend,
-      confidence: result.confidence,
-      consistency: result.consistency,
-      questionsAsked: result.questionsAsked,
-      aspectScores: {
-        communication: result.personalMaturity,
-        trust: result.relationshipMaturity,
-        intimacy: result.personalMaturity,
-        conflict: result.relationshipMaturity,
-        growth: result.personalMaturity
-      },
-      detailedAnalysis: {
-        strengths: result.indicators.slice(0, 3),
-        challenges: [],
-        recommendations: [`Ваш уровень зрелости: ${result.personalMaturity}`]
-      }
-    };
-    localStorage.setItem('adaptiveTestResult', JSON.stringify(adaptiveResult));
+    // Сохраняем результат в localStorage
+    localStorage.setItem('adaptiveTestResult', JSON.stringify(result));
   };
 
   const handleRestart = () => {
     console.log('🔥 SmartAdaptiveTestPage: handleRestart called');
-    // Очищаем все сохраненные данные
-    SmartAdaptiveEngine.clearSavedData();
-    // Также очищаем старый формат данных для совместимости
+    // Очищаем сохраненные данные
     localStorage.removeItem('adaptiveTestResult');
-    
+
     setTestStarted(false);
     setTestResult(null);
   };
@@ -74,7 +43,8 @@ export const SmartAdaptiveTestPage: React.FC = () => {
 
   if (testResult) {
     console.log('🔥 SmartAdaptiveTestPage: Rendering ModernAdaptiveResults with result:', testResult);
-    return <ModernAdaptiveResults result={testResult} onRestart={handleRestart} />;
+    // TODO: Update ModernAdaptiveResults to work with new TestResult type
+    return <ModernAdaptiveResults result={testResult as any} onRestart={handleRestart} />;
   }
 
   if (testStarted) {

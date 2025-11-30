@@ -2,37 +2,45 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
 
-// UI компоненты
-
-
-// Утилиты
-import { SmartAdaptiveEngine, type SmartTestResult } from '../../utils/smart-adaptive-engine';
-import type { SmartQuestion } from '../../utils/smart-adaptive-questions';
+// Утилиты - НОВАЯ ЛОГИКА
+import {
+  initializeAdaptiveTest,
+  getNextQuestion,
+  recordAnswer,
+  completeTest,
+  getCurrentLevelDetection,
+  type AdaptiveTestState,
+  type QuestionSelection
+} from '../../adaptive-algorithm';
+import { validateTestResults } from '../../validation-engine';
+import { calculateTestResult } from '../../score-calculation';
+import { interpretResult } from '../../results-interpreter';
+import type { SmartQuestion, TestResult, TestMode, RelationshipStatus, UserAnswer } from '../../types';
 
 // Стили
 import '../../styles/shared-components.css';
 import '../../styles/design-system.css';
 
 interface SmartAdaptiveTestProps {
-  onComplete: (result: SmartTestResult) => void;
+  onComplete: (result: TestResult) => void;
+  testMode?: TestMode;
+  relationshipStatus?: RelationshipStatus;
 }
 
-// Переводы фаз на русский
+// Переводы фаз на русский (НОВАЯ СИСТЕМА)
 const phaseTranslations = {
-  'relationship_status': 'Статус отношений',
-  'detection': 'Определение зоны',
-  'core_diagnostic': 'Основная диагностика', 
-  'clarification': 'Уточнение уровня',
-  'validation': 'Проверка результата'
+  'zoning': 'Определение зоны',
+  'refinement': 'Уточнение уровня',
+  'validation': 'Проверка результата',
+  'complete': 'Завершение'
 };
 
 // Цвета для фаз
 const phaseColors = {
-  'relationship_status': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-  'detection': 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-  'core_diagnostic': 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-  'clarification': 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-  'validation': 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)'
+  'zoning': 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+  'refinement': 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+  'validation': 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+  'complete': 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)'
 };
 
 // Улучшенный компонент прогресс-бара с цветовой индикацией
@@ -72,115 +80,153 @@ const ProgressBar: React.FC<{ value: number; phase: string; questionCount: numbe
   );
 };
 
-export const SmartAdaptiveTest: React.FC<SmartAdaptiveTestProps> = ({ onComplete }) => {
-  const [engine] = useState(() => new SmartAdaptiveEngine());
-  const [currentQuestion, setCurrentQuestion] = useState<SmartQuestion | null>(null);
+export const SmartAdaptiveTest: React.FC<SmartAdaptiveTestProps> = ({
+  onComplete,
+  testMode = 'self',
+  relationshipStatus = 'single_potential'
+}) => {
+  const sessionId = `session-${Date.now()}`;
+  const [testState, setTestState] = useState<AdaptiveTestState | null>(null);
+  const [currentQuestionData, setCurrentQuestionData] = useState<QuestionSelection | null>(null);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [startTime, setStartTime] = useState<number>(Date.now());
   const [questionHistory, setQuestionHistory] = useState<Array<{question: SmartQuestion; selectedOption: string}>>([]);
 
+  // Инициализация теста
   useEffect(() => {
-    // Проверяем, если тест уже завершен, загружаем результаты
-    if (engine.isTestComplete()) {
-      console.log('🔄 SmartAdaptiveTest: Тест уже завершен, загружаем сохраненные результаты');
-      const savedResults = SmartAdaptiveEngine.loadSavedResults();
-      if (savedResults) {
-        console.log('🔄 SmartAdaptiveTest: Найдены сохраненные результаты, переходим к результатам');
-        onComplete(savedResults);
-        return;
-      } else {
-        console.log('🔄 SmartAdaptiveTest: Сохраненные результаты не найдены, получаем новые');
-        const results = engine.getResults();
-        onComplete(results);
-        return;
-      }
-    }
-    
-    // Устанавливаем первый вопрос
-    const firstQuestion = engine.getNextQuestion();
-    setCurrentQuestion(firstQuestion);
-    console.log('🔄 SmartAdaptiveTest: Установлен первый вопрос:', firstQuestion?.text);
-  }, [engine, onComplete]);
+    console.log('🔄 SmartAdaptiveTest: Инициализирую новый тест');
+    const newState = initializeAdaptiveTest(sessionId);
+    setTestState(newState);
+
+    // Получить первый вопрос
+    const firstQuestion = getNextQuestion(newState);
+    setCurrentQuestionData(firstQuestion);
+    console.log('✅ SmartAdaptiveTest: Первый вопрос получен', firstQuestion?.nextQuestion.id);
+  }, []);
 
   useEffect(() => {
     setStartTime(Date.now());
-  }, [currentQuestion]);
+  }, [currentQuestionData]);
 
   const handleAnswerSelect = (optionId: string) => {
     setSelectedOption(optionId);
   };
 
   const handleNext = () => {
-    if (!selectedOption || !currentQuestion) return;
-    
+    if (!selectedOption || !currentQuestionData || !testState) return;
+
     setIsLoading(true);
-    
-    // Добавляем в историю
-    setQuestionHistory(prev => [...prev, { question: currentQuestion, selectedOption }]);
-    
+
+    // Получаем выбранный вариант
+    const selectedAnswerOption = currentQuestionData.nextQuestion.options.find(
+      (opt) => opt.id === selectedOption
+    );
+    if (!selectedAnswerOption) return;
+
     // Рассчитываем время ответа
     const responseTime = Date.now() - startTime;
-    
-    // Обрабатываем ответ
-    engine.processAnswer(currentQuestion.id, selectedOption, responseTime);
-    
-    console.log('Test completion check:', {
-      isComplete: engine.isTestComplete(),
-      phase: engine.getPhase(),
-      answersCount: engine.getAnswersCount()
+
+    // Создаем объект UserAnswer
+    const userAnswer: UserAnswer = {
+      questionId: currentQuestionData.nextQuestion.id,
+      selectedOptionId: selectedOption,
+      selectedLevel: selectedAnswerOption.level,
+      responseTime,
+      timestamp: Date.now(),
+      mode: testMode,
+    };
+
+    // Добавляем в историю
+    setQuestionHistory(prev => [...prev, {
+      question: currentQuestionData.nextQuestion,
+      selectedOption
+    }]);
+
+    // Обрабатываем ответ - НОВАЯ ЛОГИКА (модифицирует state in-place)
+    recordAnswer(testState, userAnswer);
+
+    console.log('📊 Test progress:', {
+      phase: testState.currentPhase,
+      questionsAnswered: testState.questionsAnswered,
+      detectedZone: testState.detectedZone
     });
-    
+
     // Проверяем завершение теста
-    if (engine.isTestComplete()) {
-      console.log('Test completed! Getting results...');
-      const result = engine.getResults();
-      console.log('Results:', result);
-      onComplete(result);
+    if (testState.currentPhase === 'complete') {
+      console.log('🎉 Тест завершен! Рассчитываю результаты...');
+      completeTest(testState);
+
+      // Валидируем результаты
+      const validationResult = validateTestResults(testState.answers);
+
+      // Рассчитываем финальный результат
+      const finalResult = calculateTestResult(
+        sessionId,
+        testState.answers,
+        validationResult.metrics,
+        testMode,
+        relationshipStatus
+      );
+
+      // Интерпретируем результат
+      const interpretation = interpretResult(finalResult);
+
+      console.log('✅ Результаты готовы:', finalResult);
+      console.log('📝 Интерпретация:', interpretation);
+      onComplete(finalResult);
       return;
     }
-    
+
     // Переходим к следующему вопросу
-    const nextQuestion = engine.getNextQuestion();
-    setCurrentQuestion(nextQuestion);
+    const nextQuestion = getNextQuestion(testState);
+    setCurrentQuestionData(nextQuestion);
     setSelectedOption(null);
     setIsLoading(false);
   };
 
   const handleGoBack = () => {
-    if (questionHistory.length === 0) return;
-    
+    if (questionHistory.length === 0 || !testState) return;
+
     // Получаем предыдущий вопрос и ответ
     const previousEntry = questionHistory[questionHistory.length - 1];
-    
-    // Удаляем последний ответ из истории (движок не поддерживает публичное удаление)
-    // engine.removeLastAnswer();
-    
+
+    // Удаляем последний ответ из истории
+    const updatedAnswers = testState.answers.slice(0, -1);
+    const updatedState = { ...testState, answers: updatedAnswers };
+
     // Обновляем состояние
-    setCurrentQuestion(previousEntry.question);
+    setTestState(updatedState);
+    setCurrentQuestionData({
+      nextQuestion: previousEntry.question,
+      phase: testState.currentPhase,
+      questionsAnswered: testState.questionsAnswered - 1,
+      questionsRemaining: testState.questionsAnswered > 0 ? (28 - (testState.questionsAnswered - 1)) : 28,
+      estimatedLevelSoFar: getCurrentLevelDetection(updatedState)
+    });
     setSelectedOption(previousEntry.selectedOption);
     setQuestionHistory(prev => prev.slice(0, -1));
   };
 
-  if (!currentQuestion) {
+  if (!currentQuestionData || !testState) {
     return (
       <div className="container">
-        <div style={{ 
+        <div style={{
           background: 'white',
           border: '1px solid var(--primary-200)',
           borderRadius: '16px',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-          padding: '2rem', 
-          textAlign: 'center', 
-          maxWidth: '32rem', 
-          margin: '0 auto' 
+          padding: '2rem',
+          textAlign: 'center',
+          maxWidth: '32rem',
+          margin: '0 auto'
         }}>
-          <div style={{ 
-            width: '32px', 
-            height: '32px', 
-            border: '2px solid var(--accent-blue)', 
-            borderTop: '2px solid transparent', 
-            borderRadius: '50%', 
+          <div style={{
+            width: '32px',
+            height: '32px',
+            border: '2px solid var(--accent-blue)',
+            borderTop: '2px solid transparent',
+            borderRadius: '50%',
             animation: 'spin 1s linear infinite',
             margin: '0 auto 1rem'
           }}></div>
@@ -190,9 +236,11 @@ export const SmartAdaptiveTest: React.FC<SmartAdaptiveTestProps> = ({ onComplete
     );
   }
 
-  const progress = engine.getProgress();
-  const phase = engine.getPhase();
-  const questionCount = engine.getQuestionCount();
+  // Рассчитать прогресс (20-28 вопросов максимум)
+  const progress = (testState.questionsAnswered / 28) * 100;
+  const phase = testState.currentPhase;
+  const questionCount = testState.questionsAnswered + 1;
+  const currentQuestion = currentQuestionData.nextQuestion;
 
   return (
     <div className="container">
@@ -217,24 +265,24 @@ export const SmartAdaptiveTest: React.FC<SmartAdaptiveTestProps> = ({ onComplete
         key={currentQuestion.id}
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
-        style={{ 
+        style={{
           background: 'white',
           border: '1px solid var(--primary-200)',
           borderRadius: '16px',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-          padding: '2rem', 
-          marginBottom: '1.5rem' 
+          padding: '2rem',
+          marginBottom: '1.5rem'
         }}
       >
-        <h2 style={{ 
+        <h2 style={{
           fontSize: '1.25rem',
           fontWeight: '600',
-            color: 'var(--color-text)', 
+            color: 'var(--color-text)',
           marginBottom: '2rem',
           lineHeight: '1.5',
             textAlign: 'center'
           }}>
-            {currentQuestion.text}
+            {currentQuestion.text[testMode === 'partner_assessment' ? 'partner' : testMode]}
         </h2>
         
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -262,7 +310,6 @@ export const SmartAdaptiveTest: React.FC<SmartAdaptiveTestProps> = ({ onComplete
                 onClick={() => handleAnswerSelect(option.id)}
                 data-answer={option.id}
                 data-level={option.level}
-                data-zone={option.zone}
                 data-autoclicker-target="answer"
               >
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', width: '100%' }}>
