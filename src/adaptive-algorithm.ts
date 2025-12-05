@@ -138,6 +138,7 @@ function calculateLevelScores(
 
 /**
  * Определить детектируемый уровень на основе текущих ответов
+ * Использует логику "Доминантного уровня" с учетом "Нижнего якоря"
  */
 function detectCurrentLevel(
   answers: UserAnswer[],
@@ -146,38 +147,76 @@ function detectCurrentLevel(
   const levelScores = calculateLevelScores(answers, questions);
   const scores = Array.from(levelScores.entries());
 
-  // Найти уровень с наивысшим баллом
+  // 1. Найти уровень с наивысшим баллом (Доминанта)
   let maxScore = -1;
-  let topLevel: UnionLevel = 1;
+  let dominantLevel: UnionLevel = 1;
   let topConfidence = 0;
 
   scores.forEach(([level, { score, confidence }]) => {
     if (score > maxScore) {
       maxScore = score;
-      topLevel = level;
+      dominantLevel = level;
       topConfidence = confidence;
     }
   });
 
-  // Определить зону
-  let zone: 'low' | 'middle' | 'high';
-  if (topLevel <= 4) zone = 'low';
-  else if (topLevel <= 8) zone = 'middle';
-  else zone = 'high';
+  // 2. Найти "Нижний якорь" (Lowest Anchor)
+  // Это самый низкий уровень, набравший значимое количество баллов (например, > 15% от максимума)
+  // Психологический принцип: развитие определяется самым слабым звеном.
+  let lowestAnchor: UnionLevel = dominantLevel;
+  const significantThreshold = maxScore * 0.25; // Порог значимости (25% от лидера)
 
-  // Рассчитать плавающий уровень (1-12 с точностью 0.1)
-  // На основе взвешенного среднего с весами
-  let detectedLevel = 0;
-  let totalWeight = 0;
-
-  scores.forEach(([level, { confidence }]) => {
-    detectedLevel += level * confidence;
-    totalWeight += confidence;
-  });
-
-  if (totalWeight > 0) {
-    detectedLevel /= totalWeight;
+  for (let level: UnionLevel = 1; level < dominantLevel; level++) {
+    const current = levelScores.get(level);
+    if (current && current.score > significantThreshold) {
+      lowestAnchor = level;
+      break; // Нашли самый первый (низкий) значимый уровень
+    }
   }
+
+  // 3. Рассчитать итоговый уровень
+  let detectedLevel = 0;
+
+  // Если есть значительный разрыв между Якорем и Доминантой (более 2 уровней)
+  // Значит, у человека есть "хвосты" внизу, которые тянут его назад.
+  // Мы смещаем оценку в сторону якоря.
+  if (dominantLevel - lowestAnchor > 2) {
+    // "Пессимистичный" расчет: берем среднее между якорем и доминантой, но ближе к якорю
+    // Например: Якорь 1, Доминанта 12. Результат не 6.5, а скорее 2-3 (так как 1-й уровень критичен)
+
+    // Вес якоря выше, чем вес доминанты в таких случаях
+    const anchorWeight = 0.7;
+    const dominantWeight = 0.3;
+    detectedLevel = (lowestAnchor * anchorWeight) + (dominantLevel * dominantWeight);
+  } else {
+    // Если разрыва нет или он мал (нормальное развитие), считаем взвешенное среднее
+    // НО только вокруг доминанты (±2 уровня), чтобы отсечь случайные "выбросы"
+    let totalWeight = 0;
+    let weightedSum = 0;
+
+    scores.forEach(([level, { score }]) => {
+      // Учитываем только уровни рядом с доминантой или якорем
+      if (Math.abs(level - dominantLevel) <= 2 || (level >= lowestAnchor && level <= dominantLevel)) {
+        weightedSum += level * score;
+        totalWeight += score;
+      }
+    });
+
+    if (totalWeight > 0) {
+      detectedLevel = weightedSum / totalWeight;
+    } else {
+      detectedLevel = dominantLevel;
+    }
+  }
+
+  // Определить зону на основе ЯКОРЯ (безопаснее), а не среднего
+  // Если якорь на 1, а среднее 5 - мы все равно должны проверять зону Low
+  let zone: 'low' | 'middle' | 'high';
+  const zoneReferenceLevel = Math.min(Math.round(detectedLevel), lowestAnchor + 1); // Компромисс
+
+  if (zoneReferenceLevel <= 4) zone = 'low';
+  else if (zoneReferenceLevel <= 8) zone = 'middle';
+  else zone = 'high';
 
   return {
     detectedLevel: Math.round(detectedLevel * 10) / 10,
