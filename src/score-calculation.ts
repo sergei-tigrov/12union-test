@@ -20,15 +20,7 @@ import { QUESTIONS } from './questions-database';
 // КОНСТАНТЫ
 // ============================================================================
 
-// Вес для каждого типа вопроса
-const QUESTION_WEIGHT: Record<string, number> = {
-  'zone-conflict-001': 2.0, // Зонирование - высокий вес
-  'zone-safety-002': 2.0,
-  'zone-growth-003': 1.8,
-  'zone-intimacy-004': 2.0,
-  'zone-choice-005': 2.0,
-  'zone-difference-006': 1.8,
-};
+
 
 // ============================================================================
 // ОСНОВНЫЕ ФУНКЦИИ РАСЧЕТА
@@ -40,6 +32,12 @@ const QUESTION_WEIGHT: Record<string, number> = {
 /**
  * Рассчитать оценки уровней на основе ответов
  */
+import { diagnoseUser } from './diagnostic-engine';
+
+/**
+ * Рассчитать оценки уровней на основе ответов
+ * Использует новый DIAGNOSTIC ENGINE
+ */
 export function calculateLevelScores(
   answers: UserAnswer[]
 ): {
@@ -48,163 +46,51 @@ export function calculateLevelScores(
   levelScores: LevelScore[];
   levelDistribution: any[]; // DetailedLevelScore[]
 } {
-  // Инициализировать счетчики для каждого уровня
-  const levelCounts = new Map<UnionLevel, {
-    sum: number;
-    weight: number;
-    count: number;
-    personalSum: number;
-    personalWeight: number;
-    relationshipSum: number;
-    relationshipWeight: number;
-  }>();
+  // 1. Запускаем диагностику
+  // Нам нужно преобразовать answers в Map вопросов, так как движок этого требует
+  // Но движок принимает (answers, questionsMap).
+  // QUESTIONS у нас уже есть импортированный.
+  const questionsMap = new Map<string, any>();
+  QUESTIONS.forEach(q => questionsMap.set(q.id, q));
 
-  for (let level: UnionLevel = 1; level <= 12; level++) {
-    levelCounts.set(level, {
-      sum: 0, weight: 0, count: 0,
-      personalSum: 0, personalWeight: 0,
-      relationshipSum: 0, relationshipWeight: 0
-    });
-  }
+  const diagnosis = diagnoseUser(answers, questionsMap);
 
-  // Категории вопросов
-  const personalCategories = ['values', 'growth', 'freedom', 'creation', 'transcendence', 'emotions', 'trauma', 'patterns'];
-  // Все остальные считаем relationship (conflict, intimacy, boundaries, acceptance, communication, validation)
-
-  // Обработать каждый ответ
-  answers.forEach((answer) => {
-    const question = QUESTIONS.find((q) => q.id === answer.questionId);
-    if (!question) return;
-
-    // Определить тип вопроса (Личность vs Отношения)
-    const isPersonal = personalCategories.includes(question.category);
-
-    // Определить вес вопроса
-    const questionWeight =
-      QUESTION_WEIGHT[question.id] || (question.priority === 1 ? 1.5 : 1.0);
-
-    // Выбранный уровень
-    const selectedLevel = answer.selectedLevel;
-
-    // Пропускаем уровни вне диапазона 1-12 (например, валидационные 0)
-    if (selectedLevel < 1 || selectedLevel > 12) return;
-
-    // Добавить в счет для выбранного уровня - более высокий вес
-    const current = levelCounts.get(selectedLevel)!;
-    current.sum += selectedLevel * questionWeight;
-    current.weight += questionWeight;
-    current.count++;
-
-    if (isPersonal) {
-      current.personalSum += selectedLevel * questionWeight;
-      current.personalWeight += questionWeight;
-    } else {
-      current.relationshipSum += selectedLevel * questionWeight;
-      current.relationshipWeight += questionWeight;
-    }
-
-    // МИНИМАЛЬНЫЙ вклад в ближайшие соседи (±1 уровень)
-    const maxNeighborDistance = 1;
-    for (let level: UnionLevel = 1; level <= 12; level++) {
-      if (level === selectedLevel) continue;
-
-      const distance = Math.abs(level - selectedLevel);
-      if (distance > maxNeighborDistance) continue; // Пропускаем далекие уровни
-
-      // Очень маленький вес для соседей (±1 уровень)
-      const neighborWeight = (1 - distance / (maxNeighborDistance + 1)) * questionWeight * 0.1;
-
-      if (neighborWeight > 0) {
-        const neighbor = levelCounts.get(level)!;
-        neighbor.sum += level * neighborWeight;
-        neighbor.weight += neighborWeight;
-
-        if (isPersonal) {
-          neighbor.personalSum += level * neighborWeight;
-          neighbor.personalWeight += neighborWeight;
-        } else {
-          neighbor.relationshipSum += level * neighborWeight;
-          neighbor.relationshipWeight += neighborWeight;
-        }
-      }
-    }
-  });
-
-  // Рассчитать средний уровень для каждого уровня
+  // 2. Формируем levelScores (старый формат для совместимости)
   const levelScores: LevelScore[] = [];
   const levelDistribution: any[] = [];
 
-  // Рассчитать средние оценки для каждого уровня
-  let totalWeightedScore = 0;
-  let totalWeight = 0;
+  // Проходим по всем уровням 1-12
+  for (let level = 1; level <= 12; level++) {
+    const score = diagnosis.levelScores.get(level as UnionLevel) || 0;
+    const percentage = Math.round(score * 100);
 
-  let totalPersonalScore = 0;
-  let totalPersonalWeight = 0;
-
-  let totalRelationshipScore = 0;
-  let totalRelationshipWeight = 0;
-
-  // Находим максимальные веса для нормализации процентов
-  const maxWeight = Math.max(...Array.from(levelCounts.values()).map(d => d.weight));
-  const maxPersonalWeight = Math.max(...Array.from(levelCounts.values()).map(d => d.personalWeight));
-  const maxRelationshipWeight = Math.max(...Array.from(levelCounts.values()).map(d => d.relationshipWeight));
-
-  for (let level: UnionLevel = 1; level <= 12; level++) {
-    const data = levelCounts.get(level)!;
-
-    if (data.weight > 0) {
-      totalWeightedScore += level * data.weight;
-      totalWeight += data.weight;
-    }
-
-    if (data.personalWeight > 0) {
-      totalPersonalScore += level * data.personalWeight;
-      totalPersonalWeight += data.personalWeight;
-    }
-
-    if (data.relationshipWeight > 0) {
-      totalRelationshipScore += level * data.relationshipWeight;
-      totalRelationshipWeight += data.relationshipWeight;
-    }
-
-    const percentage = maxWeight > 0 ? Math.round((data.weight / maxWeight) * 100) : 0;
-    const confidence = Math.min(1, data.count / Math.max(1, answers.length * 0.5));
+    // Confidence в новом движке можно считать как силу сигнала
+    const confidence = score;
 
     levelScores.push({
-      level,
+      level: level as UnionLevel,
       percentage,
-      confidence,
+      confidence
     });
 
-    // Detailed distribution for UnionLadder
+    // Для распределения (старый формат требовал разделения на personal/relationship)
+    // Новый движок это не разделяет так явно, поэтому используем общий скор
+    // Это допустимое упрощение, так как мы переходим на целостный подход
     levelDistribution.push({
       levelId: level,
-      personal: Math.round(data.personalWeight * 10), // Scale up for display
-      relationship: Math.round(data.relationshipWeight * 10),
-      total: Math.round(data.weight * 10),
-      personalPercentage: maxPersonalWeight > 0 ? Math.round((data.personalWeight / maxPersonalWeight) * 100) : 0,
-      relationshipPercentage: maxRelationshipWeight > 0 ? Math.round((data.relationshipWeight / maxRelationshipWeight) * 100) : 0
+      personal: Math.round(score * 10),
+      relationship: Math.round(score * 10),
+      total: Math.round(score * 10),
+      personalPercentage: percentage,
+      relationshipPercentage: percentage
     });
   }
 
-  // Рассчитать плавающий личный уровень
-  let personalLevel = 6; // По умолчанию
-  if (totalPersonalWeight > 0) {
-    personalLevel = totalPersonalScore / totalPersonalWeight;
-  } else if (totalWeight > 0) {
-    // Fallback to total if no personal questions (unlikely)
-    personalLevel = totalWeightedScore / totalWeight;
-  }
-
-  // Рассчитать уровень отношений
-  let relationshipLevel = personalLevel;
-  if (totalRelationshipWeight > 0) {
-    relationshipLevel = totalRelationshipScore / totalRelationshipWeight;
-  }
-
+  // 3. Возвращаем результаты
+  // Используем currentLevel из диагностики как основной результат
   return {
-    personalLevel: Math.round(personalLevel * 10) / 10,
-    relationshipLevel: Math.round(relationshipLevel * 10) / 10,
+    personalLevel: diagnosis.currentLevel,
+    relationshipLevel: diagnosis.currentLevel, // В новой логике они связаны
     levelScores,
     levelDistribution
   };
