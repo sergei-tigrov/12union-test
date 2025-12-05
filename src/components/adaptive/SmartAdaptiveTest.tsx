@@ -338,8 +338,13 @@ export const SmartAdaptiveTest: React.FC<SmartAdaptiveTestProps> = ({
     );
   }
 
-  // Рассчитать прогресс (20-24 вопросов максимум)
-  const progress = (testState.questionsAnswered / 24) * 100;
+  // Рассчитать прогресс
+  // Максимум вопросов может варьироваться (18-24), поэтому используем адаптивный прогресс
+  // Если фаза complete, то всегда 100%
+  const maxQuestions = 24;
+  const currentProgress = (testState.questionsAnswered / maxQuestions) * 100;
+  const progress = testState.currentPhase === 'complete' ? 100 : Math.min(95, currentProgress);
+
   const phase = testState.currentPhase;
   const questionCount = testState.questionsAnswered + 1;
   const currentQuestion = currentQuestionData.nextQuestion;

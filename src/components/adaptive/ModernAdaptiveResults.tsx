@@ -256,23 +256,7 @@ export const ModernAdaptiveResults: React.FC<ModernAdaptiveResultsProps> = ({
         )
       }
 
-      {/* Мандала Союза (НОВОЕ) */}
-      {
-        result.dimensionsScore && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.23 }}
-            style={{
-              marginBottom: '2rem',
-              display: 'flex',
-              justifyContent: 'center'
-            }}
-          >
-            <UnionMandala scores={result.dimensionsScore} />
-          </motion.div>
-        )
-      }
+
 
       {/* Описание уровня */}
       <motion.div
