@@ -15,6 +15,7 @@ import { getLevelDefinition } from '../../levels-definitions';
 import { getActionPlan } from '../../action-library';
 import UnionLadder from '../UnionLadder';
 import { UnionMandala } from '../UnionMandala';
+import { useTelegram } from '../../hooks/useTelegram';
 
 // Стили
 import '../../styles/design-system.css';
