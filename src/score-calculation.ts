@@ -12,6 +12,7 @@ import {
   UnionLevel,
   ValidationMetrics,
   TestResult,
+  TestScenario,
 } from './types';
 import { QUESTIONS } from './questions-database';
 
@@ -36,20 +37,47 @@ const QUESTION_WEIGHT: Record<string, number> = {
 /**
  * Рассчитать оценки уровней на основе ответов
  */
+/**
+ * Рассчитать оценки уровней на основе ответов
+ */
 export function calculateLevelScores(
   answers: UserAnswer[]
-): { personalLevel: number; relationshipLevel: number; levelScores: LevelScore[] } {
+): {
+  personalLevel: number;
+  relationshipLevel: number;
+  levelScores: LevelScore[];
+  levelDistribution: any[]; // DetailedLevelScore[]
+} {
   // Инициализировать счетчики для каждого уровня
-  const levelCounts = new Map<UnionLevel, { sum: number; weight: number; count: number }>();
+  const levelCounts = new Map<UnionLevel, {
+    sum: number;
+    weight: number;
+    count: number;
+    personalSum: number;
+    personalWeight: number;
+    relationshipSum: number;
+    relationshipWeight: number;
+  }>();
 
   for (let level: UnionLevel = 1; level <= 12; level++) {
-    levelCounts.set(level, { sum: 0, weight: 0, count: 0 });
+    levelCounts.set(level, {
+      sum: 0, weight: 0, count: 0,
+      personalSum: 0, personalWeight: 0,
+      relationshipSum: 0, relationshipWeight: 0
+    });
   }
+
+  // Категории вопросов
+  const personalCategories = ['values', 'growth', 'freedom', 'creation', 'transcendence', 'emotions', 'trauma', 'patterns'];
+  // Все остальные считаем relationship (conflict, intimacy, boundaries, acceptance, communication, validation)
 
   // Обработать каждый ответ
   answers.forEach((answer) => {
     const question = QUESTIONS.find((q) => q.id === answer.questionId);
     if (!question) return;
+
+    // Определить тип вопроса (Личность vs Отношения)
+    const isPersonal = personalCategories.includes(question.category);
 
     // Определить вес вопроса
     const questionWeight =
@@ -58,105 +86,173 @@ export function calculateLevelScores(
     // Выбранный уровень
     const selectedLevel = answer.selectedLevel;
 
-    // Добавить в счет для выбранного уровня
+    // Пропускаем уровни вне диапазона 1-12 (например, валидационные 0)
+    if (selectedLevel < 1 || selectedLevel > 12) return;
+
+    // Добавить в счет для выбранного уровня - более высокий вес
     const current = levelCounts.get(selectedLevel)!;
     current.sum += selectedLevel * questionWeight;
     current.weight += questionWeight;
     current.count++;
 
-    // Также добавить вклад в соседние уровни с убывающим весом
-    // Это представляет неопределенность
+    if (isPersonal) {
+      current.personalSum += selectedLevel * questionWeight;
+      current.personalWeight += questionWeight;
+    } else {
+      current.relationshipSum += selectedLevel * questionWeight;
+      current.relationshipWeight += questionWeight;
+    }
+
+    // МИНИМАЛЬНЫЙ вклад в ближайшие соседи (±1 уровень)
+    const maxNeighborDistance = 1;
     for (let level: UnionLevel = 1; level <= 12; level++) {
       if (level === selectedLevel) continue;
 
       const distance = Math.abs(level - selectedLevel);
-      const neighborWeight = Math.max(0, 1 - distance / 12) * questionWeight * 0.5;
+      if (distance > maxNeighborDistance) continue; // Пропускаем далекие уровни
+
+      // Очень маленький вес для соседей (±1 уровень)
+      const neighborWeight = (1 - distance / (maxNeighborDistance + 1)) * questionWeight * 0.1;
 
       if (neighborWeight > 0) {
         const neighbor = levelCounts.get(level)!;
         neighbor.sum += level * neighborWeight;
         neighbor.weight += neighborWeight;
+
+        if (isPersonal) {
+          neighbor.personalSum += level * neighborWeight;
+          neighbor.personalWeight += neighborWeight;
+        } else {
+          neighbor.relationshipSum += level * neighborWeight;
+          neighbor.relationshipWeight += neighborWeight;
+        }
       }
     }
   });
 
   // Рассчитать средний уровень для каждого уровня
   const levelScores: LevelScore[] = [];
-  let maxScore = 0;
+  const levelDistribution: any[] = [];
 
-  // Рассчитать средние оценки
-  const levelAverages = new Map<UnionLevel, number>();
-  levelCounts.forEach((data, level) => {
-    if (data.weight > 0) {
-      const avg = data.sum / data.weight;
-      levelAverages.set(level, avg);
-    }
-  });
+  // Рассчитать средние оценки для каждого уровня
+  let totalWeightedScore = 0;
+  let totalWeight = 0;
 
-  // Найти максимум для нормализации
-  const maxAverage = Math.max(...Array.from(levelAverages.values()));
+  let totalPersonalScore = 0;
+  let totalPersonalWeight = 0;
 
-  // Создать LevelScore с процентами и уверенностью
+  let totalRelationshipScore = 0;
+  let totalRelationshipWeight = 0;
+
+  // Находим максимальные веса для нормализации процентов
+  const maxWeight = Math.max(...Array.from(levelCounts.values()).map(d => d.weight));
+  const maxPersonalWeight = Math.max(...Array.from(levelCounts.values()).map(d => d.personalWeight));
+  const maxRelationshipWeight = Math.max(...Array.from(levelCounts.values()).map(d => d.relationshipWeight));
+
   for (let level: UnionLevel = 1; level <= 12; level++) {
-    const avg = levelAverages.get(level) || 0;
-    const percentage = maxAverage > 0 ? (avg / maxAverage) * 100 : 0;
+    const data = levelCounts.get(level)!;
 
-    // Уверенность зависит от количества ответов
-    const count = levelCounts.get(level)!.count;
-    const confidence = Math.min(1, count / (answers.length * 0.3));
+    if (data.weight > 0) {
+      totalWeightedScore += level * data.weight;
+      totalWeight += data.weight;
+    }
+
+    if (data.personalWeight > 0) {
+      totalPersonalScore += level * data.personalWeight;
+      totalPersonalWeight += data.personalWeight;
+    }
+
+    if (data.relationshipWeight > 0) {
+      totalRelationshipScore += level * data.relationshipWeight;
+      totalRelationshipWeight += data.relationshipWeight;
+    }
+
+    const percentage = maxWeight > 0 ? Math.round((data.weight / maxWeight) * 100) : 0;
+    const confidence = Math.min(1, data.count / Math.max(1, answers.length * 0.5));
 
     levelScores.push({
       level,
-      percentage: Math.round(percentage),
+      percentage,
       confidence,
     });
 
-    if (percentage > maxScore) {
-      maxScore = percentage;
-    }
+    // Detailed distribution for UnionLadder
+    levelDistribution.push({
+      levelId: level,
+      personal: Math.round(data.personalWeight * 10), // Scale up for display
+      relationship: Math.round(data.relationshipWeight * 10),
+      total: Math.round(data.weight * 10),
+      personalPercentage: maxPersonalWeight > 0 ? Math.round((data.personalWeight / maxPersonalWeight) * 100) : 0,
+      relationshipPercentage: maxRelationshipWeight > 0 ? Math.round((data.relationshipWeight / maxRelationshipWeight) * 100) : 0
+    });
   }
 
-  // Рассчитать плавающий личный уровень (1-12 с точностью 0.1)
-  let personalLevel = calculateFloatingLevel(levelAverages);
+  // Рассчитать плавающий личный уровень
+  let personalLevel = 6; // По умолчанию
+  if (totalPersonalWeight > 0) {
+    personalLevel = totalPersonalScore / totalPersonalWeight;
+  } else if (totalWeight > 0) {
+    // Fallback to total if no personal questions (unlikely)
+    personalLevel = totalWeightedScore / totalWeight;
+  }
 
-  // Уровень отношений обычно рассчитывается как личный уровень
-  // (в реальной системе это может быть отдельный расчет)
+  // Рассчитать уровень отношений
   let relationshipLevel = personalLevel;
-
-  // Если это оценка партнера, это может быть интерпретировано иначе
-  // Но здесь мы используем ту же логику
+  if (totalRelationshipWeight > 0) {
+    relationshipLevel = totalRelationshipScore / totalRelationshipWeight;
+  }
 
   return {
     personalLevel: Math.round(personalLevel * 10) / 10,
     relationshipLevel: Math.round(relationshipLevel * 10) / 10,
     levelScores,
+    levelDistribution
   };
 }
 
 /**
- * Рассчитать плавающий уровень (1-12 с точностью 0.1)
- * На основе взвешенного среднего
+ * Рассчитать оценки по измерениям (Мандала Союза)
  */
-function calculateFloatingLevel(
-  levelAverages: Map<UnionLevel, number>
-): number {
-  let totalScore = 0;
-  let totalWeight = 0;
+function calculateDimensionsScore(answers: UserAnswer[]): any {
+  const dimensions = {
+    safety: { sum: 0, count: 0, categories: ['trauma', 'patterns', 'conflict', 'safety', 'boundaries'] },
+    connection: { sum: 0, count: 0, categories: ['emotions', 'intimacy', 'acceptance', 'communication'] },
+    growth: { sum: 0, count: 0, categories: ['growth', 'freedom', 'values'] },
+    mission: { sum: 0, count: 0, categories: ['creation', 'transcendence', 'synergy'] }
+  };
 
-  levelAverages.forEach((avg, level) => {
-    totalScore += level * avg;
-    totalWeight += avg;
+  answers.forEach(answer => {
+    const question = QUESTIONS.find(q => q.id === answer.questionId);
+    if (!question) return;
+
+    // Найти подходящее измерение
+    for (const data of Object.values(dimensions)) {
+      if (data.categories.includes(question.category)) {
+        // Используем выбранный уровень как показатель качества в этом измерении
+        // Уровень 1 = 8.3%, Уровень 12 = 100%
+        data.sum += answer.selectedLevel;
+        data.count++;
+        break;
+      }
+    }
   });
 
-  if (totalWeight === 0) {
-    return 6; // Центральное значение по умолчанию
-  }
+  const calculateScore = (data: { sum: number, count: number }) => {
+    if (data.count === 0) return 0;
+    const avgLevel = data.sum / data.count;
+    // Нормализация: 1..12 -> 0..100
+    // Но чтобы 1 уровень не был 0, сделаем линейную шкалу
+    return Math.round((avgLevel / 12) * 100);
+  };
 
-  const floatingLevel = totalScore / totalWeight;
-
-  // Убедиться что уровень в пределах 1-12
-  return Math.max(1, Math.min(12, floatingLevel));
+  return {
+    safety: calculateScore(dimensions.safety),
+    connection: calculateScore(dimensions.connection),
+    growth: calculateScore(dimensions.growth),
+    mission: calculateScore(dimensions.mission)
+  };
 }
+
 
 /**
  * Применить коррекции валидации к результатам
@@ -220,10 +316,14 @@ export function calculateTestResult(
   answers: UserAnswer[],
   validation: ValidationMetrics,
   testMode: any,
-  relationshipStatus: any
+  relationshipStatus: any,
+  testScenario?: TestScenario
 ): TestResult {
   // Рассчитать базовые оценки
-  const { personalLevel, relationshipLevel, levelScores } = calculateLevelScores(answers);
+  const { personalLevel, relationshipLevel, levelScores, levelDistribution } = calculateLevelScores(answers);
+
+  // Рассчитать оценки по измерениям
+  const dimensionsScore = calculateDimensionsScore(answers);
 
   // Применить коррекции валидации
   const { personalLevel: adjustedPersonal, relationshipLevel: adjustedRelationship } =
@@ -240,10 +340,13 @@ export function calculateTestResult(
   return {
     sessionId,
     testMode,
+    testScenario,
     relationshipStatus,
     personalLevel: adjustedPersonal,
     relationshipLevel: adjustedRelationship,
     levelScores,
+    levelDistribution,
+    dimensionsScore, // Added this
     validation,
     answers,
     totalQuestions: answers.length,

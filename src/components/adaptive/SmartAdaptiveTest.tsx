@@ -15,7 +15,7 @@ import {
 import { validateTestResults } from '../../validation-engine';
 import { calculateTestResult } from '../../score-calculation';
 import { interpretResult } from '../../results-interpreter';
-import type { SmartQuestion, TestResult, TestMode, RelationshipStatus, UserAnswer } from '../../types';
+import type { SmartQuestion, TestResult, TestMode, RelationshipStatus, TestScenario, UserAnswer } from '../../types';
 
 // Стили
 import '../../styles/shared-components.css';
@@ -25,6 +25,7 @@ interface SmartAdaptiveTestProps {
   onComplete: (result: TestResult) => void;
   testMode?: TestMode;
   relationshipStatus?: RelationshipStatus;
+  testScenario?: TestScenario;
 }
 
 // Переводы фаз на русский (НОВАЯ СИСТЕМА)
@@ -44,11 +45,11 @@ const phaseColors = {
 };
 
 // Улучшенный компонент прогресс-бара с цветовой индикацией
-const ProgressBar: React.FC<{ value: number; phase: string; questionCount: number; className?: string }> = ({ 
-  value, 
-  phase, 
+const ProgressBar: React.FC<{ value: number; phase: string; questionCount: number; className?: string }> = ({
+  value,
+  phase,
   questionCount,
-  className 
+  className
 }) => {
   const russianPhase = phaseTranslations[phase as keyof typeof phaseTranslations] || phase;
   const phaseColor = phaseColors[phase as keyof typeof phaseColors] || 'var(--gradient-primary)';
@@ -65,11 +66,11 @@ const ProgressBar: React.FC<{ value: number; phase: string; questionCount: numbe
         <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', minWidth: 50, textAlign: 'right' }}>{Math.round(value)}%</span>
       </div>
       <div style={{ width: '100%', backgroundColor: 'var(--primary-200)', borderRadius: '50px', height: '12px', overflow: 'hidden' }}>
-        <div 
-          style={{ 
-            background: phaseColor, 
-            height: '100%', 
-            borderRadius: '50px', 
+        <div
+          style={{
+            background: phaseColor,
+            height: '100%',
+            borderRadius: '50px',
             transition: 'all 0.5s ease-out',
             width: `${Math.min(100, Math.max(0, value))}%`,
             boxShadow: `0 0 10px ${phaseColor.includes('gradient') ? 'rgba(79, 172, 254, 0.3)' : 'rgba(0, 0, 0, 0.1)'}`
@@ -83,7 +84,8 @@ const ProgressBar: React.FC<{ value: number; phase: string; questionCount: numbe
 export const SmartAdaptiveTest: React.FC<SmartAdaptiveTestProps> = ({
   onComplete,
   testMode = 'self',
-  relationshipStatus = 'single_potential'
+  relationshipStatus = 'single_potential',
+  testScenario
 }) => {
   const sessionId = `session-${Date.now()}`;
   const [testState, setTestState] = useState<AdaptiveTestState | null>(null);
@@ -91,7 +93,23 @@ export const SmartAdaptiveTest: React.FC<SmartAdaptiveTestProps> = ({
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [startTime, setStartTime] = useState<number>(Date.now());
-  const [questionHistory, setQuestionHistory] = useState<Array<{question: SmartQuestion; selectedOption: string}>>([]);
+  const [questionHistory, setQuestionHistory] = useState<Array<{ question: SmartQuestion; selectedOption: string }>>([]);
+
+  // Helper function to get the correct answer text variant based on testMode
+  const getAnswerText = (optionText: any): string => {
+    if (typeof optionText === 'string') {
+      // Legacy format - just return as is
+      return optionText;
+    }
+    // New format with variants
+    const modeMap: Record<TestMode, keyof typeof optionText> = {
+      'self': 'self',
+      'partner_assessment': 'partner',
+      'potential': 'potential',
+      'pair_discussion': 'pair_discussion'
+    };
+    return optionText[modeMap[testMode]] || optionText.self;
+  };
 
   // Инициализация теста
   useEffect(() => {
@@ -166,7 +184,8 @@ export const SmartAdaptiveTest: React.FC<SmartAdaptiveTestProps> = ({
         testState.answers,
         validationResult.metrics,
         testMode,
-        relationshipStatus
+        relationshipStatus,
+        testScenario
       );
 
       // Интерпретируем результат
@@ -180,10 +199,61 @@ export const SmartAdaptiveTest: React.FC<SmartAdaptiveTestProps> = ({
 
     // Переходим к следующему вопросу
     const nextQuestion = getNextQuestion(testState);
+
+    // Если вопросов больше нет - принудительно завершаем
+    if (!nextQuestion) {
+      console.log('⚠️ Вопросов больше нет, принудительное завершение...');
+      completeTest(testState); // Это обновит фазу на complete
+
+      // Рекурсивно вызываем логику завершения
+      handleCompletion(testState);
+      return;
+    }
+
     setCurrentQuestionData(nextQuestion);
     setSelectedOption(null);
     setIsLoading(false);
   };
+
+  // Вынесенная логика завершения
+  const handleCompletion = (finalState: AdaptiveTestState) => {
+    console.log('🎉 Тест завершен! Рассчитываю результаты...');
+
+    // Валидируем результаты
+    const validationResult = validateTestResults(finalState.answers);
+
+    // Рассчитываем финальный результат
+    const finalResult = calculateTestResult(
+      sessionId,
+      finalState.answers,
+      validationResult.metrics,
+      testMode,
+      relationshipStatus,
+      testScenario
+    );
+
+    // Интерпретируем результат
+    const interpretation = interpretResult(finalResult);
+
+    console.log('✅ Результаты готовы:', finalResult);
+    console.log('📝 Интерпретация:', interpretation);
+    onComplete(finalResult);
+  };
+
+  // Effect для отлова зависаний
+  useEffect(() => {
+    if (testState && !currentQuestionData && !isLoading && testState.currentPhase !== 'complete') {
+      console.log('🔄 Обнаружено зависание (нет вопроса, не complete) - попытка восстановления...');
+      const next = getNextQuestion(testState);
+      if (next) {
+        setCurrentQuestionData(next);
+      } else {
+        // Если вопросов реально нет - завершаем
+        completeTest(testState);
+        handleCompletion(testState);
+      }
+    }
+  }, [testState, currentQuestionData, isLoading]);
 
   const handleGoBack = () => {
     if (questionHistory.length === 0 || !testState) return;
@@ -201,7 +271,7 @@ export const SmartAdaptiveTest: React.FC<SmartAdaptiveTestProps> = ({
       nextQuestion: previousEntry.question,
       phase: testState.currentPhase,
       questionsAnswered: testState.questionsAnswered - 1,
-      questionsRemaining: testState.questionsAnswered > 0 ? (28 - (testState.questionsAnswered - 1)) : 28,
+      questionsRemaining: testState.questionsAnswered > 0 ? (24 - (testState.questionsAnswered - 1)) : 24,
       estimatedLevelSoFar: getCurrentLevelDetection(updatedState)
     });
     setSelectedOption(previousEntry.selectedOption);
@@ -236,8 +306,8 @@ export const SmartAdaptiveTest: React.FC<SmartAdaptiveTestProps> = ({
     );
   }
 
-  // Рассчитать прогресс (20-28 вопросов максимум)
-  const progress = (testState.questionsAnswered / 28) * 100;
+  // Рассчитать прогресс (20-24 вопросов максимум)
+  const progress = (testState.questionsAnswered / 24) * 100;
   const phase = testState.currentPhase;
   const questionCount = testState.questionsAnswered + 1;
   const currentQuestion = currentQuestionData.nextQuestion;
@@ -248,12 +318,12 @@ export const SmartAdaptiveTest: React.FC<SmartAdaptiveTestProps> = ({
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        style={{ 
+        style={{
           background: 'white',
           border: '1px solid var(--primary-200)',
           borderRadius: '12px',
           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
-          padding: '1.25rem', 
+          padding: '1.25rem',
           marginBottom: '1.5rem'
         }}
       >
@@ -277,14 +347,14 @@ export const SmartAdaptiveTest: React.FC<SmartAdaptiveTestProps> = ({
         <h2 style={{
           fontSize: '1.25rem',
           fontWeight: '600',
-            color: 'var(--color-text)',
+          color: 'var(--color-text)',
           marginBottom: '2rem',
           lineHeight: '1.5',
-            textAlign: 'center'
-          }}>
-            {currentQuestion.text[testMode === 'partner_assessment' ? 'partner' : testMode]}
+          textAlign: 'center'
+        }}>
+          {currentQuestion.text[testMode === 'partner_assessment' ? 'partner' : testMode]}
         </h2>
-        
+
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {currentQuestion.options.map((option, index: number) => (
             <motion.div
@@ -329,12 +399,12 @@ export const SmartAdaptiveTest: React.FC<SmartAdaptiveTestProps> = ({
                       <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--accent-blue)' }}></div>
                     )}
                   </div>
-                  <div style={{ 
-                    fontSize: '0.95rem', 
+                  <div style={{
+                    fontSize: '0.95rem',
                     lineHeight: '1.4',
                     color: selectedOption === option.id ? 'white' : 'var(--color-text)'
                   }}>
-                    {option.text}
+                    {getAnswerText(option.text)}
                   </div>
                 </div>
               </button>
@@ -344,7 +414,7 @@ export const SmartAdaptiveTest: React.FC<SmartAdaptiveTestProps> = ({
       </motion.div>
 
       {/* Навигация */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
@@ -352,7 +422,7 @@ export const SmartAdaptiveTest: React.FC<SmartAdaptiveTestProps> = ({
       >
         {/* Кнопка назад */}
         {questionHistory.length > 0 && (
-          <button 
+          <button
             onClick={handleGoBack}
             className="compact-btn compact-btn--outline"
             style={{
@@ -376,9 +446,9 @@ export const SmartAdaptiveTest: React.FC<SmartAdaptiveTestProps> = ({
             <span>Назад</span>
           </button>
         )}
-        
+
         {/* Кнопка далее */}
-        <button 
+        <button
           onClick={handleNext}
           disabled={!selectedOption || isLoading}
           className={selectedOption && !isLoading ? 'gradient-button' : ''}
@@ -400,12 +470,12 @@ export const SmartAdaptiveTest: React.FC<SmartAdaptiveTestProps> = ({
         >
           {isLoading ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center' }}>
-              <div style={{ 
-                width: '18px', 
-                height: '18px', 
-                border: '2px solid currentColor', 
-                borderTop: '2px solid transparent', 
-                borderRadius: '50%', 
+              <div style={{
+                width: '18px',
+                height: '18px',
+                border: '2px solid currentColor',
+                borderTop: '2px solid transparent',
+                borderRadius: '50%',
                 animation: 'spin 1s linear infinite'
               }}></div>
               <span>Обработка...</span>

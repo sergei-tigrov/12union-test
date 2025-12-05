@@ -2,7 +2,8 @@ import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import styles from './UnionLadder.module.css';
 import { levels } from '../utils/levels';
-import type { TestResult } from '../utils/calculateResult';
+import { getScenarioInterpretation } from '../utils/scenario-interpretations';
+import type { TestResult } from '../types';
 
 interface UnionLadderProps {
   result: TestResult | null;
@@ -23,22 +24,37 @@ const UnionLadder: React.FC<UnionLadderProps> = ({
     return levels.find(l => l.id === selectedLevelId);
   }, [selectedLevelId]);
 
+  // Получаем сценарий-специфичную интерпретацию
+  const scenarioInterpretation = useMemo(() => {
+    if (!result?.testScenario || !selectedLevel) {
+      return null;
+    }
+    try {
+      return getScenarioInterpretation(selectedLevelId, result.testScenario);
+    } catch (error) {
+      console.warn(`Не удалось получить интерпретацию для уровня ${selectedLevelId} и сценария ${result.testScenario}:`, error);
+      return null;
+    }
+  }, [selectedLevelId, result?.testScenario, selectedLevel]);
+
   // Определяем доминирующие уровни - теперь это массив  
   const dominantLevels = useMemo(() => {
     if (!result) return [];
-    
+
     // Возвращаем массив доминирующих уровней
     return [
       { levelId: result.personalLevel, type: 'personal' as const },
       { levelId: result.relationshipLevel, type: 'relationship' as const },
-      { levelId: result.potentialLevel, type: 'potential' as const }
-    ].filter(level => level.levelId > 0);
+      result.potentialLevel ? { levelId: result.potentialLevel, type: 'potential' as const } : null
+    ].filter((level): level is { levelId: number; type: 'personal' | 'relationship' | 'potential' } =>
+      level !== null && level.levelId > 0
+    );
   }, [result]);
 
   // Получаем баллы для каждого уровня из новой структуры
   const getScoresForLevel = (levelId: number) => {
     if (!result?.levelDistribution) return { personal: 0, relationship: 0, total: 0 };
-    
+
     const levelScore = result.levelDistribution.find(s => s.levelId === levelId);
     return {
       personal: levelScore?.personal || 0,
@@ -50,7 +66,7 @@ const UnionLadder: React.FC<UnionLadderProps> = ({
   // Получаем проценты для прогресс-баров
   const getPercentagesForLevel = (levelId: number) => {
     if (!result?.levelDistribution) return { personalPercent: 0, relationshipPercent: 0 };
-    
+
     const levelScore = result.levelDistribution.find(s => s.levelId === levelId);
     return {
       personalPercent: levelScore?.personalPercentage || 0,
@@ -135,25 +151,25 @@ const UnionLadder: React.FC<UnionLadderProps> = ({
       {/* Основной контейнер с лестницей и прогресс-барами */}
       <div className={styles.ladderWithProgress}>
         {/* Строки лестницы - каждая строка содержит левый прогресс, ступень, правый прогресс */}
-        <motion.div 
+        <motion.div
           className={styles.ladderRows}
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
           {sortedLevels.map((level) => {
-            console.log('Rendering ladder level:', { 
-              level: typeof level, 
-              levelId: level?.id, 
+            console.log('Rendering ladder level:', {
+              level: typeof level,
+              levelId: level?.id,
               levelName: level?.name,
               isObject: typeof level === 'object'
             });
-            
+
             if (!level || typeof level !== 'object') {
               console.error('Invalid level object in UnionLadder:', level);
               return null;
             }
-            
+
             const stepWidth = getStepWidth(level.id);
             const isActive = selectedLevelId === level.id;
             const isDominant = isDominantLevel(level.id);
@@ -188,11 +204,11 @@ const UnionLadder: React.FC<UnionLadderProps> = ({
                 >
                   <div className={styles.progressScore}>{scores.personal}</div>
                   <div className={`${styles.progressBar} ${styles.leftProgressBar}`}>
-                    <motion.div 
+                    <motion.div
                       className={styles.progressFill}
-                      style={{ 
-                        background: isDominant && dominantType === 'personal' 
-                          ? 'linear-gradient(90deg, #4f46e5, #6366f1)' 
+                      style={{
+                        background: isDominant && dominantType === 'personal'
+                          ? 'linear-gradient(90deg, #4f46e5, #6366f1)'
                           : 'linear-gradient(90deg, #818cf8, #a5b4fc)',
                         width: `${personalPercent}%`
                       }}
@@ -204,17 +220,17 @@ const UnionLadder: React.FC<UnionLadderProps> = ({
                 </motion.div>
 
                 {/* Ступень */}
-                <div 
+                <div
                   className={styles.ladderStepContainer}
                   onClick={() => onLevelSelect(level.id)}
                 >
                   <motion.div
                     className={`${styles.ladderStep} ${isActive ? styles.active : ''} ${isDominant ? styles.dominant : ''}`}
-                    style={{ 
+                    style={{
                       width: `${stepWidth}%`,
                       margin: '0 auto'
                     }}
-                    whileHover={{ 
+                    whileHover={{
                       scale: 1.02,
                       y: -2
                     }}
@@ -223,7 +239,7 @@ const UnionLadder: React.FC<UnionLadderProps> = ({
                     <div className={styles.stepBackground}>
                       <div className={`bg-gradient-to-r ${stepColor}`}></div>
                     </div>
-                    
+
                     <div className={styles.stepContent}>
                       <div className={styles.stepLeft}>
                         <div className={styles.levelNumber}>{level.id}</div>
@@ -245,9 +261,9 @@ const UnionLadder: React.FC<UnionLadderProps> = ({
                   transition={{ delay: 0.1 + (12 - level.id) * 0.05 }}
                 >
                   <div className={`${styles.progressBar} ${styles.rightProgressBar}`}>
-                    <motion.div 
+                    <motion.div
                       className={styles.progressFill}
-                      style={{ 
+                      style={{
                         background: isDominant && dominantType === 'relationship'
                           ? 'linear-gradient(90deg, #ec4899, #f472b6)'
                           : 'linear-gradient(90deg, #f472b6, #f9a8d4)',
@@ -277,7 +293,7 @@ const UnionLadder: React.FC<UnionLadderProps> = ({
 
       {/* Описание выбранного уровня */}
       {selectedLevel && (
-        <motion.div 
+        <motion.div
           className={styles.levelDescription}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -291,26 +307,48 @@ const UnionLadder: React.FC<UnionLadderProps> = ({
               <div className={styles.levelInfo}>
                 <h3 className={styles.levelTitle}>{selectedLevel.name}</h3>
                 <p className={styles.levelSubtitle}>
-                  {selectedLevel.shortDescription}
+                  {scenarioInterpretation?.description || selectedLevel.shortDescription}
                 </p>
               </div>
             </div>
-            
+
             <div className={styles.descriptionContent}>
+              {/* Основная интерпретация */}
               <p className={styles.levelFullDescription}>
-                {selectedLevel.fullDescription || selectedLevel.shortDescription}
+                {scenarioInterpretation?.interpretation || selectedLevel.fullDescription || selectedLevel.shortDescription}
               </p>
-              
-              {selectedLevel.recommendations && selectedLevel.recommendations.length > 0 && (
+
+              {/* Фокус внимания - если есть сценарий-специфичная интерпретация */}
+              {scenarioInterpretation?.focus && (
+                <div className={styles.recommendations}>
+                  <h4 className={styles.recommendationsTitle}>На что обратить внимание:</h4>
+                  <p style={{ margin: '0.5rem 0', color: '#555', lineHeight: '1.6' }}>
+                    {scenarioInterpretation.focus}
+                  </p>
+                </div>
+              )}
+
+              {/* Рекомендации - используем сценарий-специфичные или базовые */}
+              {(scenarioInterpretation?.recommendations || selectedLevel.recommendations) && (
                 <div className={styles.recommendations}>
                   <h4 className={styles.recommendationsTitle}>Рекомендации:</h4>
                   <ul className={styles.recommendationsList}>
-                    {selectedLevel.recommendations.slice(0, 3).map((rec, index) => (
+                    {(scenarioInterpretation?.recommendations || selectedLevel.recommendations)?.slice(0, 5).map((rec, index) => (
                       <li key={index} className={styles.recommendationItem}>
                         {rec}
                       </li>
                     ))}
                   </ul>
+                </div>
+              )}
+
+              {/* Путь развития - если есть сценарий-специфичная интерпретация */}
+              {scenarioInterpretation?.growthPath && (
+                <div className={styles.recommendations} style={{ borderTop: '1px solid #e0e0e0', paddingTop: '1rem', marginTop: '1rem' }}>
+                  <h4 className={styles.recommendationsTitle}>Путь развития:</h4>
+                  <p style={{ margin: '0.5rem 0', color: '#555', lineHeight: '1.6', fontStyle: 'italic' }}>
+                    {scenarioInterpretation.growthPath}
+                  </p>
                 </div>
               )}
             </div>

@@ -209,8 +209,8 @@ function selectNextQuestion(
         'zone-safety-002',
         'zone-growth-003',
         'zone-intimacy-004',
-        'zone-choice-005',
-        'zone-difference-006',
+        'zone-responsibility-005',
+        'zone-future-006',
       ].includes(q.id)
     );
 
@@ -241,12 +241,7 @@ function selectNextQuestion(
     // Выбрать вопрос, который лучше всего разделяет уровни в целевом диапазоне
     const refinementQuestions = availableQuestions.filter((q) => {
       // Вопрос должен быть о уточнении, не о зонировании, не о валидации
-      const isRefinement =
-        q.id.startsWith('level-detail-') ||
-        q.id.startsWith('boundary-') ||
-        q.id.startsWith('autonomy-') ||
-        q.id.startsWith('understanding-') ||
-        q.id.startsWith('hope-');
+      const isRefinement = q.id.startsWith('level-');
 
       if (!isRefinement) return false;
 
@@ -293,8 +288,8 @@ function advancePhase(state: AdaptiveTestState): void {
       'zone-safety-002',
       'zone-growth-003',
       'zone-intimacy-004',
-      'zone-choice-005',
-      'zone-difference-006',
+      'zone-responsibility-005',
+      'zone-future-006',
     ];
 
     const zoningAnswered = state.answers.filter((a) =>
@@ -305,17 +300,18 @@ function advancePhase(state: AdaptiveTestState): void {
       state.currentPhase = 'refinement';
     }
   } else if (state.currentPhase === 'refinement') {
-    // Перейти к валидации после 8-12 вопросов уточнения
+    // Перейти к валидации после 12 вопросов уточнения (было 8)
+    // Это даст более точную картину и больше данных для портрета
     const refinementCount = state.answers.length - 6; // Минус вопросы зонирования
 
-    if (refinementCount >= 8) {
+    if (refinementCount >= 12) {
       state.currentPhase = 'validation';
     }
   } else if (state.currentPhase === 'validation') {
-    // Завершить после 3-4 вопросов валидации
-    const validationCount = state.answers.length - 6 - 8; // Минус предыдущие фазы
+    // Завершить после 5 вопросов валидации (было 3)
+    const validationCount = state.answers.length - 6 - 12; // Минус предыдущие фазы
 
-    if (validationCount >= 3) {
+    if (validationCount >= 5) {
       state.currentPhase = 'complete';
     }
   }
@@ -400,6 +396,9 @@ export function completeTest(
 
   const finalLevel = detectCurrentLevel(state.answers, questionsMap);
 
+  // Явно помечаем тест как завершенный
+  state.currentPhase = 'complete';
+
   return {
     finalLevel,
     totalQuestionsAnswered: state.questionsAnswered,
@@ -427,7 +426,7 @@ function createQuestionSelection(
     nextQuestion: question,
     phase: state.currentPhase,
     questionsAnswered: state.questionsAnswered,
-    questionsRemaining: 28 - state.questionsAnswered, // Максимум 28 вопросов
+    questionsRemaining: 24 - state.questionsAnswered, // Максимум 24 вопроса
     estimatedLevelSoFar: estimatedLevel,
   };
 }

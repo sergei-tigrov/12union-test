@@ -79,7 +79,7 @@
   opacity: 1;
 }
 
-.pdf-export-mode [class*="AnimatePresence"] > div {
+.pdf-export-mode [class*="AnimatePresence"]>div {
   display: block;
   opacity: 1;
   height: auto;
@@ -106,7 +106,7 @@
   .motion-safe\:animate-none {
     animation: none;
   }
-  
+
   .motion-safe\:transition-none {
     transition: none;
   }
@@ -137,10 +137,106 @@
     flex-wrap: wrap;
     gap: 0.5rem;
   }
-  
+
   .compact-btn {
     font-size: 0.75rem;
     padding: 0.375rem 0.75rem;
     height: auto;
   }
-} 
+}
+
+/* 📱 Адаптивные компоненты результатов */
+
+.results-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.results-card {
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.results-hero-icon {
+  width: 120px;
+  height: 120px;
+  font-size: 5rem;
+}
+
+.results-hero-title {
+  font-size: 3rem;
+}
+
+.results-hero-subtitle {
+  font-size: 1.8rem;
+}
+
+.results-hero-text {
+  font-size: 1.15rem;
+  max-width: 700px;
+  margin: 0 auto 2.5rem;
+}
+
+.results-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1.5rem;
+  padding-top: 2rem;
+}
+
+.results-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+@media (max-width: 640px) {
+  .results-card {
+    padding: 1.5rem;
+    border-radius: 12px;
+  }
+
+  .results-hero-icon {
+    width: 90px;
+    height: 90px;
+    font-size: 3.5rem;
+  }
+
+  .results-hero-title {
+    font-size: 2.5rem;
+  }
+
+  .results-hero-subtitle {
+    font-size: 1.4rem;
+  }
+
+  .results-hero-text {
+    font-size: 1rem;
+  }
+
+  .results-grid-2 {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+.results-stat-label {
+  font-size: 0.85rem;
+  color: #999;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+
+.results-stat-value {
+  font-size: 2.2rem;
+  font-weight: 800;
+}
+
+@media (max-width: 640px) {
+  .results-stat-value {
+    font-size: 1.8rem;
+  }
+}

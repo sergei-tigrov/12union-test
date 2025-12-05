@@ -153,10 +153,28 @@ export function getNextTestQuestion(
   }
 
   // Подготовить варианты ответов
-  const options = question.options.map((opt) => ({
-    id: opt.id,
-    text: opt.text,
-  }));
+  const options = question.options.map((opt) => {
+    // Get the correct text variant based on testMode
+    let optionText: string;
+    if (typeof opt.text === 'string') {
+      // Legacy format
+      optionText = opt.text;
+    } else {
+      // New format with variants
+      const modeMap: Record<string, keyof typeof opt.text> = {
+        'self': 'self',
+        'partner_assessment': 'partner',
+        'potential': 'potential',
+        'pair_discussion': 'pair_discussion'
+      };
+      optionText = opt.text[modeMap[testMode]] || opt.text.self;
+    }
+
+    return {
+      id: opt.id,
+      text: optionText,
+    };
+  });
 
   // Получить текущую оценку уровня (если уже достаточно ответов)
   const estimatedLevel =

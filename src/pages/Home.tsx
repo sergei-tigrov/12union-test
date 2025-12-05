@@ -2,10 +2,10 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import { 
-  Clock, 
-  Heart, 
-  TrendingUp, 
+import {
+  Clock,
+  Heart,
+  TrendingUp,
   ArrowRight,
   Target,
   Shield
@@ -39,8 +39,6 @@ const Home = () => {
     navigate('/adaptive-test');
   };
 
-
-
   // Анимация для элементов
   const fadeInUp = {
     hidden: { opacity: 0, y: 30 },
@@ -59,7 +57,7 @@ const Home = () => {
   };
 
   return (
-    <motion.div 
+    <motion.div
       className="home-page"
       initial="hidden"
       animate="visible"
@@ -77,7 +75,7 @@ const Home = () => {
             >
               <h1 className="hero-main-title">Лестница Союза:</h1>
               <h2 className="hero-subtitle">12 ступеней к идеальным отношениям</h2>
-              
+
               <p className="hero-description">
                 Откройте научно обоснованную модель развития отношений. Пройдите тест и узнайте, на какой ступени находятся ваши отношения прямо сейчас.
               </p>
@@ -97,14 +95,14 @@ const Home = () => {
                 </div>
               </div>
 
-              <button 
+              <button
                 className="hero-cta-button gradient-button"
                 onClick={handleStartAdaptiveTest}
               >
                 <span>Начать тестирование</span>
                 <ArrowRight className="hero-cta-icon" />
               </button>
-              
+
               <div className="hero-badges">
                 <div className="hero-badge">
                   <Clock className="hero-duration-icon" />
@@ -123,7 +121,7 @@ const Home = () => {
       {/* Секция с пирамидой ступеней */}
       <section className="pyramid-section">
         <div className="container">
-          <motion.div 
+          <motion.div
             className="section-header"
             variants={fadeInUp}
             transition={{ duration: 0.6 }}
@@ -133,7 +131,7 @@ const Home = () => {
           </motion.div>
 
           <div className="pyramid-container">
-            <motion.div 
+            <motion.div
               className="pyramid-container-inner"
               variants={staggerContainer}
             >
@@ -155,13 +153,13 @@ const Home = () => {
                     <span className="level-name gradient-text">Лестница Союза</span>
                   </div>
                 </motion.div>
-                
+
                 {[...levels].reverse().map((level) => (
                   <div key={level.id} className="pyramid-step-container">
                     <div className="step-number-container">
                       <div className="step-number">{level.id}</div>
                     </div>
-                    
+
                     <motion.div
                       className={`pyramid-level level-${level.id} gradient-card ${selectedLevel?.id === level.id ? 'selected' : ''} ${hoveredLevel === level.id ? 'hovered' : ''}`}
                       variants={fadeInUp}
@@ -183,7 +181,7 @@ const Home = () => {
               </div>
 
               <AnimatePresence mode="wait">
-                <motion.div 
+                <motion.div
                   className="level-details gradient-card"
                   initial={{ opacity: 0, x: 50 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -197,16 +195,16 @@ const Home = () => {
                           <span className="detail-icon">{selectedLevel.icon}</span>
                           Ступень {selectedLevel.id}: {selectedLevel.name}
                         </h3>
-                        <button 
+                        <button
                           className="close-detail"
                           onClick={() => setSelectedLevel(null)}
                         >
-                          <i className="fas fa-times"></i>
+                          ✕
                         </button>
                       </div>
-                      
+
                       <p className="detail-description">{selectedLevel.fullDescription}</p>
-                      
+
                       {selectedLevel.example && (
                         <div className="detail-example">
                           <h4>Пример из жизни:</h4>
@@ -214,7 +212,7 @@ const Home = () => {
                         </div>
                       )}
 
-                      <motion.button 
+                      <motion.button
                         className="detail-cta gradient-button"
                         onClick={handleStartAdaptiveTest}
                         whileHover={{ scale: 1.05 }}
@@ -229,9 +227,9 @@ const Home = () => {
                         <h3 className="gradient-text">{modelDescription.title}</h3>
                         <p className="detail-subtitle">{modelDescription.subtitle}</p>
                       </div>
-                      
+
                       <p className="detail-description">{modelDescription.description}</p>
-                      
+
                       <div className="detail-features">
                         <h4>Ключевые особенности модели:</h4>
                         <ul>
@@ -241,7 +239,7 @@ const Home = () => {
                         </ul>
                       </div>
 
-                      <motion.button 
+                      <motion.button
                         className="detail-cta gradient-button"
                         onClick={handleStartAdaptiveTest}
                         whileHover={{ scale: 1.05 }}
@@ -261,20 +259,20 @@ const Home = () => {
       {/* Секция преимуществ теста */}
       <section className="benefits-section">
         <div className="container">
-          <motion.div 
+          <motion.div
             className="section-header"
             variants={fadeInUp}
           >
             <h2 className="gradient-text">Что вы получите после прохождения теста</h2>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             className="benefits-grid-row"
             variants={staggerContainer}
           >
             <motion.div className="benefit-card gradient-card" variants={fadeInUp}>
               <div className="benefit-icon">
-                <i className="fas fa-microscope"></i>
+                🔬
               </div>
               <h3>Точный анализ</h3>
               <p>Определение вашего текущего уровня личной зрелости и уровня отношений на основе научной модели</p>
@@ -282,7 +280,7 @@ const Home = () => {
 
             <motion.div className="benefit-card gradient-card" variants={fadeInUp}>
               <div className="benefit-icon">
-                <i className="fas fa-map-marked-alt"></i>
+                🗺️
               </div>
               <h3>Карта развития</h3>
               <p>Ясное понимание следующих шагов для перехода на более высокие ступени отношений</p>
@@ -290,7 +288,7 @@ const Home = () => {
 
             <motion.div className="benefit-card gradient-card" variants={fadeInUp}>
               <div className="benefit-icon">
-                <i className="fas fa-lightbulb"></i>
+                💡
               </div>
               <h3>Практические советы</h3>
               <p>Конкретные рекомендации и упражнения для работы с текущими вызовами в отношениях</p>
@@ -298,7 +296,7 @@ const Home = () => {
 
             <motion.div className="benefit-card gradient-card" variants={fadeInUp}>
               <div className="benefit-icon">
-                <i className="fas fa-chart-bar"></i>
+                📊
               </div>
               <h3>Визуализация прогресса</h3>
               <p>Наглядные графики и диаграммы, показывающие ваши сильные стороны и зоны роста</p>
@@ -310,19 +308,19 @@ const Home = () => {
       {/* Призыв к действию */}
       <section className="final-cta-section">
         <div className="hero-overlay"></div>
-        <motion.div 
+        <motion.div
           className="final-cta-content"
           variants={fadeInUp}
-          style={{ 
-            maxWidth: '600px', 
-            margin: '0 auto', 
+          style={{
+            maxWidth: '600px',
+            margin: '0 auto',
             textAlign: 'center',
             position: 'relative',
             zIndex: 3,
             padding: '80px 20px'
           }}
         >
-          <h2 style={{ 
+          <h2 style={{
             fontSize: 'clamp(1.5rem, 4vw, 2.5rem)',
             fontWeight: '700',
             marginBottom: '2rem',
@@ -331,8 +329,8 @@ const Home = () => {
           }}>
             Готовы узнать правду<br/>о своих отношениях?
           </h2>
-          
-          <button 
+
+          <button
             className="hero-cta-button gradient-button"
             onClick={handleStartAdaptiveTest}
           >

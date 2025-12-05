@@ -94,7 +94,7 @@ export const analyzeJealousyDynamics = (
     severity = 'significant';
   } else if (type === 'healthy_concern') {
     title = 'Здоровая забота';
-    description = 'Ваше чувство ревности находится в здоровом диапазоне и является частью заботы о отношениях';
+    description = 'Ваше чувство ревности находится в здоровом диапазоне и является частью заботы об отношениях';
     characteristics.push('Открытое обсуждение чувств');
     characteristics.push('Баланс между заботой и доверием');
     severity = 'minimal';

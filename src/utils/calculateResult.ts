@@ -1,4 +1,5 @@
 import type { Answer } from './types';
+import type { TestScenario } from '../types';
 
 // Психологически обоснованная конфигурация алгоритма
 export const PSYCHOLOGICAL_CONFIG = {
@@ -52,6 +53,8 @@ export interface ValidationResult {
 }
 
 export interface TestResult {
+  // Сценарий тестирования
+  testScenario?: TestScenario;
   // Основные результаты
   personalLevel: number;
   relationshipLevel: number;

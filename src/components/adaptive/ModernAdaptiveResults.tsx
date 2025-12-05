@@ -13,6 +13,8 @@ import type { TestResult } from '../../types';
 import { interpretResult } from '../../results-interpreter';
 import { getLevelDefinition } from '../../levels-definitions';
 import { getActionPlan } from '../../action-library';
+import UnionLadder from '../UnionLadder';
+import { UnionMandala } from '../UnionMandala';
 
 // Стили
 import '../../styles/design-system.css';
@@ -31,6 +33,7 @@ export const ModernAdaptiveResults: React.FC<ModernAdaptiveResultsProps> = ({
   onRestart
 }) => {
   const [activeTab, setActiveTab] = useState<'summary' | 'breakdown' | 'actions' | 'validation'>('summary');
+  const [selectedLevelId, setSelectedLevelId] = useState<number>(Math.round(result.personalLevel));
 
   // Интерпретируем результаты
   const interpretation = interpretResult(result);
@@ -61,152 +64,239 @@ export const ModernAdaptiveResults: React.FC<ModernAdaptiveResultsProps> = ({
 
   // Компонент для вкладки резюме
   const SummaryTab = () => (
-    <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-      {/* Главный результат */}
+    <div className="results-container">
+      {/* Основной результат с уровнем */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
+        className="results-card"
         style={{
-          background: 'white',
-          border: '2px solid #e0e0e0',
-          borderRadius: '16px',
-          padding: '3rem 2rem',
-          marginBottom: '2rem',
+          background: `linear-gradient(135deg, ${getLevelColor(roundedLevel)}08 0%, white 100%)`,
+          border: `2px solid ${getLevelColor(roundedLevel)}30`,
           textAlign: 'center'
         }}
       >
-        <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>
-          {getLevelIcon(roundedLevel)}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
+          <div className="results-hero-icon" style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: `${getLevelColor(roundedLevel)}15`,
+            borderRadius: '50%',
+            border: `3px solid ${getLevelColor(roundedLevel)}`
+          }}>
+            {getLevelIcon(roundedLevel)}
+          </div>
         </div>
 
-        <h2 style={{
-          fontSize: '2.5rem',
-          fontWeight: '700',
+        <h2 className="results-hero-title" style={{
+          fontWeight: '800',
           color: getLevelColor(roundedLevel),
-          marginBottom: '0.5rem'
+          marginBottom: '0.25rem',
+          lineHeight: '1.1'
         }}>
-          Уровень {roundedLevel}: {levelDef?.name}
+          {roundedLevel}
         </h2>
 
-        <p style={{
-          fontSize: '1.1rem',
-          color: '#666',
-          marginBottom: '2rem',
-          maxWidth: '700px',
-          margin: '1rem auto 2rem'
+        <h3 className="results-hero-subtitle" style={{
+          fontWeight: '700',
+          color: '#333',
+          marginBottom: '1.5rem'
+        }}>
+          {levelDef?.name}
+        </h3>
+
+        <p className="results-hero-text" style={{
+          color: '#555',
+          lineHeight: '1.8'
         }}>
           {interpretation.heroMessage}
         </p>
 
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: '1.5rem',
-          marginBottom: '2rem'
-        }}>
-          <div style={{
-            padding: '1rem',
-            background: '#f5f5f5',
-            borderRadius: '12px'
-          }}>
-            <div style={{ fontSize: '0.9rem', color: '#999', marginBottom: '0.5rem' }}>
+        {/* Stats Grid */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.1 }}
+          className="results-stats-grid"
+          style={{
+            borderTop: `1px solid ${getLevelColor(roundedLevel)}20`
+          }}
+        >
+          <div style={{ textAlign: 'center' }}>
+            <div className="results-stat-label">
               Вопросов ответено
             </div>
-            <div style={{ fontSize: '1.8rem', fontWeight: '700', color: '#2196F3' }}>
+            <div className="results-stat-value" style={{
+              color: getLevelColor(roundedLevel)
+            }}>
               {result.totalQuestions}
             </div>
           </div>
 
-          <div style={{
-            padding: '1rem',
-            background: '#f5f5f5',
-            borderRadius: '12px'
-          }}>
-            <div style={{ fontSize: '0.9rem', color: '#999', marginBottom: '0.5rem' }}>
+          <div style={{ textAlign: 'center' }}>
+            <div className="results-stat-label">
               Время теста
             </div>
-            <div style={{ fontSize: '1.8rem', fontWeight: '700', color: '#4CAF50' }}>
+            <div className="results-stat-value" style={{
+              color: '#4CAF50'
+            }}>
               {timeFormatted}
             </div>
           </div>
 
-          <div style={{
-            padding: '1rem',
-            background: '#f5f5f5',
-            borderRadius: '12px'
-          }}>
-            <div style={{ fontSize: '0.9rem', color: '#999', marginBottom: '0.5rem' }}>
+          <div style={{ textAlign: 'center' }}>
+            <div className="results-stat-label">
               Надёжность
             </div>
-            <div style={{ fontSize: '1.8rem', fontWeight: '700', color:
-              result.validation.reliability === 'high' ? '#4CAF50' :
-              result.validation.reliability === 'medium' ? '#ff9800' : '#f44336'
+            <div className="results-stat-value" style={{
+              color:
+                result.validation.reliability === 'high' ? '#4CAF50' :
+                  result.validation.reliability === 'medium' ? '#ff9800' : '#f44336'
             }}>
               {
+                result.validation.reliability === 'high' ? '✓' :
+                  result.validation.reliability === 'medium' ? '≈' : '?'
+              }
+            </div>
+            <div style={{ fontSize: '0.9rem', color: '#666', marginTop: '0.5rem' }}>
+              {
                 result.validation.reliability === 'high' ? 'Высокая' :
-                result.validation.reliability === 'medium' ? 'Средняя' : 'Низкая'
+                  result.validation.reliability === 'medium' ? 'Средняя' : 'Низкая'
               }
             </div>
           </div>
-        </div>
+        </motion.div>
+      </motion.div>
+
+      {/* Лестница Союза - интерактивная пирамида */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15 }}
+        style={{ marginBottom: '2rem' }}
+      >
+        <UnionLadder
+          result={result}
+          selectedLevelId={selectedLevelId}
+          onLevelSelect={setSelectedLevelId}
+        />
       </motion.div>
 
       {/* Главный инсайт */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
+        transition={{ delay: 0.2 }}
         style={{
-          background: 'white',
-          border: '1px solid #e0e0e0',
+          background: 'linear-gradient(135deg, #ff6b6b08 0%, #ff6b6b04 100%)',
+          border: '2px solid #ff6b6b30',
           borderRadius: '12px',
-          padding: '2rem',
+          padding: '2.5rem',
           marginBottom: '2rem'
         }}
       >
         <h3 style={{
-          fontSize: '1.3rem',
+          fontSize: '1.25rem',
           fontWeight: '700',
-          marginBottom: '1rem',
+          marginBottom: '1.25rem',
           display: 'flex',
           alignItems: 'center',
-          gap: '0.5rem'
+          gap: '0.75rem',
+          color: '#333'
         }}>
           <Heart size={24} color="#ff6b6b" />
           Главный инсайт
         </h3>
         <p style={{
-          fontSize: '1rem',
-          lineHeight: '1.6',
-          color: '#333'
+          fontSize: '1.05rem',
+          lineHeight: '1.8',
+          color: '#444'
         }}>
           {interpretation.mainInsight}
         </p>
       </motion.div>
 
+      {/* Психологический портрет (НОВОЕ) */}
+      {
+        interpretation.indicatorAnalysis && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.22 }}
+            style={{
+              background: 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)',
+              border: '2px solid #90caf9',
+              borderRadius: '12px',
+              padding: '2.5rem',
+              marginBottom: '2rem'
+            }}
+          >
+            <h3 style={{
+              fontSize: '1.25rem',
+              fontWeight: '700',
+              marginBottom: '1.25rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              color: '#0d47a1'
+            }}>
+              <span style={{ fontSize: '1.5rem' }}>🧠</span>
+              Психологический портрет
+            </h3>
+            <p style={{
+              fontSize: '1.05rem',
+              lineHeight: '1.8',
+              color: '#1565c0'
+            }}>
+              {interpretation.indicatorAnalysis}
+            </p>
+          </motion.div>
+        )
+      }
+
+      {/* Мандала Союза (НОВОЕ) */}
+      {
+        result.dimensionsScore && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.23 }}
+            style={{
+              marginBottom: '2rem',
+              display: 'flex',
+              justifyContent: 'center'
+            }}
+          >
+            <UnionMandala scores={result.dimensionsScore} />
+          </motion.div>
+        )
+      }
+
       {/* Описание уровня */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
+        transition={{ delay: 0.25 }}
         style={{
           background: 'white',
-          border: '1px solid #e0e0e0',
+          border: '1px solid #e8e8e8',
           borderRadius: '12px',
-          padding: '2rem',
+          padding: '2.5rem',
           marginBottom: '2rem'
         }}
       >
         <h3 style={{
-          fontSize: '1.3rem',
+          fontSize: '1.25rem',
           fontWeight: '700',
-          marginBottom: '1rem'
+          marginBottom: '1.25rem',
+          color: '#333'
         }}>
-          Что это значит?
+          📚 Что это значит?
         </h3>
         <p style={{
-          fontSize: '1rem',
-          lineHeight: '1.7',
+          fontSize: '1.05rem',
+          lineHeight: '1.8',
           color: '#555'
         }}>
           {interpretation.levelDescription}
@@ -214,33 +304,34 @@ export const ModernAdaptiveResults: React.FC<ModernAdaptiveResultsProps> = ({
       </motion.div>
 
       {/* Вызов и путь роста */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
+      <div className="results-grid-2" style={{ marginBottom: '2rem' }}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
           style={{
-            background: 'white',
-            border: '1px solid #e0e0e0',
+            background: 'linear-gradient(135deg, #ff980808 0%, #ff980804 100%)',
+            border: '2px solid #ff980030',
             borderRadius: '12px',
-            padding: '2rem'
+            padding: '2.5rem'
           }}
         >
           <h3 style={{
-            fontSize: '1.1rem',
+            fontSize: '1.2rem',
             fontWeight: '700',
-            marginBottom: '1rem',
+            marginBottom: '1.25rem',
             display: 'flex',
             alignItems: 'center',
-            gap: '0.5rem'
+            gap: '0.75rem',
+            color: '#333'
           }}>
-            <AlertCircle size={20} color="#ff9800" />
+            <AlertCircle size={22} color="#ff9800" />
             Главный вызов
           </h3>
           <p style={{
-            fontSize: '0.95rem',
-            lineHeight: '1.6',
-            color: '#666'
+            fontSize: '1rem',
+            lineHeight: '1.7',
+            color: '#555'
           }}>
             {interpretation.currentChallenge}
           </p>
@@ -251,27 +342,28 @@ export const ModernAdaptiveResults: React.FC<ModernAdaptiveResultsProps> = ({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
           style={{
-            background: 'white',
-            border: '1px solid #e0e0e0',
+            background: 'linear-gradient(135deg, #4CAF5008 0%, #4CAF5004 100%)',
+            border: '2px solid #4CAF5030',
             borderRadius: '12px',
-            padding: '2rem'
+            padding: '2.5rem'
           }}
         >
           <h3 style={{
-            fontSize: '1.1rem',
+            fontSize: '1.2rem',
             fontWeight: '700',
-            marginBottom: '1rem',
+            marginBottom: '1.25rem',
             display: 'flex',
             alignItems: 'center',
-            gap: '0.5rem'
+            gap: '0.75rem',
+            color: '#333'
           }}>
-            <TrendingUp size={20} color="#4CAF50" />
+            <TrendingUp size={22} color="#4CAF50" />
             Путь роста
           </h3>
           <p style={{
-            fontSize: '0.95rem',
-            lineHeight: '1.6',
-            color: '#666'
+            fontSize: '1rem',
+            lineHeight: '1.7',
+            color: '#555'
           }}>
             {interpretation.growthPath}
           </p>
@@ -279,64 +371,71 @@ export const ModernAdaptiveResults: React.FC<ModernAdaptiveResultsProps> = ({
       </div>
 
       {/* Следующий уровень */}
-      {interpretation.nextLevel && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          style={{
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            borderRadius: '12px',
-            padding: '2rem',
-            color: 'white'
-          }}
-        >
-          <h3 style={{
-            fontSize: '1.1rem',
-            fontWeight: '700',
-            marginBottom: '0.5rem'
-          }}>
-            ✨ Что дальше?
-          </h3>
-          <p style={{
-            fontSize: '0.95rem',
-            lineHeight: '1.6',
-            opacity: 0.95
-          }}>
-            {interpretation.nextLevel}
-          </p>
-        </motion.div>
-      )}
+      {
+        interpretation.nextLevel && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            style={{
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              borderRadius: '12px',
+              padding: '2.5rem',
+              color: 'white',
+              marginBottom: '2rem'
+            }}
+          >
+            <h3 style={{
+              fontSize: '1.2rem',
+              fontWeight: '700',
+              marginBottom: '1rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem'
+            }}>
+              ✨ Что дальше?
+            </h3>
+            <p style={{
+              fontSize: '1.05rem',
+              lineHeight: '1.7',
+              opacity: 0.95
+            }}>
+              {interpretation.nextLevel}
+            </p>
+          </motion.div>
+        )
+      }
 
       {/* Валидационные замечания */}
-      {interpretation.validationNotes && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          style={{
-            background: '#fff3cd',
-            border: '1px solid #ffeaa7',
-            borderRadius: '12px',
-            padding: '1.5rem',
-            marginTop: '2rem',
-            display: 'flex',
-            gap: '1rem',
-            alignItems: 'flex-start'
-          }}
-        >
-          <AlertCircle size={20} color="#f0ad4e" style={{ flexShrink: 0, marginTop: '2px' }} />
-          <div>
-            <h4 style={{ fontWeight: '700', marginBottom: '0.5rem', color: '#856404' }}>
-              Важно знать
-            </h4>
-            <p style={{ color: '#856404', fontSize: '0.95rem', lineHeight: '1.5' }}>
-              {interpretation.validationNotes}
-            </p>
-          </div>
-        </motion.div>
-      )}
-    </div>
+      {
+        interpretation.validationNotes && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            style={{
+              background: 'linear-gradient(135deg, #fff9e608 0%, #fff3cd04 100%)',
+              border: '2px solid #ffeaa7',
+              borderRadius: '12px',
+              padding: '2rem',
+              display: 'flex',
+              gap: '1.25rem',
+              alignItems: 'flex-start'
+            }}
+          >
+            <AlertCircle size={24} color="#ff9800" style={{ flexShrink: 0, marginTop: '2px' }} />
+            <div>
+              <h4 style={{ fontWeight: '700', marginBottom: '0.75rem', color: '#856404', fontSize: '1.1rem' }}>
+                Важно знать
+              </h4>
+              <p style={{ color: '#654321', fontSize: '1rem', lineHeight: '1.6' }}>
+                {interpretation.validationNotes}
+              </p>
+            </div>
+          </motion.div>
+        )
+      }
+    </div >
   );
 
   // Компонент для вкладки распределения уровней
@@ -452,7 +551,7 @@ export const ModernAdaptiveResults: React.FC<ModernAdaptiveResultsProps> = ({
               <p style={{ fontSize: '0.9rem', color: '#999', marginBottom: '1rem' }}>
                 ⏱️ {action.duration} мин • 📊 Сложность: {
                   action.difficulty === 'easy' ? 'Простая' :
-                  action.difficulty === 'moderate' ? 'Средняя' : 'Сложная'
+                    action.difficulty === 'moderate' ? 'Средняя' : 'Сложная'
                 }
               </p>
             </div>
@@ -525,12 +624,11 @@ export const ModernAdaptiveResults: React.FC<ModernAdaptiveResultsProps> = ({
           <div style={{
             padding: '1.5rem',
             background: result.validation.reliability === 'high' ? '#e8f5e9' :
-                        result.validation.reliability === 'medium' ? '#fff9e6' : '#ffebee',
+              result.validation.reliability === 'medium' ? '#fff9e6' : '#ffebee',
             borderRadius: '12px',
-            border: `2px solid ${
-              result.validation.reliability === 'high' ? '#4CAF50' :
+            border: `2px solid ${result.validation.reliability === 'high' ? '#4CAF50' :
               result.validation.reliability === 'medium' ? '#ff9800' : '#f44336'
-            }`
+              }`
           }}>
             <div style={{ fontSize: '0.9rem', color: '#666', marginBottom: '0.5rem' }}>
               Общий рейтинг надёжности
@@ -540,14 +638,14 @@ export const ModernAdaptiveResults: React.FC<ModernAdaptiveResultsProps> = ({
               fontWeight: '700',
               color:
                 result.validation.reliability === 'high' ? '#4CAF50' :
-                result.validation.reliability === 'medium' ? '#ff9800' : '#f44336'
+                  result.validation.reliability === 'medium' ? '#ff9800' : '#f44336'
             }}>
               {result.validation.reliabilityScore}/100
             </div>
             <div style={{ fontSize: '0.85rem', marginTop: '0.5rem', color: '#666' }}>
               {
                 result.validation.reliability === 'high' ? '✓ Высокая надёжность' :
-                result.validation.reliability === 'medium' ? '⚠ Средняя надёжность' : '✗ Низкая надёжность'
+                  result.validation.reliability === 'medium' ? '⚠ Средняя надёжность' : '✗ Низкая надёжность'
               }
             </div>
           </div>
@@ -618,15 +716,15 @@ export const ModernAdaptiveResults: React.FC<ModernAdaptiveResultsProps> = ({
                   width: `${result.validation.coherenceScore}%`,
                   height: '100%',
                   background: result.validation.coherenceScore > 70 ? '#4CAF50' :
-                              result.validation.coherenceScore > 40 ? '#ff9800' : '#f44336'
+                    result.validation.coherenceScore > 40 ? '#ff9800' : '#f44336'
                 }} />
               </div>
               <p style={{ fontSize: '0.85rem', color: '#999', marginTop: '0.5rem' }}>
                 {result.validation.coherenceScore > 70
                   ? 'Ответы очень согласованные'
                   : result.validation.coherenceScore > 40
-                  ? 'Есть некоторые противоречия'
-                  : 'Много противоречий в ответах'}
+                    ? 'Есть некоторые противоречия'
+                    : 'Много противоречий в ответах'}
               </p>
             </div>
 
@@ -690,24 +788,38 @@ export const ModernAdaptiveResults: React.FC<ModernAdaptiveResultsProps> = ({
       minHeight: '100vh',
       paddingBottom: '3rem'
     }}>
-      {/* Header */}
+      {/* Hero Results Section */}
       <div style={{
-        background: 'white',
-        borderBottom: '1px solid #e0e0e0',
-        padding: '2rem 1rem'
+        background: `linear-gradient(135deg, ${getLevelColor(roundedLevel)}15 0%, ${getLevelColor(roundedLevel)}05 100%)`,
+        borderBottom: `3px solid ${getLevelColor(roundedLevel)}`,
+        padding: '3rem 1rem'
       }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
-          <h1 style={{
-            fontSize: '2.5rem',
-            fontWeight: '700',
-            marginBottom: '0.5rem',
-            color: getLevelColor(roundedLevel)
-          }}>
-            Ваши результаты 🎉
-          </h1>
-          <p style={{ color: '#999' }}>
-            Лестница Союза - Определение уровня психологической зрелости в отношениях
-          </p>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={{ textAlign: 'center', marginBottom: '2rem' }}
+          >
+            <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🎉</div>
+            <h1 style={{
+              fontSize: 'clamp(2rem, 5vw, 3.5rem)',
+              fontWeight: '800',
+              marginBottom: '1rem',
+              color: getLevelColor(roundedLevel),
+              lineHeight: '1.2'
+            }}>
+              Ваш результат готов!
+            </h1>
+            <p style={{
+              fontSize: '1.15rem',
+              color: '#666',
+              marginBottom: '2rem',
+              maxWidth: '700px',
+              margin: '0 auto 2rem'
+            }}>
+              Лестница Союза - Психологическая зрелость в отношениях
+            </p>
+          </motion.div>
         </div>
       </div>
 
@@ -743,8 +855,8 @@ export const ModernAdaptiveResults: React.FC<ModernAdaptiveResultsProps> = ({
             >
               {
                 tab === 'summary' ? '📋 Резюме' :
-                tab === 'breakdown' ? '📊 Распределение' :
-                tab === 'actions' ? '🎯 Действия' : '✅ Валидация'
+                  tab === 'breakdown' ? '📊 Распределение' :
+                    tab === 'actions' ? '🎯 Действия' : '✅ Валидация'
               }
             </button>
           ))}
@@ -759,33 +871,45 @@ export const ModernAdaptiveResults: React.FC<ModernAdaptiveResultsProps> = ({
         </div>
 
         {/* Action Buttons */}
-        <div style={{
-          maxWidth: '900px',
-          margin: '0 auto',
-          display: 'flex',
-          gap: '1rem',
-          justifyContent: 'center'
-        }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 }}
+          style={{
+            maxWidth: '900px',
+            margin: '0 auto',
+            display: 'flex',
+            gap: '1.25rem',
+            justifyContent: 'center',
+            flexWrap: 'wrap'
+          }}
+        >
           <button
             onClick={onRestart}
             style={{
-              padding: '1rem 2rem',
-              borderRadius: '8px',
-              border: '1px solid #e0e0e0',
+              padding: '1.1rem 2.25rem',
+              borderRadius: '10px',
+              border: '2px solid #e0e0e0',
               background: 'white',
               cursor: 'pointer',
               fontSize: '1rem',
               fontWeight: '600',
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
-              gap: '0.5rem',
+              gap: '0.75rem',
               transition: 'all 0.3s ease'
             }}
             onMouseOver={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background = '#f5f5f5';
+              const btn = e.currentTarget as HTMLButtonElement;
+              btn.style.background = '#f9f9f9';
+              btn.style.borderColor = '#2196F3';
+              btn.style.color = '#2196F3';
             }}
             onMouseOut={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background = 'white';
+              const btn = e.currentTarget as HTMLButtonElement;
+              btn.style.background = 'white';
+              btn.style.borderColor = '#e0e0e0';
+              btn.style.color = '#333';
             }}
           >
             <RotateCcw size={20} />
@@ -805,30 +929,35 @@ export const ModernAdaptiveResults: React.FC<ModernAdaptiveResultsProps> = ({
               });
             }}
             style={{
-              padding: '1rem 2rem',
-              borderRadius: '8px',
+              padding: '1.1rem 2.25rem',
+              borderRadius: '10px',
               border: 'none',
-              background: '#2196F3',
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
               color: 'white',
               cursor: 'pointer',
               fontSize: '1rem',
               fontWeight: '600',
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
-              gap: '0.5rem',
-              transition: 'all 0.3s ease'
+              gap: '0.75rem',
+              transition: 'all 0.3s ease',
+              boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)'
             }}
             onMouseOver={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background = '#1976D2';
+              const btn = e.currentTarget as HTMLButtonElement;
+              btn.style.transform = 'translateY(-2px)';
+              btn.style.boxShadow = '0 8px 25px rgba(102, 126, 234, 0.6)';
             }}
             onMouseOut={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background = '#2196F3';
+              const btn = e.currentTarget as HTMLButtonElement;
+              btn.style.transform = 'translateY(0)';
+              btn.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.4)';
             }}
           >
             <Share2 size={20} />
             Поделиться результатом
           </button>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
