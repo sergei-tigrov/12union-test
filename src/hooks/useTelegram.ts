@@ -6,13 +6,30 @@ const tg = WebApp;
 export function useTelegram() {
     const [isReady, setIsReady] = useState(false);
 
+    // Проверка, запущены ли мы в Telegram
+    const isTelegram = typeof window !== 'undefined' && !!(window as any).Telegram?.WebApp?.initData;
+
+    // Инициализация при старте
     useEffect(() => {
         if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp) {
             tg.ready();
-            tg.expand();
             setIsReady(true);
         }
     }, []);
+
+    // Эффект для расширения и установки класса
+    useEffect(() => {
+        if (isReady) {
+            tg.expand();
+        }
+
+        // Добавляем класс для компактного режима в Telegram
+        if (isTelegram) {
+            document.body.classList.add('telegram-webapp-mode');
+        } else {
+            document.body.classList.remove('telegram-webapp-mode');
+        }
+    }, [isReady, isTelegram]);
 
     const onClose = () => {
         tg.close();
@@ -33,7 +50,6 @@ export function useTelegram() {
         user: tg.initDataUnsafe?.user,
         queryId: tg.initDataUnsafe?.query_id,
         isReady,
-        // Проверка, запущены ли мы в Telegram
-        isTelegram: typeof window !== 'undefined' && !!(window as any).Telegram?.WebApp?.initData
+        isTelegram
     };
 }

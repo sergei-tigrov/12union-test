@@ -48,14 +48,22 @@
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
-  --text-xs: 0.75rem;     /* 12px */
-  --text-sm: 0.875rem;    /* 14px */
-  --text-base: 1rem;      /* 16px */
-  --text-lg: 1.125rem;    /* 18px */
-  --text-xl: 1.25rem;     /* 20px */
-  --text-2xl: 1.5rem;     /* 24px */
-  --text-3xl: 1.875rem;   /* 30px */
-  --text-4xl: 2.25rem;    /* 36px */
+  --text-xs: 0.75rem;
+  /* 12px */
+  --text-sm: 0.875rem;
+  /* 14px */
+  --text-base: 1rem;
+  /* 16px */
+  --text-lg: 1.125rem;
+  /* 18px */
+  --text-xl: 1.25rem;
+  /* 20px */
+  --text-2xl: 1.5rem;
+  /* 24px */
+  --text-3xl: 1.875rem;
+  /* 30px */
+  --text-4xl: 2.25rem;
+  /* 36px */
 
   --font-light: 300;
   --font-normal: 400;
@@ -68,24 +76,40 @@
   --leading-relaxed: 1.75;
 
   /* 📐 Spacing & Layout */
-  --space-1: 0.25rem;   /* 4px */
-  --space-2: 0.5rem;    /* 8px */
-  --space-3: 0.75rem;   /* 12px */
-  --space-4: 1rem;      /* 16px */
-  --space-5: 1.25rem;   /* 20px */
-  --space-6: 1.5rem;    /* 24px */
-  --space-8: 2rem;      /* 32px */
-  --space-10: 2.5rem;   /* 40px */
-  --space-12: 3rem;     /* 48px */
-  --space-16: 4rem;     /* 64px */
+  --space-1: 0.25rem;
+  /* 4px */
+  --space-2: 0.5rem;
+  /* 8px */
+  --space-3: 0.75rem;
+  /* 12px */
+  --space-4: 1rem;
+  /* 16px */
+  --space-5: 1.25rem;
+  /* 20px */
+  --space-6: 1.5rem;
+  /* 24px */
+  --space-8: 2rem;
+  /* 32px */
+  --space-10: 2.5rem;
+  /* 40px */
+  --space-12: 3rem;
+  /* 48px */
+  --space-16: 4rem;
+  /* 64px */
 
   /* 🔄 Border Radius */
-  --radius-sm: 0.375rem;  /* 6px */
-  --radius-md: 0.5rem;    /* 8px */
-  --radius-lg: 0.75rem;   /* 12px */
-  --radius-xl: 1rem;      /* 16px */
-  --radius-2xl: 1.5rem;   /* 24px */
-  --radius-3xl: 2rem;     /* 32px */
+  --radius-sm: 0.375rem;
+  /* 6px */
+  --radius-md: 0.5rem;
+  /* 8px */
+  --radius-lg: 0.75rem;
+  /* 12px */
+  --radius-xl: 1rem;
+  /* 16px */
+  --radius-2xl: 1.5rem;
+  /* 24px */
+  --radius-3xl: 2rem;
+  /* 32px */
 
   /* 🌟 Shadows */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
@@ -105,17 +129,17 @@
   --gradient-hero: linear-gradient(135deg, #ffecd2 0%, #fcb69f 25%, #667eea 75%, #764ba2 100%);
   --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.3) 100%);
   --gradient-surface: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
-  
+
   /* Анимируемые градиенты */
   --gradient-animated-1: linear-gradient(45deg, #ff9a9e, #fecfef, #a8edea);
   --gradient-animated-2: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
   --gradient-hover: linear-gradient(135deg, #ff6b9d 0%, #c44569 25%, #6c5ce7 75%, #a29bfe 100%);
-  
+
   /* Нежные пастельные градиенты для текстовых блоков */
   --gradient-hover-soft: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(139, 92, 246, 0.08) 25%, rgba(236, 72, 153, 0.06) 50%, rgba(16, 185, 129, 0.07) 75%, rgba(255, 255, 255, 0.15) 100%);
   --gradient-card-hover-soft: linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(248, 250, 252, 0.9) 25%, rgba(241, 245, 249, 0.8) 50%, rgba(255, 255, 255, 0.7) 75%, rgba(255, 255, 255, 0.6) 100%);
   --gradient-icon-bg: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(139, 92, 246, 0.12) 50%, rgba(236, 72, 153, 0.08) 100%);
-  
+
   /* Размеры для анимаций */
   --gradient-size: 300% 300%;
 
@@ -124,6 +148,62 @@
   --breakpoint-md: 768px;
   --breakpoint-lg: 1024px;
   --breakpoint-xl: 1280px;
+}
+
+/* 📱 Telegram Mini App Compact Mode */
+body.telegram-webapp-mode {
+  /* Уменьшенные шрифты */
+  --text-xs: 0.7rem;
+  --text-sm: 0.8rem;
+  --text-base: 0.9rem;
+  --text-lg: 1rem;
+  --text-xl: 1.125rem;
+  --text-2xl: 1.25rem;
+  --text-3xl: 1.5rem;
+  --text-4xl: 1.75rem;
+
+  /* Уменьшенные отступы */
+  --space-1: 0.125rem;
+  --space-2: 0.25rem;
+  --space-3: 0.5rem;
+  --space-4: 0.75rem;
+  --space-5: 1rem;
+  --space-6: 1.25rem;
+  --space-8: 1.5rem;
+  --space-10: 2rem;
+  --space-12: 2.5rem;
+  --space-16: 3rem;
+
+  /* Уменьшенные радиусы */
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.25rem;
+}
+
+/* Компактный контейнер для Telegram */
+body.telegram-webapp-mode .container {
+  padding: 0 var(--space-3);
+  max-width: 100%;
+}
+
+/* Компактные карточки для Telegram */
+body.telegram-webapp-mode .modern-card,
+body.telegram-webapp-mode .beautiful-section,
+body.telegram-webapp-mode .result-card {
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  /* Меньше тень */
+}
+
+/* Убираем лишние отступы у заголовков в Telegram */
+body.telegram-webapp-mode h1,
+body.telegram-webapp-mode h2,
+body.telegram-webapp-mode h3 {
+  margin-bottom: var(--space-3);
+  line-height: 1.3;
 }
 
 /* 🌓 Dark mode support - ОТКЛЮЧЕН для единого стиля */
@@ -272,7 +352,7 @@
     padding: var(--space-4);
     border-radius: var(--radius-xl);
   }
-  
+
   .modern-card:hover {
     transform: none;
   }
@@ -353,6 +433,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -360,8 +441,15 @@
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
 }
 
 @keyframes slideInRight {
@@ -369,6 +457,7 @@
     opacity: 0;
     transform: translateX(20px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -389,31 +478,57 @@
 
 /* ✨ Градиентные анимации */
 @keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 @keyframes gradientPulse {
-  0%, 100% { 
-    background-size: 100% 100%; 
+
+  0%,
+  100% {
+    background-size: 100% 100%;
     opacity: 0.8;
   }
-  50% { 
-    background-size: 120% 120%; 
+
+  50% {
+    background-size: 120% 120%;
     opacity: 1;
   }
 }
 
 @keyframes shimmer {
-  0% { background-position: -200% 0%; }
-  100% { background-position: 200% 0%; }
+  0% {
+    background-position: -200% 0%;
+  }
+
+  100% {
+    background-position: 200% 0%;
+  }
 }
 
 @keyframes gradientFloat {
-  0%, 100% { transform: translateY(0px) scale(1); }
-  33% { transform: translateY(-10px) scale(1.02); }
-  66% { transform: translateY(5px) scale(0.98); }
+
+  0%,
+  100% {
+    transform: translateY(0px) scale(1);
+  }
+
+  33% {
+    transform: translateY(-10px) scale(1.02);
+  }
+
+  66% {
+    transform: translateY(5px) scale(0.98);
+  }
 }
 
 /* 🎨 Градиентные классы */
@@ -523,14 +638,14 @@
   line-height: 1;
 }
 
-.icon-text-aligned > *:first-child {
+.icon-text-aligned>*:first-child {
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
-.icon-text-aligned > *:last-child {
+.icon-text-aligned>*:last-child {
   display: flex;
   align-items: center;
   line-height: 1.2;
@@ -544,14 +659,14 @@
   line-height: 1;
 }
 
-.icon-text-aligned-sm > *:first-child {
+.icon-text-aligned-sm>*:first-child {
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
-.icon-text-aligned-sm > *:last-child {
+.icon-text-aligned-sm>*:last-child {
   display: flex;
   align-items: center;
   line-height: 1.1;
@@ -564,14 +679,14 @@
   line-height: 1;
 }
 
-.icon-text-aligned-lg > *:first-child {
+.icon-text-aligned-lg>*:first-child {
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
-.icon-text-aligned-lg > *:last-child {
+.icon-text-aligned-lg>*:last-child {
   display: flex;
   align-items: center;
   line-height: 1.3;
