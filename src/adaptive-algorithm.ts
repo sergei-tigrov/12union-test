@@ -64,167 +64,33 @@ export function initializeAdaptiveTest(sessionId: string): AdaptiveTestState {
   };
 }
 
-/**
- * Рассчитать точность по каждому уровню на основе ответов
- * Использует взвешенные очки с учетом целевых уровней вопроса
- */
-function calculateLevelScores(
-  answers: UserAnswer[],
-  questions: Map<string, SmartQuestion>
-): Map<UnionLevel, { score: number; confidence: number }> {
-  const levelScores = new Map<UnionLevel, { score: number; confidence: number }>();
 
-  // Инициализировать все уровни
-  for (let level: UnionLevel = 1; level <= 12; level++) {
-    levelScores.set(level, { score: 0, confidence: 0 });
-  }
 
-  // Обработать каждый ответ
-  answers.forEach((answer) => {
-    const question = questions.get(answer.questionId);
-    if (!question) return;
-
-    // Найти выбранный вариант ответа
-    const selectedOption = question.options.find(
-      (opt) => opt.id === answer.selectedOptionId
-    );
-    if (!selectedOption) return;
-
-    const selectedLevel = selectedOption.level;
-    const targetLevels = question.targetLevels;
-
-    // Рассчитать вес этого ответа для каждого уровня
-    // Максимальный вес если вопрос предназначен для этого уровня
-    // Убывающий вес по мере удаления от выбранного уровня
-    for (let level: UnionLevel = 1; level <= 12; level++) {
-      const current = levelScores.get(level)!;
-
-      // Базовый вес: попадает ли уровень в целевые уровни вопроса
-      let weight = targetLevels.includes(level) ? 1.0 : 0.3;
-
-      // Более высокий вес если ответ непосредственно указывает на этот уровень
-      if (selectedLevel === level) {
-        weight = 2.0;
-      }
-
-      // Снижение веса по мере удаления (более резкое падение)
-      const distance = Math.abs(level - selectedLevel);
-      // Было: 1 - distance / 12 (линейное, медленное)
-      // Стало: 1 / (1 + distance) (гиперболическое, быстрое)
-      // Или экспоненциальное: Math.pow(0.7, distance)
-      const distancePenalty = Math.pow(0.6, distance);
-      weight *= distancePenalty;
-
-      // Добавить в итоговый счёт
-      current.score += weight;
-    }
-  });
-
-  // Нормализовать оценки и рассчитать уверенность
-  const totalScore = Array.from(levelScores.values()).reduce(
-    (sum, s) => sum + s.score,
-    0
-  );
-
-  if (totalScore > 0) {
-    Array.from(levelScores.values()).forEach((item) => {
-      item.confidence = item.score / totalScore; // 0-1
-      item.score = item.score / totalScore; // Нормализовать 0-1
-    });
-  }
-
-  return levelScores;
-}
+import { diagnoseUser } from './diagnostic-engine';
 
 /**
  * Определить детектируемый уровень на основе текущих ответов
- * Использует логику "Доминантного уровня" с учетом "Нижнего якоря"
+ * Использует новый DIAGNOSTIC ENGINE (Quantum Logic)
  */
 function detectCurrentLevel(
   answers: UserAnswer[],
   questions: Map<string, SmartQuestion>
 ): LevelDetection {
-  const levelScores = calculateLevelScores(answers, questions);
-  const scores = Array.from(levelScores.entries());
+  // Используем новый мощный движок диагностики
+  const diagnosis = diagnoseUser(answers, questions);
 
-  // 1. Найти уровень с наивысшим баллом (Доминанта)
-  let maxScore = -1;
-  let dominantLevel: UnionLevel = 1;
-  let topConfidence = 0;
-
-  scores.forEach(([level, { score, confidence }]) => {
-    if (score > maxScore) {
-      maxScore = score;
-      dominantLevel = level;
-      topConfidence = confidence;
-    }
-  });
-
-  // 2. Найти "Нижний якорь" (Lowest Anchor)
-  // Это самый низкий уровень, набравший значимое количество баллов (например, > 15% от максимума)
-  // Психологический принцип: развитие определяется самым слабым звеном.
-  let lowestAnchor: UnionLevel = dominantLevel;
-  const significantThreshold = maxScore * 0.25; // Порог значимости (25% от лидера)
-
-  for (let level: UnionLevel = 1; level < dominantLevel; level++) {
-    const current = levelScores.get(level);
-    if (current && current.score > significantThreshold) {
-      lowestAnchor = level;
-      break; // Нашли самый первый (низкий) значимый уровень
-    }
-  }
-
-  // 3. Рассчитать итоговый уровень
-  let detectedLevel = 0;
-
-  // Если есть значительный разрыв между Якорем и Доминантой (более 2 уровней)
-  // Значит, у человека есть "хвосты" внизу, которые тянут его назад.
-  // Мы смещаем оценку в сторону якоря.
-  if (dominantLevel - lowestAnchor > 2) {
-    // "Пессимистичный" расчет: берем среднее между якорем и доминантой, но ближе к якорю
-    // Например: Якорь 1, Доминанта 12. Результат не 6.5, а скорее 2-3 (так как 1-й уровень критичен)
-
-    // Вес якоря выше, чем вес доминанты в таких случаях
-    const anchorWeight = 0.7;
-    const dominantWeight = 0.3;
-    detectedLevel = (lowestAnchor * anchorWeight) + (dominantLevel * dominantWeight);
-  } else {
-    // Если разрыва нет или он мал (нормальное развитие), считаем взвешенное среднее
-    // НО только вокруг доминанты (±2 уровня), чтобы отсечь случайные "выбросы"
-    let totalWeight = 0;
-    let weightedSum = 0;
-
-    scores.forEach(([level, { score }]) => {
-      // Учитываем только уровни рядом с доминантой или якорем
-      if (Math.abs(level - dominantLevel) <= 2 || (level >= lowestAnchor && level <= dominantLevel)) {
-        weightedSum += level * score;
-        totalWeight += score;
-      }
-    });
-
-    if (totalWeight > 0) {
-      detectedLevel = weightedSum / totalWeight;
-    } else {
-      detectedLevel = dominantLevel;
-    }
-  }
-
-  // Определить зону на основе ЯКОРЯ (безопаснее), а не среднего
-  // Если якорь на 1, а среднее 5 - мы все равно должны проверять зону Low
+  // Определяем зону на основе БАЗОВОГО уровня (фундамента)
+  // Это критически важно: зона определяется тем, где мы стоим прочно, а не где летаем в мечтах
   let zone: 'low' | 'middle' | 'high';
-  const zoneReferenceLevel = Math.min(Math.round(detectedLevel), lowestAnchor + 1); // Компромисс
-
-  if (zoneReferenceLevel <= 4) zone = 'low';
-  else if (zoneReferenceLevel <= 8) zone = 'middle';
+  if (diagnosis.baseLevel <= 4) zone = 'low';
+  else if (diagnosis.baseLevel <= 8) zone = 'middle';
   else zone = 'high';
 
   return {
-    detectedLevel: Math.round(detectedLevel * 10) / 10,
-    confidence: topConfidence,
+    detectedLevel: diagnosis.currentLevel,
+    confidence: 1.0, // Новый движок детерминирован
     zone,
-    levelScoreDistribution: new Map(
-      scores.map(([level, { confidence }]) => [level, confidence])
-    ),
+    levelScoreDistribution: diagnosis.levelScores,
   };
 }
 
