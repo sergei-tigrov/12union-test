@@ -107,9 +107,12 @@ function calculateLevelScores(
         weight = 2.0;
       }
 
-      // Снижение веса по мере удаления
+      // Снижение веса по мере удаления (более резкое падение)
       const distance = Math.abs(level - selectedLevel);
-      const distancePenalty = Math.max(0, 1 - distance / 12);
+      // Было: 1 - distance / 12 (линейное, медленное)
+      // Стало: 1 / (1 + distance) (гиперболическое, быстрое)
+      // Или экспоненциальное: Math.pow(0.7, distance)
+      const distancePenalty = Math.pow(0.6, distance);
       weight *= distancePenalty;
 
       // Добавить в итоговый счёт
@@ -144,8 +147,8 @@ function detectCurrentLevel(
   const scores = Array.from(levelScores.entries());
 
   // Найти уровень с наивысшим баллом
-  let maxScore = 0;
-  let topLevel: UnionLevel = 6;
+  let maxScore = -1;
+  let topLevel: UnionLevel = 1;
   let topConfidence = 0;
 
   scores.forEach(([level, { score, confidence }]) => {
