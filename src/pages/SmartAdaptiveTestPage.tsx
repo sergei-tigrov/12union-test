@@ -19,6 +19,21 @@ export const SmartAdaptiveTestPage: React.FC = () => {
   const [selectedScenario, setSelectedScenario] = useState<TestScenario | null>(null);
   const [testResult, setTestResult] = useState<TestResult | null>(null);
 
+  // Загружаем сохраненный результат при монтировании
+  React.useEffect(() => {
+    const savedResult = localStorage.getItem('adaptiveTestResult');
+    if (savedResult) {
+      try {
+        const parsedResult = JSON.parse(savedResult);
+        setTestResult(parsedResult);
+        console.log('🔄 SmartAdaptiveTestPage: Restored saved result from localStorage');
+      } catch (e) {
+        console.error('Failed to parse saved result', e);
+        localStorage.removeItem('adaptiveTestResult');
+      }
+    }
+  }, []);
+
   const handleTestComplete = (result: TestResult) => {
     console.log('🔥 SmartAdaptiveTestPage: handleTestComplete called with result:', result);
     setTestResult(result);
