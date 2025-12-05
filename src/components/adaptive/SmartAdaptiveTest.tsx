@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
+import { useTelegram } from '../../hooks/useTelegram';
 
 // Утилиты - НОВАЯ ЛОГИКА
 import {
@@ -87,6 +88,7 @@ export const SmartAdaptiveTest: React.FC<SmartAdaptiveTestProps> = ({
   relationshipStatus = 'single_potential',
   testScenario
 }) => {
+  const { tg, isTelegram } = useTelegram();
   const sessionId = `session-${Date.now()}`;
   const [testState, setTestState] = useState<AdaptiveTestState | null>(null);
   const [currentQuestionData, setCurrentQuestionData] = useState<QuestionSelection | null>(null);
@@ -127,12 +129,53 @@ export const SmartAdaptiveTest: React.FC<SmartAdaptiveTestProps> = ({
     setStartTime(Date.now());
   }, [currentQuestionData]);
 
+  // Управление кнопкой Telegram MainButton
+  useEffect(() => {
+    if (!isTelegram) return;
+
+    if (selectedOption && !isLoading) {
+      tg.MainButton.setText('Далее');
+      tg.MainButton.show();
+      tg.MainButton.onClick(handleNext);
+    } else {
+      tg.MainButton.hide();
+    }
+
+    return () => {
+      tg.MainButton.offClick(handleNext);
+    };
+  }, [selectedOption, isLoading, isTelegram, currentQuestionData]); // Зависимости для обновления обработчика
+
+  // Управление кнопкой Telegram BackButton
+  useEffect(() => {
+    if (!isTelegram) return;
+
+    if (questionHistory.length > 0) {
+      tg.BackButton.show();
+      tg.BackButton.onClick(handleGoBack);
+    } else {
+      tg.BackButton.hide();
+    }
+
+    return () => {
+      tg.BackButton.offClick(handleGoBack);
+    };
+  }, [questionHistory, isTelegram]);
+
+
   const handleAnswerSelect = (optionId: string) => {
     setSelectedOption(optionId);
+    if (isTelegram) {
+      tg.HapticFeedback.impactOccurred('light');
+    }
   };
 
   const handleNext = () => {
     if (!selectedOption || !currentQuestionData || !testState) return;
+
+    if (isTelegram) {
+      tg.HapticFeedback.impactOccurred('medium');
+    }
 
     setIsLoading(true);
 
@@ -174,26 +217,7 @@ export const SmartAdaptiveTest: React.FC<SmartAdaptiveTestProps> = ({
     if (testState.currentPhase === 'complete') {
       console.log('🎉 Тест завершен! Рассчитываю результаты...');
       completeTest(testState);
-
-      // Валидируем результаты
-      const validationResult = validateTestResults(testState.answers);
-
-      // Рассчитываем финальный результат
-      const finalResult = calculateTestResult(
-        sessionId,
-        testState.answers,
-        validationResult.metrics,
-        testMode,
-        relationshipStatus,
-        testScenario
-      );
-
-      // Интерпретируем результат
-      const interpretation = interpretResult(finalResult);
-
-      console.log('✅ Результаты готовы:', finalResult);
-      console.log('📝 Интерпретация:', interpretation);
-      onComplete(finalResult);
+      handleCompletion(testState);
       return;
     }
 
@@ -204,8 +228,6 @@ export const SmartAdaptiveTest: React.FC<SmartAdaptiveTestProps> = ({
     if (!nextQuestion) {
       console.log('⚠️ Вопросов больше нет, принудительное завершение...');
       completeTest(testState); // Это обновит фазу на complete
-
-      // Рекурсивно вызываем логику завершения
       handleCompletion(testState);
       return;
     }
@@ -237,6 +259,12 @@ export const SmartAdaptiveTest: React.FC<SmartAdaptiveTestProps> = ({
 
     console.log('✅ Результаты готовы:', finalResult);
     console.log('📝 Интерпретация:', interpretation);
+
+    if (isTelegram) {
+      tg.MainButton.hide();
+      tg.BackButton.hide();
+    }
+
     onComplete(finalResult);
   };
 
@@ -257,6 +285,10 @@ export const SmartAdaptiveTest: React.FC<SmartAdaptiveTestProps> = ({
 
   const handleGoBack = () => {
     if (questionHistory.length === 0 || !testState) return;
+
+    if (isTelegram) {
+      tg.HapticFeedback.impactOccurred('light');
+    }
 
     // Получаем предыдущий вопрос и ответ
     const previousEntry = questionHistory[questionHistory.length - 1];
@@ -313,7 +345,7 @@ export const SmartAdaptiveTest: React.FC<SmartAdaptiveTestProps> = ({
   const currentQuestion = currentQuestionData.nextQuestion;
 
   return (
-    <div className="container">
+    <div className="container" style={{ paddingBottom: isTelegram ? '80px' : '0' }}>
       {/* Прогресс */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -413,81 +445,83 @@ export const SmartAdaptiveTest: React.FC<SmartAdaptiveTestProps> = ({
         </div>
       </motion.div>
 
-      {/* Навигация */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}
-      >
-        {/* Кнопка назад */}
-        {questionHistory.length > 0 && (
+      {/* Навигация - скрываем в Telegram, так как используем нативные кнопки */}
+      {!isTelegram && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}
+        >
+          {/* Кнопка назад */}
+          {questionHistory.length > 0 && (
+            <button
+              onClick={handleGoBack}
+              className="compact-btn compact-btn--outline"
+              style={{
+                minWidth: '120px',
+                height: '44px',
+                fontSize: '1rem',
+                fontWeight: '500',
+                borderRadius: '50px',
+                border: '1px solid var(--primary-300)',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                background: 'white',
+                color: 'var(--primary-600)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                justifyContent: 'center'
+              }}
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Назад</span>
+            </button>
+          )}
+
+          {/* Кнопка далее */}
           <button
-            onClick={handleGoBack}
-            className="compact-btn compact-btn--outline"
+            onClick={handleNext}
+            disabled={!selectedOption || isLoading}
+            className={selectedOption && !isLoading ? 'gradient-button' : ''}
             style={{
-              minWidth: '120px',
+              minWidth: '160px',
               height: '44px',
               fontSize: '1rem',
-              fontWeight: '500',
+              fontWeight: '600',
               borderRadius: '50px',
-              border: '1px solid var(--primary-300)',
-              cursor: 'pointer',
+              border: selectedOption && !isLoading ? 'none' : '1px solid var(--primary-300)',
+              cursor: selectedOption && !isLoading ? 'pointer' : 'not-allowed',
               transition: 'all 0.3s ease',
-              background: 'white',
-              color: 'var(--primary-600)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              justifyContent: 'center'
+              background: selectedOption && !isLoading ? undefined : 'white',
+              color: selectedOption && !isLoading ? undefined : 'var(--primary-500)',
+              opacity: selectedOption && !isLoading ? 1 : 0.6
             }}
+            data-autoclicker-target="next"
+            data-testid="next-button"
           >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Назад</span>
+            {isLoading ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center' }}>
+                <div style={{
+                  width: '18px',
+                  height: '18px',
+                  border: '2px solid currentColor',
+                  borderTop: '2px solid transparent',
+                  borderRadius: '50%',
+                  animation: 'spin 1s linear infinite'
+                }}></div>
+                <span>Обработка...</span>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center' }}>
+                <span>Далее</span>
+                <span>→</span>
+              </div>
+            )}
           </button>
-        )}
-
-        {/* Кнопка далее */}
-        <button
-          onClick={handleNext}
-          disabled={!selectedOption || isLoading}
-          className={selectedOption && !isLoading ? 'gradient-button' : ''}
-          style={{
-            minWidth: '160px',
-            height: '44px',
-            fontSize: '1rem',
-            fontWeight: '600',
-            borderRadius: '50px',
-            border: selectedOption && !isLoading ? 'none' : '1px solid var(--primary-300)',
-            cursor: selectedOption && !isLoading ? 'pointer' : 'not-allowed',
-            transition: 'all 0.3s ease',
-            background: selectedOption && !isLoading ? undefined : 'white',
-            color: selectedOption && !isLoading ? undefined : 'var(--primary-500)',
-            opacity: selectedOption && !isLoading ? 1 : 0.6
-          }}
-          data-autoclicker-target="next"
-          data-testid="next-button"
-        >
-          {isLoading ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center' }}>
-              <div style={{
-                width: '18px',
-                height: '18px',
-                border: '2px solid currentColor',
-                borderTop: '2px solid transparent',
-                borderRadius: '50%',
-                animation: 'spin 1s linear infinite'
-              }}></div>
-              <span>Обработка...</span>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center' }}>
-              <span>Далее</span>
-              <span>→</span>
-            </div>
-          )}
-        </button>
-      </motion.div>
+        </motion.div>
+      )}
 
     </div>
   );

@@ -9,13 +9,12 @@ import { analyzeJealousyDynamics } from '../../utils/analysis-psychology';
  * Рефакторинговый компонент анализа динамики ревности
  */
 const JealousyDynamicsAnalysisRefactored: React.FC<JealousyDynamicsProps> = ({
-  jealousyAnswers: _jealousyAnswers,
   indicators = [],
   personalMaturity
 }) => {
   // Используем утилиту для анализа динамики ревности
   const dynamics = analyzeJealousyDynamics(indicators, personalMaturity);
-  
+
   // Получаем иконку в зависимости от типа динамики ревности
   const getDynamicsIcon = () => {
     switch (dynamics.type) {
@@ -62,7 +61,7 @@ const JealousyDynamicsAnalysisRefactored: React.FC<JealousyDynamicsProps> = ({
           maxWidth="max-w-sm"
         />
       </div>
-      
+
       <AnalysisCard
         title={dynamics.title}
         description={dynamics.description}

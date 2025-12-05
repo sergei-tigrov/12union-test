@@ -9,59 +9,59 @@ const UnionLadderLogo: React.FC = () => {
   return (
     <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
       {/* Столбики роста в нежных тонах */}
-      
+
       {/* Красный столбик (самый низкий) */}
-      <rect 
-        x="4" 
-        y="20" 
-        width="5" 
-        height="8" 
-        fill="#ff9999" 
-        rx="2" 
+      <rect
+        x="4"
+        y="20"
+        width="5"
+        height="8"
+        fill="#ff9999"
+        rx="2"
         opacity="0.9"
       />
-      
+
       {/* Желтый столбик */}
-      <rect 
-        x="10" 
-        y="16" 
-        width="5" 
-        height="12" 
-        fill="#ffeb9c" 
-        rx="2" 
+      <rect
+        x="10"
+        y="16"
+        width="5"
+        height="12"
+        fill="#ffeb9c"
+        rx="2"
         opacity="0.9"
       />
-      
+
       {/* Зеленый столбик */}
-      <rect 
-        x="16" 
-        y="12" 
-        width="5" 
-        height="16" 
-        fill="#a8e6a3" 
-        rx="2" 
+      <rect
+        x="16"
+        y="12"
+        width="5"
+        height="16"
+        fill="#a8e6a3"
+        rx="2"
         opacity="0.9"
       />
-      
+
       {/* Фиолетовый столбик (самый высокий) */}
-      <rect 
-        x="22" 
-        y="8" 
-        width="5" 
-        height="20" 
-        fill="#c8a8e9" 
-        rx="2" 
+      <rect
+        x="22"
+        y="8"
+        width="5"
+        height="20"
+        fill="#c8a8e9"
+        rx="2"
         opacity="0.9"
       />
-      
+
       {/* Тонкие блики для объема */}
-      <rect x="5" y="21" width="1" height="6" fill="rgba(255,255,255,0.4)" rx="0.5"/>
-      <rect x="11" y="17" width="1" height="10" fill="rgba(255,255,255,0.4)" rx="0.5"/>
-      <rect x="17" y="13" width="1" height="14" fill="rgba(255,255,255,0.4)" rx="0.5"/>
-      <rect x="23" y="9" width="1" height="18" fill="rgba(255,255,255,0.4)" rx="0.5"/>
-      
+      <rect x="5" y="21" width="1" height="6" fill="rgba(255,255,255,0.4)" rx="0.5" />
+      <rect x="11" y="17" width="1" height="10" fill="rgba(255,255,255,0.4)" rx="0.5" />
+      <rect x="17" y="13" width="1" height="14" fill="rgba(255,255,255,0.4)" rx="0.5" />
+      <rect x="23" y="9" width="1" height="18" fill="rgba(255,255,255,0.4)" rx="0.5" />
+
       {/* Базовая линия */}
-      <line x1="2" y1="29" x2="30" y2="29" stroke="#e0e0e0" strokeWidth="1" opacity="0.6"/>
+      <line x1="2" y1="29" x2="30" y2="29" stroke="#e0e0e0" strokeWidth="1" opacity="0.6" />
     </svg>
   );
 };
@@ -69,7 +69,14 @@ const UnionLadderLogo: React.FC = () => {
 const Header: React.FC = () => {
   const location = useLocation();
   const [showAutoClicker, setShowAutoClicker] = useState(false);
-  
+
+  // Проверяем, запущены ли мы в Telegram
+  const isTelegram = typeof window !== 'undefined' &&
+    // @ts-ignore
+    window.Telegram?.WebApp?.initData !== '';
+
+  if (isTelegram) return null;
+
   const isActive = (path: string) => {
     return location.pathname === path;
   };
@@ -78,7 +85,7 @@ const Header: React.FC = () => {
   const isDev = true; // Включено для Netlify деплоя
 
   return (
-    <header style={{ 
+    <header style={{
       background: 'var(--gradient-glass)',
       backdropFilter: 'blur(20px)',
       borderBottom: '1px solid rgba(255, 255, 255, 0.3)',
@@ -95,12 +102,12 @@ const Header: React.FC = () => {
               Лестница союза
             </span>
           </Link>
-          
+
           <nav>
             <ul style={{ display: 'flex', alignItems: 'center', gap: '2rem', listStyle: 'none', margin: 0, padding: 0 }}>
               <li>
-                <Link 
-                  to="/" 
+                <Link
+                  to="/"
                   style={{
                     textDecoration: 'none',
                     color: isActive('/') ? 'var(--accent-blue)' : 'var(--color-text)',
@@ -114,7 +121,7 @@ const Header: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link 
+                <Link
                   to="/smart-adaptive-test"
                   style={{
                     textDecoration: 'none',
@@ -162,10 +169,10 @@ const Header: React.FC = () => {
                 </>
               )}
               <li style={{ position: 'relative', zIndex: 5 }}>
-                <Link 
-                  to="/smart-adaptive-test" 
+                <Link
+                  to="/smart-adaptive-test"
                   className="gradient-button"
-                  style={{ 
+                  style={{
                     textDecoration: 'none',
                     padding: '8px 16px',
                     borderRadius: '8px',
@@ -209,7 +216,7 @@ const Header: React.FC = () => {
               overflow: 'hidden'
             }}
           >
-            <div style={{ 
+            <div style={{
               padding: '8px 12px',
               background: 'var(--gradient-glass)',
               borderBottom: '1px solid rgba(0, 0, 0, 0.1)',

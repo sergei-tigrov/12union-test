@@ -1,6 +1,6 @@
 import React from 'react';
 import { AlertTriangle, Brain, Shield, Lightbulb } from 'lucide-react';
-import { 
+import {
   TraumaPatternProps
 } from '../../types/analysis-types';
 import AnalysisCard from '../shared/AnalysisCard';
@@ -16,14 +16,10 @@ import { analyzeTraumaPattern } from '../../utils/trauma-analysis';
  */
 const TraumaPatternAnalysisRefactored: React.FC<TraumaPatternProps> = ({
   indicators = [],
-  personalMaturity,
-  // @ts-ignore - сохраняем для единообразия API, хотя пока не используется
-  relationshipMaturity,
-  // @ts-ignore - сохраняем для единообразия API, хотя пока не используется
-  traumaAnswers = []
+  personalMaturity
 }) => {
   const trauma = analyzeTraumaPattern(indicators, personalMaturity);
-  
+
   // Получаем иконку в зависимости от типа паттерна травмы
   const getTraumaIcon = () => {
     switch (trauma.type) {
@@ -52,7 +48,7 @@ const TraumaPatternAnalysisRefactored: React.FC<TraumaPatternProps> = ({
           maxWidth="max-w-sm"
         />
       </div>
-      
+
       <AnalysisCard
         title={trauma.title}
         description={trauma.description}

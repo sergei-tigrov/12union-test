@@ -1,6 +1,6 @@
 import React from 'react';
 import { Heart, Shield, Users, Zap, Lightbulb } from 'lucide-react';
-import { 
+import {
   AttachmentStyleProps
 } from '../../types/analysis-types';
 import AnalysisCard from '../shared/AnalysisCard';
@@ -19,11 +19,9 @@ import { analyzeAttachmentStyle } from '../../utils/analysis-psychology';
 const AttachmentStyleAnalysisRefactored: React.FC<AttachmentStyleProps> = ({
   indicators = [],
   personalMaturity,
-  // @ts-ignore - сохраняем для единообразия API, хотя пока не используется
-  relationshipMaturity
 }) => {
   const style = analyzeAttachmentStyle(indicators, personalMaturity);
-  
+
   // Получаем иконку в зависимости от типа привязанности
   const getStyleIcon = () => {
     switch (style.type) {
@@ -53,7 +51,7 @@ const AttachmentStyleAnalysisRefactored: React.FC<AttachmentStyleProps> = ({
           maxWidth="max-w-sm"
         />
       </div>
-      
+
       <AnalysisCard
         title={style.title}
         description={style.description}

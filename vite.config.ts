@@ -7,5 +7,16 @@ export default defineConfig({
   server: {
     port: 8080,
     strictPort: true, // Если порт занят, выводит ошибку вместо выбора другого порта
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'framer-motion'],
+          ui: ['lucide-react']
+        }
+      }
+    },
+    chunkSizeWarningLimit: 1000
   }
 })

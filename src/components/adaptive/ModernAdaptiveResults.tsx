@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 
 // Типы и функции
-import type { TestResult } from '../../types';
+import type { TestResult, UnionLevel } from '../../types';
 import { interpretResult } from '../../results-interpreter';
 import { getLevelDefinition } from '../../levels-definitions';
 import { getActionPlan } from '../../action-library';
@@ -38,8 +38,8 @@ export const ModernAdaptiveResults: React.FC<ModernAdaptiveResultsProps> = ({
   // Интерпретируем результаты
   const interpretation = interpretResult(result);
   const roundedLevel = Math.round(result.personalLevel);
-  const levelDef = getLevelDefinition(roundedLevel as any);
-  const actionPlan = getActionPlan(roundedLevel as any);
+  const levelDef = getLevelDefinition(roundedLevel as UnionLevel);
+  const actionPlan = getActionPlan(roundedLevel as UnionLevel);
 
   // Форматируем данные для отображения
   const completionTimeMinutes = Math.round(result.completionTime / 60000);
@@ -782,6 +782,8 @@ export const ModernAdaptiveResults: React.FC<ModernAdaptiveResultsProps> = ({
     </div>
   );
 
+  const { tg, isTelegram } = useTelegram();
+
   return (
     <div style={{
       backgroundColor: '#fafafa',
@@ -789,45 +791,50 @@ export const ModernAdaptiveResults: React.FC<ModernAdaptiveResultsProps> = ({
       paddingBottom: '3rem'
     }}>
       {/* Hero Results Section */}
-      <div style={{
-        background: `linear-gradient(135deg, ${getLevelColor(roundedLevel)}15 0%, ${getLevelColor(roundedLevel)}05 100%)`,
-        borderBottom: `3px solid ${getLevelColor(roundedLevel)}`,
-        padding: '3rem 1rem'
-      }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            style={{ textAlign: 'center', marginBottom: '2rem' }}
-          >
-            <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🎉</div>
-            <h1 style={{
-              fontSize: 'clamp(2rem, 5vw, 3.5rem)',
-              fontWeight: '800',
-              marginBottom: '1rem',
-              color: getLevelColor(roundedLevel),
-              lineHeight: '1.2'
-            }}>
-              Ваш результат готов!
-            </h1>
-            <p style={{
-              fontSize: '1.15rem',
+      {/* Compact Modern Header - скрываем в Telegram */}
+      {!isTelegram && (
+        <header style={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 50,
+          background: 'rgba(255, 255, 255, 0.9)',
+          backdropFilter: 'blur(10px)',
+          borderBottom: '1px solid rgba(0,0,0,0.05)',
+          padding: '1rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.02)'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+            fontSize: '1.1rem',
+            fontWeight: '700',
+            color: '#1a1a1a'
+          }}>
+            <span style={{ fontSize: '1.25rem' }}>✨</span>
+            <span>Лестница Союза</span>
+            <span style={{
+              fontSize: '0.9rem',
+              fontWeight: 'normal',
               color: '#666',
-              marginBottom: '2rem',
-              maxWidth: '700px',
-              margin: '0 auto 2rem'
+              marginLeft: '0.5rem',
+              paddingLeft: '0.75rem',
+              borderLeft: '1px solid #eee'
             }}>
-              Лестница Союза - Психологическая зрелость в отношениях
-            </p>
-          </motion.div>
-        </div>
-      </div>
+              Результат
+            </span>
+          </div>
+        </header>
+      )}
 
       {/* Tabs */}
       <div style={{
         maxWidth: '1200px',
         margin: '0 auto',
-        padding: '2rem 1rem'
+        padding: isTelegram ? '1rem' : '1.5rem 1rem 1rem'
       }}>
         <div style={{
           display: 'flex',
@@ -835,12 +842,18 @@ export const ModernAdaptiveResults: React.FC<ModernAdaptiveResultsProps> = ({
           marginBottom: '2rem',
           borderBottom: '1px solid #e0e0e0',
           overflowX: 'auto',
-          paddingBottom: '1rem'
+          paddingBottom: '1rem',
+          // Скрываем скроллбар для чистоты
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none'
         }}>
           {(['summary', 'breakdown', 'actions', 'validation'] as const).map((tab) => (
             <button
               key={tab}
-              onClick={() => setActiveTab(tab)}
+              onClick={() => {
+                setActiveTab(tab);
+                if (isTelegram) tg.HapticFeedback.impactOccurred('light');
+              }}
               style={{
                 padding: '0.75rem 1.5rem',
                 border: 'none',
@@ -881,11 +894,15 @@ export const ModernAdaptiveResults: React.FC<ModernAdaptiveResultsProps> = ({
             display: 'flex',
             gap: '1.25rem',
             justifyContent: 'center',
-            flexWrap: 'wrap'
+            flexWrap: 'wrap',
+            flexDirection: isTelegram ? 'column' : 'row' // Вертикально на мобильных в ТГ
           }}
         >
           <button
-            onClick={onRestart}
+            onClick={() => {
+              if (isTelegram) tg.HapticFeedback.impactOccurred('medium');
+              onRestart();
+            }}
             style={{
               padding: '1.1rem 2.25rem',
               borderRadius: '10px',
@@ -896,8 +913,10 @@ export const ModernAdaptiveResults: React.FC<ModernAdaptiveResultsProps> = ({
               fontWeight: '600',
               display: 'inline-flex',
               alignItems: 'center',
+              justifyContent: 'center',
               gap: '0.75rem',
-              transition: 'all 0.3s ease'
+              transition: 'all 0.3s ease',
+              width: isTelegram ? '100%' : 'auto'
             }}
             onMouseOver={(e) => {
               const btn = e.currentTarget as HTMLButtonElement;
@@ -918,15 +937,27 @@ export const ModernAdaptiveResults: React.FC<ModernAdaptiveResultsProps> = ({
 
           <button
             onClick={() => {
-              const text = `Результат теста "Лестница Союза": Уровень ${roundedLevel} - ${levelDef?.name}. ${interpretation.heroMessage}`;
-              navigator.share?.({
-                title: 'Лестница Союза',
-                text,
-                url: window.location.href
-              }).catch(() => {
-                navigator.clipboard.writeText(`${text}\n${window.location.href}`);
-                alert('Результат скопирован в буфер обмена');
-              });
+              if (isTelegram) tg.HapticFeedback.impactOccurred('medium');
+
+              const text = `Мой уровень в "Лестнице Союза": ${roundedLevel} - ${levelDef?.name}.\n${interpretation.heroMessage}\n\nПройди тест и узнай свой уровень:`;
+
+              if (isTelegram) {
+                // Используем нативный шеринг в Telegram
+                // Формируем ссылку на бота (нужно будет заменить на реальный юзернейм бота)
+                // Но лучше использовать switchInlineQuery если бот поддерживает инлайн режим
+                // Или просто открыть ссылку на шеринг
+                const url = `https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(text)}`;
+                tg.openTelegramLink(url);
+              } else {
+                navigator.share?.({
+                  title: 'Лестница Союза',
+                  text,
+                  url: window.location.href
+                }).catch(() => {
+                  navigator.clipboard.writeText(`${text}\n${window.location.href}`);
+                  alert('Результат скопирован в буфер обмена');
+                });
+              }
             }}
             style={{
               padding: '1.1rem 2.25rem',
@@ -939,9 +970,11 @@ export const ModernAdaptiveResults: React.FC<ModernAdaptiveResultsProps> = ({
               fontWeight: '600',
               display: 'inline-flex',
               alignItems: 'center',
+              justifyContent: 'center',
               gap: '0.75rem',
               transition: 'all 0.3s ease',
-              boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)'
+              boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
+              width: isTelegram ? '100%' : 'auto'
             }}
             onMouseOver={(e) => {
               const btn = e.currentTarget as HTMLButtonElement;

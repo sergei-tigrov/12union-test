@@ -1,6 +1,6 @@
 import React from 'react';
 import { Shield, Heart, Users, ArrowRight } from 'lucide-react';
-import { 
+import {
   BoundariesHealthProps
 } from '../../types/analysis-types';
 import AnalysisCard from '../shared/AnalysisCard';
@@ -16,14 +16,10 @@ import { analyzeBoundariesHealth } from '../../utils/analysis-psychology';
  */
 const BoundariesHealthAnalysisRefactored: React.FC<BoundariesHealthProps> = ({
   indicators = [],
-  personalMaturity,
-  // @ts-ignore - сохраняем для единообразия API, хотя пока не используется
-  relationshipMaturity,
-  // @ts-ignore - сохраняем для единообразия API, хотя пока не используется
-  boundariesAnswers = []
+  personalMaturity
 }) => {
   const boundaries = analyzeBoundariesHealth(indicators, personalMaturity);
-  
+
   // Получаем иконку в зависимости от типа границ
   const getBoundaryIcon = () => {
     switch (boundaries.type) {
@@ -51,7 +47,7 @@ const BoundariesHealthAnalysisRefactored: React.FC<BoundariesHealthProps> = ({
           maxWidth="max-w-sm"
         />
       </div>
-      
+
       <AnalysisCard
         title={boundaries.title}
         description={boundaries.description}

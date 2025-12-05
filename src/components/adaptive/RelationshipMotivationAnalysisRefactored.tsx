@@ -1,6 +1,6 @@
 import React from 'react';
 import { Heart, Target, ChevronRight, AlertCircle } from 'lucide-react';
-import { 
+import {
   RelationshipMotivationProps
 } from '../../types/analysis-types';
 import AnalysisCard from '../shared/AnalysisCard';
@@ -11,17 +11,16 @@ import { analyzeRelationshipMotivation } from '../../utils/relationship-motivati
  * Рефакторинговый компонент анализа мотивации отношений
  */
 const RelationshipMotivationAnalysisRefactored: React.FC<RelationshipMotivationProps> = ({
-  motivationAnswers: _motivationAnswers,
   indicators = [],
   personalMaturity,
   relationshipMaturity
 }) => {
   const motivation = analyzeRelationshipMotivation(
-    indicators, 
+    indicators,
     personalMaturity,
     relationshipMaturity
   );
-  
+
   // Получаем иконку в зависимости от типа мотивации
   const getMotivationIcon = () => {
     switch (motivation.type) {
@@ -49,7 +48,7 @@ const RelationshipMotivationAnalysisRefactored: React.FC<RelationshipMotivationP
           maxWidth="max-w-sm"
         />
       </div>
-      
+
       <AnalysisCard
         title={motivation.title}
         description={motivation.description}
