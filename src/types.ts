@@ -138,6 +138,11 @@ export interface TestResult {
   // Аналитика по измерениям (Мандала Союза)
   dimensionsScore?: DimensionsScore;
 
+  // Диагностика
+  diagnosisTitle?: string;
+  diagnosisDescription?: string;
+  diagnosisPattern?: string;
+
   // Валидация
   validation: ValidationMetrics;
 

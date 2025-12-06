@@ -45,6 +45,9 @@ export function calculateLevelScores(
   relationshipLevel: number;
   levelScores: LevelScore[];
   levelDistribution: any[]; // DetailedLevelScore[]
+  diagnosisTitle?: string;
+  diagnosisDescription?: string;
+  diagnosisPattern?: string;
 } {
   // 1. Запускаем диагностику
   // Нам нужно преобразовать answers в Map вопросов, так как движок этого требует
@@ -92,7 +95,10 @@ export function calculateLevelScores(
     personalLevel: diagnosis.currentLevel,
     relationshipLevel: diagnosis.currentLevel, // В новой логике они связаны
     levelScores,
-    levelDistribution
+    levelDistribution,
+    diagnosisTitle: diagnosis.diagnosisTitle,
+    diagnosisDescription: diagnosis.diagnosisDescription,
+    diagnosisPattern: diagnosis.pattern
   };
 }
 
@@ -205,8 +211,16 @@ export function calculateTestResult(
   relationshipStatus: any,
   testScenario?: TestScenario
 ): TestResult {
-  // Рассчитать базовые оценки
-  const { personalLevel, relationshipLevel, levelScores, levelDistribution } = calculateLevelScores(answers);
+  // Рассчитать базовые оценки и диагностику
+  const {
+    personalLevel,
+    relationshipLevel,
+    levelScores,
+    levelDistribution,
+    diagnosisTitle,
+    diagnosisDescription,
+    diagnosisPattern
+  } = calculateLevelScores(answers);
 
   // Рассчитать оценки по измерениям
   const dimensionsScore = calculateDimensionsScore(answers);
@@ -233,6 +247,9 @@ export function calculateTestResult(
     levelScores,
     levelDistribution,
     dimensionsScore, // Added this
+    diagnosisTitle,
+    diagnosisDescription,
+    diagnosisPattern,
     validation,
     answers,
     totalQuestions: answers.length,

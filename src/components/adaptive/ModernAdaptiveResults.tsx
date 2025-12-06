@@ -113,7 +113,72 @@ export const ModernAdaptiveResults: React.FC<ModernAdaptiveResultsProps> = ({
           {interpretation.heroMessage}
         </p>
 
-        {/* Stats Grid */}
+        {/* DIAGNOSTIC PROFILE CARD */}
+        {result.diagnosisTitle && (
+          <div className="modern-card" style={{
+            marginBottom: 'var(--space-6)',
+            background: 'linear-gradient(135deg, #fdfbf7 0%, #fff 100%)',
+            borderLeft: '4px solid var(--accent-purple)',
+            position: 'relative',
+            overflow: 'hidden'
+          }}>
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              width: '100px',
+              height: '100px',
+              background: 'radial-gradient(circle, rgba(138, 43, 226, 0.1) 0%, rgba(255,255,255,0) 70%)',
+              pointerEvents: 'none'
+            }} />
+
+            <h3 style={{
+              color: 'var(--accent-purple)',
+              marginBottom: 'var(--space-3)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}>
+              <span style={{ fontSize: '1.5rem' }}>🧠</span>
+              Психологический профиль
+            </h3>
+
+            <div style={{ marginBottom: 'var(--space-4)' }}>
+              <div style={{
+                fontSize: '1.2rem',
+                fontWeight: 700,
+                color: 'var(--color-text)',
+                marginBottom: '0.5rem'
+              }}>
+                {result.diagnosisTitle}
+              </div>
+              <p style={{
+                color: 'var(--color-text-muted)',
+                lineHeight: 1.6,
+                fontSize: '1rem'
+              }}>
+                {result.diagnosisDescription}
+              </p>
+            </div>
+
+            {/* Pattern Badge */}
+            {result.diagnosisPattern && (
+              <div style={{
+                display: 'inline-block',
+                padding: '4px 12px',
+                borderRadius: '20px',
+                background: 'rgba(138, 43, 226, 0.1)',
+                color: 'var(--accent-purple)',
+                fontSize: '0.8rem',
+                fontWeight: 600
+              }}>
+                Паттерн: {result.diagnosisPattern.toUpperCase()}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TABS NAVIGATION */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
