@@ -173,7 +173,9 @@ const Home = () => {
                       } as React.CSSProperties}
                     >
                       <div className="level-content">
-                        <span className="level-name">{level.name}</span>
+                        <span className="level-name">
+                          <span className="level-num">{level.id}.</span> {level.name}
+                        </span>
                       </div>
                     </motion.div>
                   </div>

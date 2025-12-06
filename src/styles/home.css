@@ -333,6 +333,12 @@
   transition: all 0.3s ease;
 }
 
+/* Номер ступени внутри кнопки - скрыт на десктопе, виден на мобильных */
+.level-num {
+  display: none;
+  font-weight: 700;
+}
+
 /* Level Details */
 .level-details {
   background: white;
@@ -719,54 +725,153 @@
     height: 20px;
   }
   
-  /* Пирамида на очень маленьких экранах */
+  /* Пирамида на очень маленьких экранах - компактный вид */
   .pyramid-step-container {
-    gap: 6px;
+    gap: 4px;
   }
-  
+
+  /* Скрываем кружки с номерами на мобильных */
   .step-number-container {
-    width: 30px;
+    display: none !important;
   }
-  
-  .step-number {
-    width: 22px;
-    height: 22px;
-    font-size: 11px;
-  }
-  
+
   .pyramid-level {
-    padding: 8px 10px;
-    height: 40px;
+    padding: 6px 12px;
+    height: 36px;
     font-size: 13px;
+    border-radius: 6px;
   }
-  
+
   .level-name {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
   }
+
+  /* Показываем номер внутри кнопки на мобильных */
+  .level-num {
+    display: inline;
+  }
+
+  /* Компактные ширины кнопок для мобильных - лестница справа */
+  .level-1 { width: 28%; margin-left: auto; }
+  .level-2 { width: 30%; margin-left: auto; }
+  .level-3 { width: 32%; margin-left: auto; }
+  .level-4 { width: 34%; margin-left: auto; }
+  .level-5 { width: 36%; margin-left: auto; }
+  .level-6 { width: 38%; margin-left: auto; }
+  .level-7 { width: 40%; margin-left: auto; }
+  .level-8 { width: 42%; margin-left: auto; }
+  .level-9 { width: 44%; margin-left: auto; }
+  .level-10 { width: 46%; margin-left: auto; }
+  .level-11 { width: 48%; margin-left: auto; }
+  .level-12 { width: 50%; margin-left: auto; }
   
-  /* Ширины ступеней для мобильных */
-  .level-1 { width: 70%; }
-  .level-2 { width: 72%; }
-  .level-3 { width: 74%; }
-  .level-4 { width: 76%; }
-  .level-5 { width: 78%; }
-  .level-6 { width: 80%; }
-  .level-7 { width: 82%; }
-  .level-8 { width: 84%; }
-  .level-9 { width: 86%; }
-  .level-10 { width: 88%; }
-  .level-11 { width: 90%; }
-  .level-12 { width: 92%; }
-  
+  /* Улучшенная панель описания для мобильных */
   .level-details {
-    padding: 15px;
+    padding: 16px;
+    border-radius: 12px;
+    position: relative;
+    top: 0;
   }
-  
+
   .detail-header h3 {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
   }
-  
+
   .detail-description {
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+
+  .detail-example {
+    padding: 12px;
+  }
+
+  .detail-example p {
+    font-size: 0.8rem;
+  }
+
+  .detail-cta {
+    padding: 12px 20px;
     font-size: 0.9rem;
   }
+}
+
+/* Стили для Telegram Mini App */
+body.telegram-webapp-mode .pyramid-section {
+  padding: 40px 0;
+}
+
+body.telegram-webapp-mode .section-header {
+  margin-bottom: 24px;
+}
+
+body.telegram-webapp-mode .section-header h2 {
+  font-size: 1.25rem;
+}
+
+body.telegram-webapp-mode .section-header p {
+  font-size: 0.9rem;
+}
+
+body.telegram-webapp-mode .pyramid-container-inner {
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+body.telegram-webapp-mode .pyramid-step-container {
+  gap: 4px;
+}
+
+/* Скрываем кружки с номерами в Telegram Mini App */
+body.telegram-webapp-mode .step-number-container {
+  display: none !important;
+}
+
+body.telegram-webapp-mode .pyramid-level {
+  padding: 6px 12px;
+  height: 36px;
+  font-size: 13px;
+  border-radius: 6px;
+}
+
+body.telegram-webapp-mode .level-name {
+  font-size: 0.8rem;
+}
+
+/* Показываем номер внутри кнопки в Telegram Mini App */
+body.telegram-webapp-mode .level-num {
+  display: inline;
+}
+
+/* Компактные ширины кнопок для Telegram Mini App */
+body.telegram-webapp-mode .level-1 { width: 28%; margin-left: auto; }
+body.telegram-webapp-mode .level-2 { width: 30%; margin-left: auto; }
+body.telegram-webapp-mode .level-3 { width: 32%; margin-left: auto; }
+body.telegram-webapp-mode .level-4 { width: 34%; margin-left: auto; }
+body.telegram-webapp-mode .level-5 { width: 36%; margin-left: auto; }
+body.telegram-webapp-mode .level-6 { width: 38%; margin-left: auto; }
+body.telegram-webapp-mode .level-7 { width: 40%; margin-left: auto; }
+body.telegram-webapp-mode .level-8 { width: 42%; margin-left: auto; }
+body.telegram-webapp-mode .level-9 { width: 44%; margin-left: auto; }
+body.telegram-webapp-mode .level-10 { width: 46%; margin-left: auto; }
+body.telegram-webapp-mode .level-11 { width: 48%; margin-left: auto; }
+body.telegram-webapp-mode .level-12 { width: 50%; margin-left: auto; }
+
+body.telegram-webapp-mode .level-details {
+  padding: 16px;
+  border-radius: 12px;
+}
+
+body.telegram-webapp-mode .detail-header h3 {
+  font-size: 1.1rem;
+}
+
+body.telegram-webapp-mode .detail-description {
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+body.telegram-webapp-mode .detail-cta {
+  padding: 12px 20px;
+  font-size: 0.9rem;
 }
