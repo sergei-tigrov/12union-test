@@ -520,20 +520,23 @@
     display: none !important;
   }
 
-  /* Прогресс-бары видны, но компактнее */
+  /* Прогресс-бары видны, адаптивные */
   .leftProgressItem,
   .rightProgressItem {
-    width: 50px !important;
-    height: 20px !important;
+    flex: 0 0 auto;
+    gap: 2px !important;
+    height: 18px !important;
   }
 
   .progressBar {
-    width: 35px !important;
+    width: 30px !important;
     height: 3px !important;
+    min-width: 25px;
   }
 
   .progressScore {
-    font-size: 8px !important;
+    font-size: 7px !important;
+    min-width: 12px !important;
   }
 
   /* Скрываем иконки слева/справа */
@@ -587,22 +590,23 @@
     font-size: 8px;
   }
 
-  /* Лестница - УЗКИЕ кнопки слева */
+  /* Лестница - используем всю ширину */
   .ladderRows {
-    gap: 3px;
-    align-items: flex-start;
-    padding-left: 8px;
+    gap: 2px;
+    align-items: center;
+    padding: 0;
+    width: 100%;
   }
 
   .ladderRow {
-    gap: 0;
-    justify-content: flex-start;
+    gap: 4px;
+    justify-content: center;
+    width: 100%;
   }
 
   .ladderStepContainer {
-    flex: none !important;
-    width: 38% !important;
-    max-width: 140px !important;
+    flex: 1;
+    min-width: 0;
   }
 
   .ladderStep {
@@ -699,10 +703,10 @@
 }
 
 /* Telegram Mini App - ещё компактнее */
-:global(body.telegram-webapp-mode) .progressHeaders,
-:global(body.telegram-webapp-mode) .leftProgressItem,
-:global(body.telegram-webapp-mode) .rightProgressItem,
-:global(body.telegram-webapp-mode) .progressItem,
+:global(body.telegram-webapp-mode) .progressHeaders {
+  display: none !important;
+}
+
 :global(body.telegram-webapp-mode) .levelIconLeft,
 :global(body.telegram-webapp-mode) .levelIconRight,
 :global(body.telegram-webapp-mode) .stepLeft,
@@ -716,9 +720,42 @@
   display: flex !important;
 }
 
+/* Прогресс-бары видны, адаптивные */
+:global(body.telegram-webapp-mode) .leftProgressItem,
+:global(body.telegram-webapp-mode) .rightProgressItem {
+  flex: 0 0 auto;
+  gap: 2px !important;
+  height: 18px !important;
+}
+
+:global(body.telegram-webapp-mode) .progressBar {
+  width: 30px !important;
+  height: 3px !important;
+  min-width: 25px;
+}
+
+:global(body.telegram-webapp-mode) .progressScore {
+  font-size: 7px !important;
+  min-width: 12px !important;
+}
+
+/* Лестница - используем всю ширину */
+:global(body.telegram-webapp-mode) .ladderRows {
+  gap: 2px;
+  align-items: center;
+  padding: 0;
+  width: 100%;
+}
+
+:global(body.telegram-webapp-mode) .ladderRow {
+  gap: 4px;
+  justify-content: center;
+  width: 100%;
+}
+
 :global(body.telegram-webapp-mode) .ladderStepContainer {
-  width: 35% !important;
-  max-width: 130px !important;
+  flex: 1;
+  min-width: 0;
 }
 
 :global(body.telegram-webapp-mode) .ladderStep {
