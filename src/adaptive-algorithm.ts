@@ -197,9 +197,82 @@ function selectNextQuestion(
 }
 
 /**
+ * Подсчитать количество доступных вопросов для каждой фазы
+ * с учётом уже заданных вопросов и детектируемой зоны
+ */
+function getAvailableQuestionCounts(
+  state: AdaptiveTestState,
+  allQuestions: Map<string, SmartQuestion>
+): {
+  zoningAvailable: number;
+  refinementAvailable: number;
+  validationAvailable: number;
+} {
+  const allQuestionsArray = Array.from(allQuestions.values());
+
+  // Зонирование: всегда 6 вопросов
+  const zoningQIds = [
+    'zone-conflict-001',
+    'zone-safety-002',
+    'zone-growth-003',
+    'zone-intimacy-004',
+    'zone-responsibility-005',
+    'zone-future-006',
+  ];
+  const zoningAvailable = zoningQIds.filter(
+    id => !state.questionsAsked.has(id)
+  ).length;
+
+  // Валидация: вопросы с isValidation = true
+  const validationAvailable = allQuestionsArray.filter(
+    q => q.isValidation === true && !state.questionsAsked.has(q.id)
+  ).length;
+
+  // Уточнение: вопросы level-* для конкретной детектируемой зоны
+  let targetLevelRange: UnionLevel[];
+  if (state.detectedZone === 'low') {
+    targetLevelRange = [1, 2, 3, 4];
+  } else if (state.detectedZone === 'middle') {
+    targetLevelRange = [5, 6, 7, 8];
+  } else if (state.detectedZone === 'high') {
+    targetLevelRange = [9, 10, 11, 12];
+  } else {
+    // Если зона ещё не определена, берём все level-* вопросы
+    const allRefinement = allQuestionsArray.filter(
+      q => q.id.startsWith('level-') && !state.questionsAsked.has(q.id)
+    );
+    return {
+      zoningAvailable,
+      refinementAvailable: allRefinement.length,
+      validationAvailable
+    };
+  }
+
+  const refinementAvailable = allQuestionsArray.filter(q => {
+    if (!q.id.startsWith('level-')) return false;
+    if (state.questionsAsked.has(q.id)) return false;
+
+    // Вопрос должен быть релевантен для целевой зоны
+    return q.targetLevels.some(level => targetLevelRange.includes(level));
+  }).length;
+
+  return {
+    zoningAvailable,
+    refinementAvailable,
+    validationAvailable
+  };
+}
+
+/**
  * Перейти к следующей фазе теста
  */
 function advancePhase(state: AdaptiveTestState): void {
+  // Получаем карту всех вопросов для подсчёта доступных
+  const questionsMap = new Map<string, SmartQuestion>();
+  QUESTIONS.forEach(q => questionsMap.set(q.id, q));
+
+  const available = getAvailableQuestionCounts(state, questionsMap);
+
   if (state.currentPhase === 'zoning') {
     // Проверить, все ли вопросы зонирования отвечены
     const zoningQIds = [
@@ -215,22 +288,57 @@ function advancePhase(state: AdaptiveTestState): void {
       zoningQIds.includes(a.questionId)
     ).length;
 
+    // Переходим к уточнению когда все 6 вопросов зонирования отвечены
     if (zoningAnswered >= 6) {
       state.currentPhase = 'refinement';
     }
   } else if (state.currentPhase === 'refinement') {
-    // Перейти к валидации после 12 вопросов уточнения (было 8)
-    // Это даст более точную картину и больше данных для портрета
-    const refinementCount = state.answers.length - 6; // Минус вопросы зонирования
+    // АДАПТИВНЫЙ ПОРОГ для уточнения
+    // Считаем сколько вопросов уточнения уже задано
+    const refinementCount = state.answers.filter(a => {
+      const q = questionsMap.get(a.questionId);
+      return q && q.id.startsWith('level-');
+    }).length;
 
-    if (refinementCount >= 12) {
+    // Вычисляем целевое количество вопросов уточнения
+    // Это минимум между желаемым (12) и реально доступным для зоны
+    // Но не меньше чем 80% от доступного (чтобы использовать большую часть)
+    const idealRefinementQuestions = 12;
+    const totalRefinementPossible = available.refinementAvailable + refinementCount;
+
+    // Если доступно меньше 12, берём 80% от доступного (но минимум 6)
+    const requiredRefinement = Math.max(
+      6, // минимум 6 вопросов уточнения
+      Math.min(
+        idealRefinementQuestions, // желаемое: 12
+        Math.ceil(totalRefinementPossible * 0.8) // 80% от всех доступных для зоны
+      )
+    );
+
+    if (refinementCount >= requiredRefinement) {
       state.currentPhase = 'validation';
     }
   } else if (state.currentPhase === 'validation') {
-    // Завершить после 5 вопросов валидации (было 3)
-    const validationCount = state.answers.length - 6 - 12; // Минус предыдущие фазы
+    // АДАПТИВНЫЙ ПОРОГ для валидации
+    // Считаем сколько вопросов валидации уже задано
+    const validationCount = state.answers.filter(a => {
+      const q = questionsMap.get(a.questionId);
+      return q && q.isValidation === true;
+    }).length;
 
-    if (validationCount >= 5) {
+    // Целевое количество валидационных вопросов
+    // Желаем 5, но если меньше доступно - берём все
+    const idealValidationQuestions = 5;
+    const totalValidationPossible = available.validationAvailable + validationCount;
+
+    const requiredValidation = Math.min(
+      idealValidationQuestions,
+      totalValidationPossible // все доступные валидационные
+    );
+
+    // Завершаем когда задали все доступные валидационные вопросы
+    // ИЛИ достигли минимального порога (3)
+    if (validationCount >= requiredValidation || validationCount >= 3) {
       state.currentPhase = 'complete';
     }
   }
