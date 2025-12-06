@@ -80,11 +80,22 @@ function detectCurrentLevel(
   const diagnosis = diagnoseUser(answers, questions);
 
   // Определяем зону на основе БАЗОВОГО уровня (фундамента)
-  // Это критически важно: зона определяется тем, где мы стоим прочно, а не где летаем в мечтах
+  // ПЕССИМИСТИЧНОЕ ЗОНИРОВАНИЕ:
+  // Если есть хоть малейшие сомнения в базе (уровни 1-4 имеют низкий процент или есть дыры),
+  // мы всегда выбираем зону 'low', чтобы допроверить фундамент.
+  // Лучше задать лишний вопрос про безопасность, чем пропустить травму.
+
   let zone: 'low' | 'middle' | 'high';
-  if (diagnosis.baseLevel <= 4) zone = 'low';
-  else if (diagnosis.baseLevel <= 8) zone = 'middle';
-  else zone = 'high';
+
+
+
+  if (diagnosis.baseLevel <= 4) {
+    zone = 'low';
+  } else if (diagnosis.baseLevel <= 8) {
+    zone = 'middle';
+  } else {
+    zone = 'high';
+  }
 
   return {
     detectedLevel: diagnosis.currentLevel,
