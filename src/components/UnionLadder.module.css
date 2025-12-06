@@ -18,7 +18,8 @@
   padding: 0 20px;
 }
 
-.personalHeader, .relationshipHeader {
+.personalHeader,
+.relationshipHeader {
   font-size: 14px;
   font-weight: 600;
   color: #64748b;
@@ -32,6 +33,68 @@
   color: #1e293b;
   text-align: center;
   flex: 1;
+}
+
+/* Легенда индикаторов конфликтов */
+.conflictLegend {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 2px solid #fbbf24;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin: 0 20px 15px;
+  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.2);
+}
+
+.legendTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: #92400e;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.legendItems {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #78350f;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 6px;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.legendItem:hover {
+  transform: scale(1.05);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.legendIcon {
+  font-size: 14px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+.legendText {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.legendHint {
+  font-size: 11px;
+  color: #92400e;
+  text-align: center;
+  font-style: italic;
+  opacity: 0.9;
 }
 
 /* Основной контейнер с лестницей и прогресс-барами */
@@ -64,7 +127,8 @@
 }
 
 /* Прогресс-бары слева и справа */
-.leftProgressItem, .rightProgressItem {
+.leftProgressItem,
+.rightProgressItem {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -161,6 +225,132 @@
   font-weight: 700;
 }
 
+/* ========================================================================== */
+/* ИНДИКАТОРЫ ПР ОТИВОРЕЧИЙ (УЛУЧШЕННАЯ ВЕРСИЯ) */
+/* ========================================================================== */
+
+.progressItem.conflict {
+  position: relative;
+  outline: 2px dashed #fbbf24;
+  outline-offset: 2px;
+  animation: pulse-warning 2s infinite;
+  transition: all 0.3s ease;
+  z-index: 2;
+  /* Поднимаем над обычными элементами */
+}
+
+/* Severity levels */
+.progressItem.conflict[data-conflict-type="no_foundation"] {
+  outline-color: #dc2626;
+  outline-width: 3px;
+  outline-style: solid;
+}
+
+.progressItem.conflict[data-conflict-type="spiritual_bypass"] {
+  outline-color: #ef4444;
+  outline-width: 2px;
+}
+
+.progressItem.conflict[data-conflict-type="gap_warning"] {
+  outline-color: #fbbf24;
+  outline-width: 2px;
+}
+
+.conflictBadge {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  font-size: 16px;
+  z-index: 100;
+  /* Самый высокий z-index */
+  animation: bounce 1.5s ease-in-out infinite;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3));
+  cursor: help;
+  transition: transform 0.2s ease;
+}
+
+.conflictBadge:hover {
+  transform: scale(1.2);
+  animation: none;
+  /* Останавливаем bounce при hover */
+}
+
+/* Severity-specific styles */
+.conflictBadge.severity_critical {
+  font-size: 18px;
+  animation: bounce-intense 1s ease-in-out infinite, pulse-glow 2s infinite;
+}
+
+.conflictBadge.severity_warning {
+  font-size: 16px;
+  opacity: 0.95;
+}
+
+.conflictBadge.severity_info {
+  font-size: 14px;
+  opacity: 0.85;
+}
+
+/* Animations */
+@keyframes pulse-warning {
+
+  0%,
+  100% {
+    outline-opacity: 1;
+  }
+
+  50% {
+    outline-opacity: 0.5;
+  }
+}
+
+@keyframes bounce {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes bounce-intense {
+
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+
+  50% {
+    transform: translateY(-7px) scale(1.1);
+  }
+}
+
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    filter: drop-shadow(0 2px 6px rgba(220, 38, 38, 0.3));
+  }
+
+  50% {
+    filter: drop-shadow(0 4px 12px rgba(220, 38, 38, 0.6));
+  }
+}
+
+/* Accessibility: Focus states */
+.conflictBadge:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Ensure conflict indicators are above dominant elements */
+.progressItem.dominant.conflict {
+  z-index: 3;
+}
+
 /* Центральная лестница */
 .ladderStep {
   height: 100%;
@@ -201,7 +391,7 @@
   z-index: 1;
 }
 
-.stepBackground > div {
+.stepBackground>div {
   width: 100%;
   height: 100%;
 }
@@ -306,10 +496,13 @@
 
 /* Анимация пульсации для иконок */
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1);
     opacity: 1;
   }
+
   50% {
     transform: scale(1.1);
     opacity: 0.8;
@@ -419,79 +612,88 @@
     padding: 12px;
     max-width: 100%;
   }
-  
+
   .progressHeaders {
     padding: 0 10px;
     margin-bottom: 10px;
   }
-  
-  .personalHeader, .relationshipHeader {
+
+  .personalHeader,
+  .relationshipHeader {
     font-size: 11px;
     width: 80px;
   }
-  
+
   .stepsHeader {
     font-size: 14px;
     font-weight: 600;
   }
-  
+
   .ladderWithProgress {
     padding: 0 5px;
   }
-  
+
   .ladderRow {
-    gap: 8px; /* Уменьшаем отступ между элементами в строке */
+    gap: 8px;
+    /* Уменьшаем отступ между элементами в строке */
   }
-  
+
   /* Прогресс-бары остаются по бокам, но ужимаются */
-  .leftProgressItem, .rightProgressItem {
-    width: 80px; /* Уменьшаем ширину */
-    height: 32px; /* Уменьшаем высоту */
+  .leftProgressItem,
+  .rightProgressItem {
+    width: 80px;
+    /* Уменьшаем ширину */
+    height: 32px;
+    /* Уменьшаем высоту */
     gap: 6px;
   }
 
   .ladderStepContainer {
     flex: 1;
-    min-width: 0; /* Позволяем ужиматься */
+    min-width: 0;
+    /* Позволяем ужиматься */
   }
-  
+
   .progressBar {
-    width: 50px; /* Еще больше уменьшаем */
+    width: 50px;
+    /* Еще больше уменьшаем */
     height: 6px;
   }
-  
+
   .progressScore {
     font-size: 10px;
     min-width: 20px;
     text-align: center;
   }
-  
+
   /* Ступени тоже ужимаются */
   .ladderStep {
-    min-height: 32px; /* Уменьшаем высоту ступеней */
+    min-height: 32px;
+    /* Уменьшаем высоту ступеней */
     border-radius: 8px;
   }
-  
+
   .stepContent {
-    padding: 0 8px; /* Уменьшаем внутренние отступы */
+    padding: 0 8px;
+    /* Уменьшаем внутренние отступы */
     gap: 6px;
   }
-  
+
   .stepLeft {
     width: 20px;
     height: 20px;
   }
-  
+
   .levelNumber {
     font-size: 10px;
     font-weight: 700;
   }
-  
+
   .levelName {
     font-size: 11px;
     font-weight: 600;
   }
-  
+
   .dominantBadge {
     width: 12px;
     height: 12px;
@@ -499,7 +701,7 @@
     top: -4px;
     right: -4px;
   }
-  
+
   .dominantIcon {
     font-size: 8px;
   }
@@ -522,68 +724,73 @@
     padding: 8px;
     border-radius: 16px;
   }
-  
+
   .progressHeaders {
     padding: 0 5px;
     margin-bottom: 8px;
   }
-  
-  .personalHeader, .relationshipHeader {
+
+  .personalHeader,
+  .relationshipHeader {
     font-size: 10px;
     width: 60px;
   }
-  
+
   .stepsHeader {
     font-size: 12px;
   }
-  
+
   .ladderWithProgress {
     padding: 0 2px;
   }
-  
+
   .ladderRow {
-    gap: 4px; /* Минимальный отступ между элементами */
+    gap: 4px;
+    /* Минимальный отступ между элементами */
   }
-  
-  .leftProgressItem, .rightProgressItem {
-    width: 60px; /* Еще меньше для очень узких экранов */
+
+  .leftProgressItem,
+  .rightProgressItem {
+    width: 60px;
+    /* Еще меньше для очень узких экранов */
     height: 28px;
     gap: 4px;
   }
-  
+
   .progressBar {
-    width: 35px; /* Минимальная ширина */
+    width: 35px;
+    /* Минимальная ширина */
     height: 5px;
   }
-  
+
   .progressScore {
     font-size: 9px;
     min-width: 16px;
   }
-  
+
   .ladderStep {
     min-height: 28px;
     border-radius: 6px;
   }
-  
+
   .stepContent {
     padding: 0 6px;
     gap: 4px;
   }
-  
+
   .stepLeft {
     width: 18px;
     height: 18px;
   }
-  
+
   .levelNumber {
     font-size: 9px;
   }
-  
+
   .levelName {
     font-size: 10px;
   }
-  
+
   .dominantBadge {
     width: 10px;
     height: 10px;
@@ -591,7 +798,7 @@
     top: -3px;
     right: -3px;
   }
-  
+
   .dominantIcon {
     font-size: 6px;
   }

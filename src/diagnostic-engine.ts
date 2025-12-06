@@ -123,9 +123,10 @@ function analyzePattern(
     let peaks: UnionLevel[] = [];
     const gaps: UnionLevel[] = [];
 
-    // 1. Первичный поиск пиков (уровни с освоением > 40%)
+    // 1. Первичный поиск пиков (уровни с освоением > 30%)
+    // Понижен порог с 40% до 30% для более гибкой диагностики
     levels.forEach(([lvl, score]) => {
-        if (score > 0.4) peaks.push(lvl);
+        if (score > 0.3) peaks.push(lvl);
     });
 
     // 2. УМНОЕ ЗАПОЛНЕНИЕ (Smart Backfill)
@@ -166,21 +167,36 @@ function analyzePattern(
     const maxPeak = Math.max(...peaks);
 
     // Поиск Базового Уровня (Base Level)
-    // Это самый высокий уровень непрерывной цепочки снизу
+    // НОВАЯ ЛОГИКА: Weighted Median (центр масс)
+    // Вместо требования непрерывной цепочки используем взвешенную медиану пиков
     let baseLevel: UnionLevel = 1;
 
-    if (!peaks.includes(1)) {
-        // Если даже после Backfill нет 1-го уровня, значит он был протестирован и провален
+    if (peaks.length === 0) {
         baseLevel = 1;
     } else {
-        // Ищем, где обрывается цепочка
-        for (let i = 1; i <= 12; i++) {
-            if (peaks.includes(i as UnionLevel)) {
-                baseLevel = i as UnionLevel;
-            } else {
-                // Нашли дыру
-                break;
+        // Создаём взвешенные пики
+        const weightedPeaks = peaks.map(lvl => ({
+            level: lvl,
+            weight: spectrogram.get(lvl) || 0
+        })).sort((a, b) => a.level - b.level);
+
+        const totalWeight = weightedPeaks.reduce((sum, p) => sum + p.weight, 0);
+
+        if (totalWeight > 0) {
+            let cumulativeWeight = 0;
+            const medianThreshold = totalWeight / 2;
+
+            // Находим взвешенную медиану
+            for (const peak of weightedPeaks) {
+                cumulativeWeight += peak.weight;
+                if (cumulativeWeight >= medianThreshold) {
+                    baseLevel = peak.level;
+                    break;
+                }
             }
+        } else {
+            // Fallback: обычная медиана
+            baseLevel = peaks[Math.floor(peaks.length / 2)];
         }
     }
 
@@ -191,15 +207,51 @@ function analyzePattern(
         }
     }
 
-    // Определение паттерна
+    // Определение паттерна (ИСПРАВЛЕННАЯ ЛОГИКА v2)
     let pattern: ProfilePattern = 'harmonious';
 
-    if (!peaks.includes(1)) {
-        pattern = 'crisis'; // Нет безопасности
-    } else if (maxPeak - minPeak > 5 && gaps.length > 2) {
-        pattern = 'spiritual_bypass'; // Большой разрыв между низом и верхом с дырами
-    } else if (gaps.length > 0) {
-        pattern = 'gap'; // Есть дыры в развитии
+    // Анализ средних значений по группам для правильной детекции
+    const foundationLevels: UnionLevel[] = [1, 2, 3];
+    const highLevelsGroup: UnionLevel[] = [9, 10, 11, 12];
+
+    const getGroupAvg = (levels: UnionLevel[]): number => {
+        const sum = levels.reduce((acc, lvl) => acc + (spectrogram.get(lvl) || 0), 0);
+        return sum / levels.length;
+    };
+
+    const foundationAvg = getGroupAvg(foundationLevels);
+    const highAvg = getGroupAvg(highLevelsGroup);
+
+    // База сильная если >= 50%, слабая если < 30%
+    const foundationStrong = foundationAvg >= 0.5;
+    const foundationWeak = foundationAvg < 0.3;
+    const highStrong = highAvg >= 0.5;
+
+    // Проверка разброса для определения гармоничности
+    const significantScores = Array.from(spectrogram.values()).filter(s => s > 0.15);
+    const scoreVariance = significantScores.length > 1
+        ? Math.max(...significantScores) - Math.min(...significantScores)
+        : 0;
+
+    // Профиль гармоничный если малый разброс или высокий средний без провала базы
+    const isHarmoniousProfile = (
+        (scoreVariance < 0.4 && significantScores.length >= 3) ||
+        (foundationStrong && foundationAvg >= 0.5)
+    );
+
+    // Обновлённая детекция паттернов
+    if (peaks.length < 3) {
+        pattern = 'crisis'; // Недостаточно данных
+    } else if (highStrong && foundationWeak && (highAvg - foundationAvg > 0.3)) {
+        // НОВАЯ ЛОГИКА: Духовный обход только при КОНТРАСТЕ
+        // Высокий верх (>=50%) + слабая база (<30%) + разрыв > 30%
+        pattern = 'spiritual_bypass';
+    } else if (isHarmoniousProfile) {
+        // Гармоничный профиль - приоритет над gap
+        pattern = 'harmonious';
+    } else if (gaps.length > 0 && !foundationStrong) {
+        // Дыры только если база не сильная
+        pattern = 'gap';
     } else if (peaks.length === 1 || (maxPeak - minPeak <= 1)) {
         pattern = 'stuck'; // Узкая специализация
     } else {
@@ -274,69 +326,126 @@ function generateDiagnosis(
 }
 
 /**
- * Детектор противоречий в ответах
- * Ищет логические несоответствия, которые указывают на:
- * - Социально желательные ответы
- * - Недопонимание вопросов
- * - Духовное избегание
+ * Детектор противоречий в ответах (ИСПРАВЛЕННАЯ ВЕРСИЯ v2)
+ *
+ * КЛЮЧЕВАЯ ЛОГИКА:
+ * - Конфликт = КОНТРАСТ между уровнями (низ слабый + верх сильный)
+ * - Если ВСЕ уровни высокие - это НОРМА, НЕ конфликт!
+ * - Если база сильная (>=50%) - фундамент в порядке
+ *
+ * Ищет:
+ * - Духовное избегание (высокий верх при провале базы)
+ * - Пропуск середины (база + верх есть, середины нет)
  */
 function detectConflicts(
     spectrogram: Map<UnionLevel, number>,
     peaks: UnionLevel[],
     gaps: UnionLevel[],
-    pattern: ProfilePattern
+    _pattern: ProfilePattern // Сохраняем для совместимости API, но не используем
 ): string[] {
     const conflicts: string[] = [];
 
-    // КОНФЛИКТ 1: Высокие уровни без базы
-    // Если взяты уровни 8-12, но провалены 1-3
-    const hasHighLevels = peaks.some(p => p >= 8);
-    const hasLowBase = peaks.every(p => p >= 4); // Нет уровней 1-3
+    // ========================================================================
+    // АНАЛИЗ ПРОФИЛЯ
+    // ========================================================================
 
-    if (hasHighLevels && hasLowBase) {
-        conflicts.push(
-            'Противоречие: высокие результаты на уровнях 8-12 при отсутствии базовых уровней 1-3. ' +
-            'Возможно, вы стремитесь к духовности, минуя эмоциональную зрелость.'
-        );
+    // Средние значения по группам уровней
+    const foundationLevels: UnionLevel[] = [1, 2, 3];
+    const middleLevels: UnionLevel[] = [4, 5, 6, 7, 8];
+    const highLevels: UnionLevel[] = [9, 10, 11, 12];
+
+    const getGroupAverage = (levels: UnionLevel[]): number => {
+        const sum = levels.reduce((acc, lvl) => acc + (spectrogram.get(lvl) || 0), 0);
+        return sum / levels.length;
+    };
+
+    const foundationAvg = getGroupAverage(foundationLevels);
+    const middleAvg = getGroupAverage(middleLevels);
+    const highAvg = getGroupAverage(highLevels);
+
+    // Определяем состояние групп
+    const foundationStrong = foundationAvg >= 0.5; // >= 50%
+    const foundationWeak = foundationAvg < 0.3;    // < 30%
+    const middleWeak = middleAvg < 0.25;           // < 25%
+    const highStrong = highAvg >= 0.5;             // >= 50%
+
+    // Общий средний балл
+    const allScores = Array.from(spectrogram.values());
+    const overallAvg = allScores.length > 0
+        ? allScores.reduce((a, b) => a + b, 0) / allScores.length
+        : 0;
+
+    // Проверяем разброс (variance)
+    const significantScores = allScores.filter(s => s > 0.15);
+    const scoreVariance = significantScores.length > 1
+        ? Math.max(...significantScores) - Math.min(...significantScores)
+        : 0;
+
+    // ========================================================================
+    // ЗАЩИТА: ГАРМОНИЧНЫЙ ПРОФИЛЬ - НЕ ДОБАВЛЯЕМ КОНФЛИКТЫ
+    // ========================================================================
+
+    // Если профиль гармоничный (малый разброс или высокий средний)
+    const isHarmonious = (
+        (scoreVariance < 0.4 && significantScores.length >= 3) ||
+        (overallAvg >= 0.5 && !foundationWeak) ||
+        (foundationStrong && foundationAvg >= 0.6)
+    );
+
+    if (isHarmonious) {
+        // Гармоничный профиль - не добавляем конфликты
+        return conflicts;
     }
 
-    // КОНФЛИКТ 2: Низкий базовый уровень, но высокие пики
-    // Например: baseLevel=2, но есть пик на уровне 10
-    const maxPeak = Math.max(...peaks, 1);
-    const baseLevel = peaks.length > 0 ? Math.max(...peaks.filter(p => {
-        for (let i = 1; i <= p; i++) {
-            if (!peaks.includes(i as UnionLevel)) return false;
-        }
-        return true;
-    }), 1) : 1;
-
-    if (maxPeak - baseLevel > 4) {
-        conflicts.push(
-            `Противоречие: вы демонстрируете понимание уровня ${maxPeak}, но не освоили уровни ${baseLevel + 1}-${maxPeak - 1}. ` +
-            'Это может указывать на теоретическое знание без практического опыта.'
-        );
+    // Если база сильная - не конфликт
+    if (foundationStrong) {
+        return conflicts;
     }
 
-    // КОНФЛИКТ 3: Большие дыры при паттерне "гармоничный"
-    if (pattern === 'harmonious' && gaps.length > 0) {
-        conflicts.push(
-            `Внимание: обнаружены пропуски на уровнях ${gaps.join(', ')}, хотя общий паттерн выглядит гармоничным. ` +
-            'Рекомендуется уделить внимание этим областям.'
-        );
-    }
+    // ========================================================================
+    // ДЕТЕКЦИЯ РЕАЛЬНЫХ КОНФЛИКТОВ
+    // ========================================================================
 
-    // КОНФЛИКТ 4: Очень низкие результаты на промежуточных уровнях
-    // Если уровень 4 или 5 провален (< 20%), но выше есть успехи
-    for (let lvl = 4; lvl <= 6; lvl++) {
-        const score = spectrogram.get(lvl as UnionLevel) || 0;
-        const hasHigherPeaks = peaks.some(p => p > lvl);
+    // КОНФЛИКТ 1: Духовный обход (spiritual_bypass)
+    // Условие: высокие уровни сильные + база слабая + большой разрыв
+    if (highStrong && foundationWeak) {
+        const gapSize = highAvg - foundationAvg;
 
-        if (score < 0.2 && hasHigherPeaks) {
+        if (gapSize > 0.3) { // Разрыв более 30%
             conflicts.push(
-                `Предупреждение: низкий результат на уровне ${lvl} (${Math.round(score * 100)}%) при наличии успехов на более высоких уровнях. ` +
-                `Уровень ${lvl} - это критически важный переход, который стоит проработать.`
+                `Духовный обход: высокие уровни (9-12: ${Math.round(highAvg * 100)}%) при слабой базе (1-3: ${Math.round(foundationAvg * 100)}%). ` +
+                'Рекомендуется укрепить фундамент эмоциональной безопасности и личных границ.'
             );
-            break; // Одно предупреждение достаточно
+        }
+    }
+
+    // КОНФЛИКТ 2: Пропуск середины
+    // Условие: есть база + есть верх, но середина провалена
+    if (!foundationWeak && highStrong && middleWeak) {
+        conflicts.push(
+            `Пропуск средних уровней (4-8: ${Math.round(middleAvg * 100)}%). ` +
+            'Развитие может быть неустойчивым без проработки этих переходных этапов.'
+        );
+    }
+
+    // КОНФЛИКТ 3: Отсутствие базы
+    // Условие: база практически пустая (< 15%) при сильном верхе
+    if (foundationAvg < 0.15 && highStrong) {
+        conflicts.push(
+            `Отсутствие фундамента: высокие уровни достигнуты (${Math.round(highAvg * 100)}%) без проработки базовых потребностей (1-3: ${Math.round(foundationAvg * 100)}%). ` +
+            'Это может создавать нестабильность в отношениях.'
+        );
+    }
+
+    // КОНФЛИКТ 4: Большие дыры в середине при наличии высоких пиков
+    // (только если это не гармоничный профиль)
+    if (gaps.length > 2 && peaks.some(p => p >= 9)) {
+        const gapLevelsInMiddle = gaps.filter(g => g >= 4 && g <= 8);
+        if (gapLevelsInMiddle.length >= 2) {
+            conflicts.push(
+                `Обнаружены пробелы на уровнях ${gapLevelsInMiddle.join(', ')}. ` +
+                'Рекомендуется уделить внимание этим областям для более устойчивого развития.'
+            );
         }
     }
 

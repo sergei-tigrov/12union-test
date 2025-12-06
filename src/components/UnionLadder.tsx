@@ -85,6 +85,177 @@ const UnionLadder: React.FC<UnionLadderProps> = ({
     return dominantLevel?.type || null;
   };
 
+  // Детекция противоречий для визуальных индикаторов (ИСПРАВЛЕННАЯ ВЕРСИЯ v2)
+  //
+  // КЛЮЧЕВАЯ ЛОГИКА:
+  // - "Духовный обход" = высокие уровни (9-12) при ПРОВАЛЕ базовых (1-3)
+  // - Если ВСЕ уровни высокие - это НОРМА, не конфликт!
+  // - Конфликт только при КОНТРАСТЕ: база слабая + верх сильный
+  //
+  const hasConflict = (levelId: number): {
+    type: 'spiritual_bypass' | 'gap_warning' | 'no_foundation' | null;
+    message: string;
+    severity: 'critical' | 'warning' | 'info';
+  } => {
+    if (!result?.levelDistribution) return { type: null, message: '', severity: 'info' };
+
+    const percentages = getPercentagesForLevel(levelId);
+    const totalPercent = percentages.personalPercent + percentages.relationshipPercent;
+
+    // Если уровень слабо освоен, не показываем конфликты для этого уровня
+    if (totalPercent < 30) return { type: null, message: '', severity: 'info' };
+
+    // ========================================================================
+    // АНАЛИЗ КОНТЕКСТА ПРОФИЛЯ
+    // ========================================================================
+    const getProfileContext = () => {
+      const allLevels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+      const levelScores = allLevels.map(l => {
+        const p = getPercentagesForLevel(l);
+        return { level: l, total: p.personalPercent + p.relationshipPercent };
+      });
+
+      // Значимые уровни - те, где есть реальные ответы (> 15%)
+      const significantLevels = levelScores.filter(s => s.total > 15);
+
+      if (significantLevels.length === 0) {
+        return {
+          avgScore: 0,
+          minLevel: 1,
+          maxLevel: 12,
+          foundationStrong: false,
+          foundationWeak: false,
+          highLevelsStrong: false,
+          isHarmonious: false,
+          testedLevelsCount: 0
+        };
+      }
+
+      // Средний балл по всем значимым уровням
+      const avgScore = significantLevels.reduce((sum, s) => sum + s.total, 0) / significantLevels.length;
+
+      const minLevel = Math.min(...significantLevels.map(s => s.level));
+      const maxLevel = Math.max(...significantLevels.map(s => s.level));
+
+      // Анализ базовых уровней (1-3)
+      const foundationScores = levelScores.filter(s => s.level <= 3);
+      const foundationAvg = foundationScores.reduce((sum, s) => sum + s.total, 0) / 3;
+      const foundationTested = foundationScores.some(s => s.total > 10);
+
+      // База СИЛЬНАЯ если средний результат >= 50% (хорошо освоены)
+      const foundationStrong = foundationAvg >= 50;
+      // База СЛАБАЯ если тестировалась и средний результат < 30%
+      const foundationWeak = foundationTested && foundationAvg < 30;
+
+      // Анализ высоких уровней (9-12)
+      const highScores = levelScores.filter(s => s.level >= 9);
+      const highAvg = highScores.reduce((sum, s) => sum + s.total, 0) / 4;
+      const highLevelsStrong = highAvg >= 50;
+
+      // Анализ средних уровней (4-8)
+      const middleScores = levelScores.filter(s => s.level >= 4 && s.level <= 8);
+      const middleAvg = middleScores.reduce((sum, s) => sum + s.total, 0) / 5;
+      const middleWeak = middleAvg < 25;
+
+      // Профиль ГАРМОНИЧНЫЙ если:
+      // 1. Все значимые уровни имеют похожие баллы (разброс < 40%)
+      // 2. ИЛИ средний балл высокий (> 50%) без резких провалов
+      const scoreVariance = significantLevels.length > 1
+        ? Math.max(...significantLevels.map(s => s.total)) - Math.min(...significantLevels.map(s => s.total))
+        : 0;
+
+      const isHarmonious = (
+        // Вариант 1: Малый разброс между уровнями
+        (scoreVariance < 40 && significantLevels.length >= 3) ||
+        // Вариант 2: Высокий средний балл и база не провалена
+        (avgScore >= 50 && !foundationWeak) ||
+        // Вариант 3: База сильная (независимо от верха)
+        (foundationStrong && foundationAvg >= 60)
+      );
+
+      return {
+        avgScore,
+        minLevel,
+        maxLevel,
+        foundationStrong,
+        foundationWeak,
+        foundationAvg,
+        highLevelsStrong,
+        highAvg,
+        middleWeak,
+        middleAvg,
+        isHarmonious,
+        testedLevelsCount: significantLevels.length,
+        scoreVariance
+      };
+    };
+
+    const context = getProfileContext();
+
+    // ========================================================================
+    // ЗАЩИТА: ГАРМОНИЧНЫЙ ПРОФИЛЬ - НЕ КОНФЛИКТ!
+    // ========================================================================
+
+    // Если профиль гармоничный - никаких конфликтов
+    if (context.isHarmonious) {
+      return { type: null, message: '', severity: 'info' };
+    }
+
+    // Если база СИЛЬНАЯ (>=50%) - это здоровый фундамент, не конфликт
+    if (context.foundationStrong) {
+      return { type: null, message: '', severity: 'info' };
+    }
+
+    // ========================================================================
+    // ДЕТЕКЦИЯ РЕАЛЬНЫХ КОНФЛИКТОВ
+    // ========================================================================
+
+    // КОНФЛИКТ 1: ДУХОВНЫЙ ОБХОД (spiritual_bypass)
+    // Условие: Высокие уровни СИЛЬНЫЕ + База СЛАБАЯ
+    // Это реальная проблема: человек "летает в облаках" без фундамента
+    if (levelId >= 9 && totalPercent >= 50) {
+      if (context.foundationWeak && context.highLevelsStrong) {
+        // Дополнительная проверка: разрыв между базой и верхом
+        const gapSize = (context.highAvg || 0) - (context.foundationAvg || 0);
+
+        if (gapSize > 30) { // Разрыв более 30% между базой и верхом
+          return {
+            type: 'spiritual_bypass',
+            message: `Высокие уровни (9-12: ${Math.round(context.highAvg || 0)}%) при слабой базе (1-3: ${Math.round(context.foundationAvg || 0)}%). Рекомендуется укрепить фундамент.`,
+            severity: 'critical'
+          };
+        }
+      }
+    }
+
+    // КОНФЛИКТ 2: ПРОПУСК СЕРЕДИНЫ (gap_warning)
+    // Условие: Есть база + есть верх, но середина провалена
+    if (levelId >= 9 && totalPercent >= 50) {
+      if (!context.foundationWeak && context.highLevelsStrong && context.middleWeak) {
+        return {
+          type: 'gap_warning',
+          message: `Пропуск средних уровней (4-8: ${Math.round(context.middleAvg || 0)}%). Может создавать неустойчивость в развитии.`,
+          severity: 'warning'
+        };
+      }
+    }
+
+    // КОНФЛИКТ 3: ОТСУТСТВИЕ БАЗЫ (no_foundation)
+    // Условие: Высокий уровень освоен, но база вообще не тестировалась или провалена полностью
+    if (levelId >= 10 && totalPercent >= 60) {
+      // Проверяем что база практически пустая (< 15% в среднем)
+      if ((context.foundationAvg || 0) < 15 && context.highLevelsStrong) {
+        return {
+          type: 'no_foundation',
+          message: `Высокий уровень ${levelId} (${Math.round(totalPercent)}%) без проработки базовых потребностей (1-3: ${Math.round(context.foundationAvg || 0)}%). Возможна нестабильность.`,
+          severity: 'critical'
+        };
+      }
+    }
+
+    return { type: null, message: '', severity: 'info' };
+  };
+
   // Цвета ступеней по смыслу и логике уровней
   const getStepColors = (level: number, isActive: boolean, isDominant: boolean) => {
     const meaningColors: { [key: number]: string } = {
@@ -148,6 +319,35 @@ const UnionLadder: React.FC<UnionLadderProps> = ({
         <div className={styles.relationshipHeader}>Отношения</div>
       </div>
 
+      {/* Легенда индикаторов (отображается если есть конфликты) */}
+      {result && sortedLevels.some(l => hasConflict(l.id).type !== null) && (
+        <motion.div
+          className={styles.conflictLegend}
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <div className={styles.legendTitle}>📊 Обнаружены особенности профиля:</div>
+          <div className={styles.legendItems}>
+            <div className={styles.legendItem}>
+              <span className={styles.legendIcon}>⛔</span>
+              <span className={styles.legendText}>Отсутствие базы (критично)</span>
+            </div>
+            <div className={styles.legendItem}>
+              <span className={styles.legendIcon}>🔴</span>
+              <span className={styles.legendText}>Духовный обход (требует внимания)</span>
+            </div>
+            <div className={styles.legendItem}>
+              <span className={styles.legendIcon}>🟡</span>
+              <span className={styles.legendText}>Пробелы в развитии (рекомендация)</span>
+            </div>
+          </div>
+          <div className={styles.legendHint}>
+            💡 Наведите курсор на индикатор для деталей
+          </div>
+        </motion.div>
+      )}
+
       {/* Основной контейнер с лестницей и прогресс-барами */}
       <div className={styles.ladderWithProgress}>
         {/* Строки лестницы - каждая строка содержит левый прогресс, ступень, правый прогресс */}
@@ -179,6 +379,7 @@ const UnionLadder: React.FC<UnionLadderProps> = ({
             const percentages = getPercentagesForLevel(level.id);
             const personalPercent = percentages.personalPercent;
             const relationshipPercent = percentages.relationshipPercent;
+            const conflict = hasConflict(level.id); // Детекция противоречий
 
             return (
               <motion.div
@@ -197,11 +398,24 @@ const UnionLadder: React.FC<UnionLadderProps> = ({
 
                 {/* Левый прогресс-бар (личность) */}
                 <motion.div
-                  className={`${styles.progressItem} ${styles.leftProgressItem} ${isDominant ? styles.dominant : ''} ${dominantType === 'personal' ? styles.personalDominant : ''}`}
+                  className={`${styles.progressItem} ${styles.leftProgressItem} ${isDominant ? styles.dominant : ''} ${dominantType === 'personal' ? styles.personalDominant : ''} ${conflict.type ? styles.conflict : ''}`}
+                  data-conflict-type={conflict.type || ''}
+                  title={conflict.message || ''}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.1 + (12 - level.id) * 0.05 }}
                 >
+                  {conflict.type && (
+                    <span
+                      className={`${styles.conflictBadge} ${styles[`severity_${conflict.severity}`]}`}
+                      title={conflict.message}
+                      role="alert"
+                      aria-label={`Конфликт: ${conflict.message}`}
+                    >
+                      {conflict.type === 'no_foundation' ? '⛔' :
+                        conflict.type === 'spiritual_bypass' ? '🔴' : '🟡'}
+                    </span>
+                  )}
                   <div className={styles.progressScore}>{scores.personal}</div>
                   <div className={`${styles.progressBar} ${styles.leftProgressBar}`}>
                     <motion.div
@@ -255,11 +469,25 @@ const UnionLadder: React.FC<UnionLadderProps> = ({
 
                 {/* Правый прогресс-бар (отношения) */}
                 <motion.div
-                  className={`${styles.progressItem} ${styles.rightProgressItem} ${isDominant ? styles.dominant : ''} ${dominantType === 'relationship' ? styles.relationshipDominant : ''}`}
+                  className={`${styles.progressItem} ${styles.rightProgressItem} ${isDominant ? styles.dominant : ''} ${dominantType === 'relationship' ? styles.relationshipDominant : ''} ${conflict.type ? styles.conflict : ''}`}
+                  data-conflict-type={conflict.type || ''}
+                  title={conflict.message || ''}
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.1 + (12 - level.id) * 0.05 }}
                 >
+                  {conflict.type && (
+                    <span
+                      className={`${styles.conflictBadge} ${styles[`severity_${conflict.severity}`]}`}
+                      title={conflict.message}
+                      role="alert"
+                      aria-label={`Конфликт: ${conflict.message}`}
+                    >
+                      {conflict.type === 'no_foundation' ? '⛔' :
+                        conflict.type === 'spiritual_bypass' ? '🔴' : '🟡'}
+                    </span>
+                  )}
+                  <div className={styles.progressScore}>{scores.relationship}</div>
                   <div className={`${styles.progressBar} ${styles.rightProgressBar}`}>
                     <motion.div
                       className={styles.progressFill}
