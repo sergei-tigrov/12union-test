@@ -17,7 +17,8 @@ export type TestScenario =
   | 'in_relationship_self'     // В отношениях - про себя
   | 'in_relationship_partner'  // В отношениях - про партнера
   | 'couple_independent'       // Пара вместе - независимые тесты
-  | 'couple_discussion';        // Пара вместе - совместное обсуждение
+  | 'couple_discussion'        // Пара вместе - совместное обсуждение
+  | 'compatibility';           // Проверка совместимости
 
 export type UnionLevel = number; // 1-12 levels
 

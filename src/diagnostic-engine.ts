@@ -273,6 +273,153 @@ function generateDiagnosis(
     }
 }
 
+/**
+ * Детектор противоречий в ответах
+ * Ищет логические несоответствия, которые указывают на:
+ * - Социально желательные ответы
+ * - Недопонимание вопросов
+ * - Духовное избегание
+ */
+function detectConflicts(
+    spectrogram: Map<UnionLevel, number>,
+    peaks: UnionLevel[],
+    gaps: UnionLevel[],
+    pattern: ProfilePattern
+): string[] {
+    const conflicts: string[] = [];
+
+    // КОНФЛИКТ 1: Высокие уровни без базы
+    // Если взяты уровни 8-12, но провалены 1-3
+    const hasHighLevels = peaks.some(p => p >= 8);
+    const hasLowBase = peaks.every(p => p >= 4); // Нет уровней 1-3
+
+    if (hasHighLevels && hasLowBase) {
+        conflicts.push(
+            'Противоречие: высокие результаты на уровнях 8-12 при отсутствии базовых уровней 1-3. ' +
+            'Возможно, вы стремитесь к духовности, минуя эмоциональную зрелость.'
+        );
+    }
+
+    // КОНФЛИКТ 2: Низкий базовый уровень, но высокие пики
+    // Например: baseLevel=2, но есть пик на уровне 10
+    const maxPeak = Math.max(...peaks, 1);
+    const baseLevel = peaks.length > 0 ? Math.max(...peaks.filter(p => {
+        for (let i = 1; i <= p; i++) {
+            if (!peaks.includes(i as UnionLevel)) return false;
+        }
+        return true;
+    }), 1) : 1;
+
+    if (maxPeak - baseLevel > 4) {
+        conflicts.push(
+            `Противоречие: вы демонстрируете понимание уровня ${maxPeak}, но не освоили уровни ${baseLevel + 1}-${maxPeak - 1}. ` +
+            'Это может указывать на теоретическое знание без практического опыта.'
+        );
+    }
+
+    // КОНФЛИКТ 3: Большие дыры при паттерне "гармоничный"
+    if (pattern === 'harmonious' && gaps.length > 0) {
+        conflicts.push(
+            `Внимание: обнаружены пропуски на уровнях ${gaps.join(', ')}, хотя общий паттерн выглядит гармоничным. ` +
+            'Рекомендуется уделить внимание этим областям.'
+        );
+    }
+
+    // КОНФЛИКТ 4: Очень низкие результаты на промежуточных уровнях
+    // Если уровень 4 или 5 провален (< 20%), но выше есть успехи
+    for (let lvl = 4; lvl <= 6; lvl++) {
+        const score = spectrogram.get(lvl as UnionLevel) || 0;
+        const hasHigherPeaks = peaks.some(p => p > lvl);
+
+        if (score < 0.2 && hasHigherPeaks) {
+            conflicts.push(
+                `Предупреждение: низкий результат на уровне ${lvl} (${Math.round(score * 100)}%) при наличии успехов на более высоких уровнях. ` +
+                `Уровень ${lvl} - это критически важный переход, который стоит проработать.`
+            );
+            break; // Одно предупреждение достаточно
+        }
+    }
+
+    return conflicts;
+}
+
+/**
+ * Расчет силы (уверенности) паттерна
+ * Возвращает число от 0 до 1, где:
+ * - 1.0 = паттерн очень четкий, диагноз уверенный
+ * - 0.5 = паттерн размытый, есть неопределенность
+ * - 0.0 = данных недостаточно
+ */
+function calculatePatternStrength(
+    pattern: ProfilePattern,
+    peaks: UnionLevel[],
+    gaps: UnionLevel[],
+    spectrogram: Map<UnionLevel, number>
+): number {
+    // Базовая сила зависит от количества данных
+    const totalPeaks = peaks.length;
+    if (totalPeaks === 0) return 0.0;
+
+    // Чем больше уровней протестировано, тем выше уверенность (но не более 1.0)
+    let baseStrength = Math.min(totalPeaks / 6, 1.0);
+
+    // Модификаторы для разных паттернов
+    switch (pattern) {
+        case 'harmonious':
+            // Гармоничный паттерн - сильный, если нет дыр
+            if (gaps.length === 0 && totalPeaks >= 3) {
+                return Math.min(baseStrength + 0.3, 1.0);
+            }
+            return baseStrength;
+
+        case 'spiritual_bypass':
+            // Духовное избегание - сильный сигнал, если контраст явный
+            const minPeak = Math.min(...peaks);
+            const maxPeak = Math.max(...peaks);
+            const contrast = maxPeak - minPeak;
+
+            if (contrast >= 6 && gaps.length >= 3) {
+                return Math.min(baseStrength + 0.2, 1.0);
+            }
+            return baseStrength * 0.8; // Немного снижаем, так как паттерн настораживающий
+
+        case 'gap':
+            // Разрыв - уверенность зависит от четкости дыры
+            if (gaps.length === 1 && totalPeaks >= 4) {
+                return Math.min(baseStrength + 0.2, 1.0);
+            }
+            return baseStrength;
+
+        case 'crisis':
+            // Кризис - если совсем нет пиков, уверенность низкая
+            return Math.max(baseStrength - 0.3, 0.3);
+
+        case 'stuck':
+            // Застревание - если один уровень сильно доминирует
+            const dominantLevel = peaks[0];
+            const dominantScore = spectrogram.get(dominantLevel) || 0;
+
+            if (dominantScore > 0.8 && totalPeaks <= 2) {
+                return Math.min(baseStrength + 0.25, 1.0);
+            }
+            return baseStrength;
+
+        case 'potential':
+            // Потенциал - если есть прогресс на следующем уровне
+            const maxLevel = Math.max(...peaks);
+            const nextLevel = Math.min(maxLevel + 1, 12) as UnionLevel;
+            const nextScore = spectrogram.get(nextLevel) || 0;
+
+            if (nextScore > 0.2 && nextScore < 0.4) {
+                return Math.min(baseStrength + 0.15, 1.0);
+            }
+            return baseStrength * 0.9; // Немного снижаем, так как прогресс не подтвержден
+
+        default:
+            return baseStrength;
+    }
+}
+
 // ============================================================================
 // ПУБЛИЧНЫЙ API
 // ============================================================================
@@ -309,18 +456,33 @@ export function diagnoseUser(
     // Если разрыв, то текущий уровень "падает" до базы, так как выше идти опасно
     // Если избегание, то тоже база, так как верх - иллюзия.
 
+    // 5. Детектируем конфликты
+    const conflicts = detectConflicts(
+        normalizedScores,
+        analysis.peaks,
+        analysis.gaps,
+        analysis.pattern
+    );
+
+    // 6. Рассчитываем силу паттерна
+    const patternStrength = calculatePatternStrength(
+        analysis.pattern,
+        analysis.peaks,
+        analysis.gaps,
+        normalizedScores
+    );
+
     return {
         baseLevel: analysis.baseLevel,
         currentLevel: Math.round(currentLevel * 10) / 10,
         potentialLevel: Math.min(analysis.baseLevel + 1, 12) as UnionLevel,
         pattern: analysis.pattern,
-        patternStrength: 1.0, // TODO: рассчитать силу
+        patternStrength,
         levelScores: normalizedScores,
         gaps: analysis.gaps,
-        conflicts: [], // TODO: добавить детектор конфликтов
+        conflicts,
         diagnosisTitle: diagnosis.title,
         diagnosisDescription: diagnosis.description,
         recommendationFocus: diagnosis.focus
     };
 }
-

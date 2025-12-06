@@ -26,6 +26,9 @@ export function mapScenarioToModes(scenario: TestScenario): {
     case 'couple_discussion':
       return { testMode: 'pair_discussion', relationshipStatus: 'pair_together' };
 
+    case 'compatibility':
+      return { testMode: 'potential', relationshipStatus: 'single_potential' };
+
     default: {
       const _exhaustive: never = scenario;
       return _exhaustive;
