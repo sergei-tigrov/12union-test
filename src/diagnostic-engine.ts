@@ -167,13 +167,15 @@ function analyzePattern(
     const maxPeak = Math.max(...peaks);
 
     // Поиск Базового Уровня (Base Level)
-    // ОБНОВЛЕННАЯ ЛОГИКА v3: Weighted Median + High Profile Boost
+    // ИСПРАВЛЕННАЯ ЛОГИКА v4: Честная Weighted Median
     //
-    // Проблема: Weighted median всегда "центрирует" результат,
-    // из-за чего даже при идеальных ответах на 11-12 baseLevel = 10
+    // ПРОБЛЕМА ВЕРСИИ v3:
+    // - Режимы isHighProfile (>60%) и isTopProfile отсекали нижние уровни
+    // - При ответах на уровне 9, игнорировались пики на 7-8
+    // - Это приводило к завышению на 1-2 уровня (9→10-11)
     //
-    // Решение: Если профиль явно "высокий" (концентрация на 9-12),
-    // используем weighted average вместо median для более точного отражения
+    // РЕШЕНИЕ: Weighted median по ВСЕМ пикам
+    // Специальный режим только для ЧИСТО высоких профилей (>90% на 9-12)
     let baseLevel: UnionLevel = 1;
 
     if (peaks.length === 0) {
@@ -187,7 +189,7 @@ function analyzePattern(
 
         const totalWeight = weightedPeaks.reduce((sum, p) => sum + p.weight, 0);
 
-        // НОВОЕ: Анализ профиля для определения метода расчёта
+        // Анализ распределения веса
         const highLevelPeaks = weightedPeaks.filter(p => p.level >= 9);
         const highLevelWeight = highLevelPeaks.reduce((sum, p) => sum + p.weight, 0);
         const topPeaks = weightedPeaks.filter(p => p.level >= 11);
@@ -198,67 +200,36 @@ function analyzePattern(
         const topRatio = totalWeight > 0 ? topWeight / totalWeight : 0;
 
         // Проверяем состояние базы (уровни 1-4)
-        const baseLevels = [1, 2, 3, 4] as UnionLevel[];
-        const baseWeight = baseLevels.reduce((sum, lvl) => sum + (spectrogram.get(lvl) || 0), 0);
-        const baseAvg = baseWeight / 4;
-
-        // Различаем:
-        // - База НЕ ТЕСТИРОВАЛАСЬ (baseAvg < 0.1) - допустимо для высокого профиля
-        // - База ПРОВАЛЕНА (0.1 <= baseAvg < 0.3 при высоких показателях на верху) - это bypass
-        // - База ХОРОШАЯ (baseAvg >= 0.5) - допустимо
+        const baseLevelsArr = [1, 2, 3, 4] as UnionLevel[];
+        const baseWeightSum = baseLevelsArr.reduce((sum, lvl) => sum + (spectrogram.get(lvl) || 0), 0);
+        const baseAvg = baseWeightSum / 4;
         const baseNotTested = baseAvg < 0.1;
-        const baseStrong = baseAvg >= 0.5;
-        const baseOkForHighProfile = baseNotTested || baseStrong;
 
-        // ВЫСОКИЙ ПРОФИЛЬ: если >60% веса на уровнях 9-12 И база не провалена
-        const isHighProfile = highRatio > 0.6 && baseOkForHighProfile;
-        // ТОП-ПРОФИЛЬ: 30%+ веса на уровнях 11-12
-        const isTopProfile = topRatio > 0.3 && highRatio > 0.5 && baseOkForHighProfile;
+        // ЧИСТО ВЫСОКИЙ ПРОФИЛЬ: >90% веса на 9-12 И база не тестировалась
+        // Только в этом КРАЙНЕМ случае используем weighted average среди высоких
+        const isPureHighProfile = highRatio > 0.90 && baseNotTested && topRatio > 0.3;
 
         if (totalWeight > 0) {
-            if (isTopProfile) {
-                // ПРОФИЛЬ С ВЕРШИНОЙ: Рассчитываем только среди высоких уровней (9-12)
-                // Уровни 7-8 не должны "тянуть вниз" если профиль явно высокий
+            if (isPureHighProfile) {
+                // ЧИСТО ВЫСОКИЙ ПРОФИЛЬ (редкий случай: ВСЕ ответы на 9-12)
+                // Weighted average среди 9-12 с минимальным бустом
                 const highOnlyPeaks = weightedPeaks.filter(p => p.level >= 9);
-                const highOnlyWeight = highOnlyPeaks.reduce((sum, p) => sum + p.weight, 0);
+                let weightedSum = 0;
+                let adjustedTotalWeight = 0;
 
-                if (highOnlyWeight > 0) {
-                    // Weighted average только среди высоких уровней с бустом для 11-12
-                    let weightedSum = 0;
-                    let adjustedTotalWeight = 0;
-
-                    for (const peak of highOnlyPeaks) {
-                        // Буст для уровней 11-12: вес * 1.5 (увеличен с 1.3)
-                        const boost = peak.level >= 11 ? 1.5 : 1.0;
-                        const adjustedWeight = peak.weight * boost;
-                        weightedSum += peak.level * adjustedWeight;
-                        adjustedTotalWeight += adjustedWeight;
-                    }
-
-                    baseLevel = Math.round(weightedSum / adjustedTotalWeight) as UnionLevel;
-                } else {
-                    // Fallback: максимальный пик
-                    baseLevel = maxPeak;
+                for (const peak of highOnlyPeaks) {
+                    // Минимальный буст 1.1x для 11-12 (было 1.5x - слишком агрессивно)
+                    const boost = peak.level >= 11 ? 1.1 : 1.0;
+                    const adjustedWeight = peak.weight * boost;
+                    weightedSum += peak.level * adjustedWeight;
+                    adjustedTotalWeight += adjustedWeight;
                 }
-                // Ограничиваем до реального максимального пика
-                baseLevel = Math.min(baseLevel, maxPeak) as UnionLevel;
-            } else if (isHighProfile) {
-                // ВЫСОКИЙ ПРОФИЛЬ: Weighted average среди уровней >= 8
-                const highPeaks = weightedPeaks.filter(p => p.level >= 8);
-                const highWeight = highPeaks.reduce((sum, p) => sum + p.weight, 0);
 
-                if (highWeight > 0) {
-                    let weightedSum = 0;
-                    for (const peak of highPeaks) {
-                        weightedSum += peak.level * peak.weight;
-                    }
-                    baseLevel = Math.round(weightedSum / highWeight) as UnionLevel;
-                } else {
-                    baseLevel = maxPeak;
-                }
+                baseLevel = Math.round(weightedSum / adjustedTotalWeight) as UnionLevel;
                 baseLevel = Math.min(baseLevel, maxPeak) as UnionLevel;
             } else {
-                // СТАНДАРТНЫЙ ПРОФИЛЬ: Weighted median (как раньше)
+                // СТАНДАРТНЫЙ РАСЧЁТ: Weighted median по ВСЕМ пикам
+                // Это честный расчёт, учитывающий ВСЕ ответы пользователя
                 let cumulativeWeight = 0;
                 const medianThreshold = totalWeight / 2;
 
