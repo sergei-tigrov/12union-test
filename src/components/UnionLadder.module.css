@@ -352,6 +352,10 @@
   flex: 1;
 }
 
+.stepRight {
+  flex: 1;
+}
+
 .levelName {
   font-size: 10px;
   font-weight: 600;
@@ -363,6 +367,29 @@
   align-items: center;
   justify-content: center;
   gap: 3px;
+}
+
+/* Компактная версия кнопки (для мобильных) */
+.stepCompact {
+  display: none; /* Скрыто по умолчанию */
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+}
+
+.compactNumber {
+  font-size: 11px;
+  font-weight: 700;
+  color: #1e293b;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.7);
+}
+
+.compactName {
+  font-size: 11px;
+  font-weight: 600;
+  color: #1e293b;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.7);
 }
 
 .dominantIcon {
@@ -484,25 +511,39 @@
 }
 
 /* ============================================
-   АДАПТИВНОСТЬ
+   АДАПТИВНОСТЬ - КОМПАКТНЫЙ МОБИЛЬНЫЙ РЕЖИМ
    ============================================ */
 
 @media (max-width: 480px) {
+  /* Скрываем заголовки прогресс-баров на мобильных */
   .progressHeaders {
-    margin-bottom: 6px;
-    padding: 0 2px;
+    display: none;
   }
 
-  .personalHeader,
-  .relationshipHeader {
-    font-size: 8px;
-    width: 50px;
+  /* Скрываем прогресс-бары */
+  .leftProgressItem,
+  .rightProgressItem {
+    display: none !important;
   }
 
-  .stepsHeader {
-    font-size: 9px;
+  /* Скрываем иконки слева/справа */
+  .levelIconLeft,
+  .levelIconRight {
+    display: none !important;
   }
 
+  /* Скрываем десктопную версию кнопки */
+  .stepLeft,
+  .stepRight {
+    display: none !important;
+  }
+
+  /* Показываем компактную версию */
+  .stepCompact {
+    display: flex !important;
+  }
+
+  /* Легенда конфликтов - компактнее */
   .conflictLegend {
     padding: 6px 8px;
     margin-bottom: 6px;
@@ -526,195 +567,166 @@
     font-size: 8px;
   }
 
+  /* Лестница - компактнее */
   .ladderRows {
-    gap: 2px;
-  }
-
-  .ladderRow {
-    gap: 3px;
-  }
-
-  .leftProgressItem,
-  .rightProgressItem {
-    width: 50px;
-    height: 22px;
-    gap: 2px;
-  }
-
-  .progressBar {
-    width: 30px;
-    height: 3px;
-  }
-
-  .progressScore {
-    font-size: 8px;
-    min-width: 14px;
-  }
-
-  .ladderStep {
-    border-radius: 5px;
-    min-height: 22px;
-  }
-
-  .stepContent {
-    padding: 0 5px;
     gap: 4px;
   }
 
-  .stepLeft {
-    width: 14px;
-    height: 14px;
+  .ladderRow {
+    gap: 0;
+    justify-content: center;
   }
 
-  .levelNumber {
-    font-size: 8px;
+  .ladderStepContainer {
+    flex: none;
+    width: 55%;
+    max-width: 200px;
   }
 
-  .levelName {
-    font-size: 8px;
+  .ladderStep {
+    border-radius: 20px;
+    min-height: 32px;
   }
 
-  .dominantIcon {
-    font-size: 7px;
+  .ladderStep.active {
+    box-shadow: 0 2px 12px rgba(59, 130, 246, 0.35);
+    transform: scale(1.02);
   }
 
-  .levelIconLeft,
-  .levelIconRight {
-    width: 16px;
-    height: 16px;
+  .stepContent {
+    padding: 6px 12px;
+    justify-content: center;
   }
 
-  .levelIconLeft .dominantIcon,
-  .levelIconRight .dominantIcon {
-    font-size: 11px;
+  .compactNumber {
+    font-size: 12px;
+    font-weight: 800;
   }
 
-  .conflictBadge {
-    top: -4px;
-    right: -4px;
-    font-size: 8px;
+  .compactName {
+    font-size: 12px;
+    font-weight: 600;
   }
 
-  .conflictBadge.severity_critical {
-    font-size: 9px;
-  }
-
-  /* Описание уровня */
+  /* Описание уровня - полная ширина, меньший шрифт */
   .levelDescription {
-    margin-top: 8px;
+    margin-top: 12px;
+    position: relative;
   }
 
   .descriptionCard {
-    padding: 10px;
-    border-radius: 8px;
+    padding: 12px;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   }
 
   .descriptionHeader {
-    gap: 8px;
-    margin-bottom: 8px;
-    padding-bottom: 6px;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
   }
 
   .levelBadge {
-    width: 24px;
-    height: 24px;
+    width: 32px;
+    height: 32px;
   }
 
   .levelBadge .levelNumber {
-    font-size: 10px;
+    font-size: 13px;
   }
 
   .levelTitle {
-    font-size: 12px;
+    font-size: 14px;
+    font-weight: 700;
   }
 
   .levelSubtitle {
+    font-size: 11px;
+    line-height: 1.4;
+  }
+
+  .levelFullDescription {
+    font-size: 12px;
+    line-height: 1.5;
+    margin-bottom: 10px;
+    color: #374151;
+  }
+
+  .recommendations {
+    padding: 10px;
+    border-left-width: 3px;
+    background: #f8fafc;
+  }
+
+  .recommendationsTitle {
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+
+  .recommendationsList {
+    padding-left: 16px;
+  }
+
+  .recommendationItem {
+    font-size: 11px;
+    line-height: 1.4;
+    margin-bottom: 4px;
+  }
+}
+
+/* Telegram Mini App (body class detection) */
+:global(body.telegram-webapp-mode) .ladderStepContainer {
+  width: 50%;
+  max-width: 180px;
+}
+
+:global(body.telegram-webapp-mode) .ladderStep {
+  min-height: 30px;
+}
+
+:global(body.telegram-webapp-mode) .compactNumber,
+:global(body.telegram-webapp-mode) .compactName {
+  font-size: 11px;
+}
+
+:global(body.telegram-webapp-mode) .levelFullDescription {
+  font-size: 11px;
+}
+
+:global(body.telegram-webapp-mode) .recommendationItem {
+  font-size: 10px;
+}
+
+/* Очень узкие экраны */
+@media (max-width: 360px) {
+  .ladderStepContainer {
+    width: 60%;
+    max-width: 160px;
+  }
+
+  .ladderStep {
+    min-height: 28px;
+    border-radius: 16px;
+  }
+
+  .stepContent {
+    padding: 5px 10px;
+  }
+
+  .compactNumber {
+    font-size: 10px;
+  }
+
+  .compactName {
     font-size: 10px;
   }
 
   .levelFullDescription {
-    font-size: 11px;
-    margin-bottom: 8px;
-  }
-
-  .recommendations {
-    padding: 8px;
-    border-left-width: 2px;
-  }
-
-  .recommendationsTitle {
-    font-size: 11px;
-    margin-bottom: 6px;
-  }
-
-  .recommendationsList {
-    padding-left: 14px;
+    font-size: 10px;
   }
 
   .recommendationItem {
-    font-size: 10px;
-    margin-bottom: 3px;
-  }
-}
-
-/* Очень узкие экраны (Telegram Mini App) */
-@media (max-width: 360px) {
-  .personalHeader,
-  .relationshipHeader {
-    font-size: 7px;
-    width: 40px;
-  }
-
-  .stepsHeader {
-    font-size: 8px;
-  }
-
-  .leftProgressItem,
-  .rightProgressItem {
-    width: 40px;
-    height: 20px;
-  }
-
-  .progressBar {
-    width: 22px;
-    height: 2px;
-  }
-
-  .progressScore {
-    font-size: 7px;
-    min-width: 12px;
-  }
-
-  .ladderStep {
-    min-height: 20px;
-  }
-
-  .stepContent {
-    padding: 0 4px;
-    gap: 3px;
-  }
-
-  .stepLeft {
-    width: 12px;
-    height: 12px;
-  }
-
-  .levelNumber {
-    font-size: 7px;
-  }
-
-  .levelName {
-    font-size: 7px;
-  }
-
-  .levelIconLeft,
-  .levelIconRight {
-    width: 14px;
-    height: 14px;
-  }
-
-  .levelIconLeft .dominantIcon,
-  .levelIconRight .dominantIcon {
     font-size: 9px;
   }
 }

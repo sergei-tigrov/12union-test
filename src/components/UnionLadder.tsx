@@ -455,6 +455,7 @@ const UnionLadder: React.FC<UnionLadderProps> = ({
                     </div>
 
                     <div className={styles.stepContent}>
+                      {/* Desktop: круг с номером */}
                       <div className={styles.stepLeft}>
                         <div className={styles.levelNumber}>{level.id}</div>
                       </div>
@@ -462,6 +463,11 @@ const UnionLadder: React.FC<UnionLadderProps> = ({
                         <div className={styles.levelName}>
                           {level.name}
                         </div>
+                      </div>
+                      {/* Mobile: номер внутри кнопки */}
+                      <div className={styles.stepCompact}>
+                        <span className={styles.compactNumber}>{level.id}.</span>
+                        <span className={styles.compactName}>{level.name}</span>
                       </div>
                     </div>
                   </motion.div>
