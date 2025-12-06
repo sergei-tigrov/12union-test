@@ -55,6 +55,25 @@
   padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
+/* ============================================
+   HEADER SECTION - Пурпурная шапка
+   ============================================ */
+.mr-header {
+  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #d946ef 100%);
+  padding: 24px 16px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.2);
+}
+
+.mr-header__title {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  letter-spacing: 0.3px;
+}
+
 .mr-container {
   width: 100%;
   max-width: 100%;
@@ -763,6 +782,14 @@
    RESPONSIVE - очень маленькие экраны
    ============================================ */
 @media (max-width: 360px) {
+  .mr-header {
+    padding: 16px 12px;
+  }
+
+  .mr-header__title {
+    font-size: 1.4rem;
+  }
+
   .mr-hero__level {
     font-size: 2.5rem;
   }
@@ -808,6 +835,14 @@
 /* ============================================
    TELEGRAM MINI APP - Красивые отступы
    ============================================ */
+body.telegram-webapp-mode .mr-header {
+  padding: 18px 14px;
+}
+
+body.telegram-webapp-mode .mr-header__title {
+  font-size: 1.5rem;
+}
+
 body.telegram-webapp-mode .mr-tabs {
   margin-top: 12px;
 }

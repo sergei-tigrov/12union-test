@@ -519,6 +519,11 @@ export const ModernAdaptiveResults: React.FC<ModernAdaptiveResultsProps> = ({
 
   return (
     <div className={`mr-page ${isTelegram ? 'tg-theme' : ''}`}>
+      {/* Header Section */}
+      <div className="mr-header">
+        <h1 className="mr-header__title">Ваши результаты</h1>
+      </div>
+
       {/* Tabs */}
       <div className="mr-tabs">
         {(['summary', 'breakdown', 'actions', 'validation'] as const).map((tab) => (
