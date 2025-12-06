@@ -120,7 +120,7 @@ function analyzePattern(
     peaks: UnionLevel[];
 } {
     const levels = Array.from(spectrogram.entries()).sort((a, b) => a[0] - b[0]);
-    let peaks: UnionLevel[] = [];
+    const peaks: UnionLevel[] = [];
     const gaps: UnionLevel[] = [];
 
     // 1. Первичный поиск пиков (уровни с освоением > 30%)
@@ -397,7 +397,7 @@ function detectConflicts(
     spectrogram: Map<UnionLevel, number>,
     peaks: UnionLevel[],
     gaps: UnionLevel[],
-    _pattern: ProfilePattern // Сохраняем для совместимости API, но не используем
+    _pattern: ProfilePattern // eslint-disable-line @typescript-eslint/no-unused-vars
 ): string[] {
     const conflicts: string[] = [];
 
@@ -526,7 +526,7 @@ function calculatePatternStrength(
     if (totalPeaks === 0) return 0.0;
 
     // Чем больше уровней протестировано, тем выше уверенность (но не более 1.0)
-    let baseStrength = Math.min(totalPeaks / 6, 1.0);
+    const baseStrength = Math.min(totalPeaks / 6, 1.0);
 
     // Модификаторы для разных паттернов
     switch (pattern) {
@@ -537,7 +537,7 @@ function calculatePatternStrength(
             }
             return baseStrength;
 
-        case 'spiritual_bypass':
+        case 'spiritual_bypass': {
             // Духовное избегание - сильный сигнал, если контраст явный
             const minPeak = Math.min(...peaks);
             const maxPeak = Math.max(...peaks);
@@ -547,6 +547,7 @@ function calculatePatternStrength(
                 return Math.min(baseStrength + 0.2, 1.0);
             }
             return baseStrength * 0.8; // Немного снижаем, так как паттерн настораживающий
+        }
 
         case 'gap':
             // Разрыв - уверенность зависит от четкости дыры
@@ -559,7 +560,7 @@ function calculatePatternStrength(
             // Кризис - если совсем нет пиков, уверенность низкая
             return Math.max(baseStrength - 0.3, 0.3);
 
-        case 'stuck':
+        case 'stuck': {
             // Застревание - если один уровень сильно доминирует
             const dominantLevel = peaks[0];
             const dominantScore = spectrogram.get(dominantLevel) || 0;
@@ -568,8 +569,9 @@ function calculatePatternStrength(
                 return Math.min(baseStrength + 0.25, 1.0);
             }
             return baseStrength;
+        }
 
-        case 'potential':
+        case 'potential': {
             // Потенциал - если есть прогресс на следующем уровне
             const maxLevel = Math.max(...peaks);
             const nextLevel = Math.min(maxLevel + 1, 12) as UnionLevel;
@@ -579,6 +581,7 @@ function calculatePatternStrength(
                 return Math.min(baseStrength + 0.15, 1.0);
             }
             return baseStrength * 0.9; // Немного снижаем, так как прогресс не подтвержден
+        }
 
         default:
             return baseStrength;

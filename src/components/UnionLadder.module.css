@@ -1,12 +1,14 @@
+/* ============================================
+   UNION LADDER - COMPACT MODERN DESIGN
+   Оптимизировано для Telegram Mini App
+   ============================================ */
+
 /* Основной контейнер */
 .unionLadderContainer {
   width: 100%;
-  /* Убираем max-width для единообразия */
-  margin: 0 auto;
-  padding: 20px;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  margin: 0;
+  padding: 0;
+  background: transparent;
 }
 
 /* Заголовки прогресс-баров */
@@ -14,142 +16,127 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
-  padding: 0 20px;
+  margin-bottom: 8px;
+  padding: 0 4px;
 }
 
 .personalHeader,
 .relationshipHeader {
-  font-size: 14px;
+  font-size: 10px;
   font-weight: 600;
-  color: #64748b;
+  color: #94a3af;
   text-align: center;
-  width: 150px;
+  width: 70px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
 
 .stepsHeader {
-  font-size: 18px;
-  font-weight: 700;
-  color: #1e293b;
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b7280;
   text-align: center;
   flex: 1;
 }
 
-/* Легенда индикаторов конфликтов */
+/* Легенда индикаторов конфликтов - КОМПАКТНАЯ */
 .conflictLegend {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  border: 2px solid #fbbf24;
-  border-radius: 12px;
-  padding: 12px 16px;
-  margin: 0 20px 15px;
-  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.2);
+  background: #fefce8;
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin: 0 0 8px;
 }
 
 .legendTitle {
-  font-size: 13px;
-  font-weight: 700;
-  color: #92400e;
-  margin-bottom: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #854d0e;
+  margin-bottom: 6px;
   text-align: center;
 }
 
 .legendItems {
   display: flex;
-  justify-content: space-around;
+  justify-content: center;
   align-items: center;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 8px;
+  gap: 8px;
+  margin-bottom: 4px;
 }
 
 .legendItem {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 12px;
+  gap: 3px;
+  font-size: 9px;
   color: #78350f;
-  padding: 4px 8px;
+  padding: 2px 6px;
   background: rgba(255, 255, 255, 0.7);
-  border-radius: 6px;
-  transition: transform 0.2s ease, background 0.2s ease;
-}
-
-.legendItem:hover {
-  transform: scale(1.05);
-  background: rgba(255, 255, 255, 0.9);
+  border-radius: 4px;
 }
 
 .legendIcon {
-  font-size: 14px;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+  font-size: 10px;
 }
 
 .legendText {
-  font-weight: 600;
+  font-weight: 500;
   white-space: nowrap;
 }
 
 .legendHint {
-  font-size: 11px;
-  color: #92400e;
+  font-size: 9px;
+  color: #a16207;
   text-align: center;
   font-style: italic;
-  opacity: 0.9;
+  display: none; /* Скрываем на мобильных */
 }
 
-/* Основной контейнер с лестницей и прогресс-барами */
+/* Основной контейнер с лестницей */
 .ladderWithProgress {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 30px;
-  margin-left: auto;
-  margin-right: auto;
-  padding: 0 20px;
+  margin: 0;
+  padding: 0;
 }
 
-/* Контейнер строк лестницы */
 .ladderRows {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 3px;
   width: 100%;
 }
 
-/* Каждая строка лестницы содержит левый прогресс, ступень, правый прогресс */
+/* Строка лестницы */
 .ladderRow {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 20px;
+  gap: 6px;
   width: 100%;
 }
 
-/* Прогресс-бары слева и справа */
+/* Прогресс-бары */
 .leftProgressItem,
 .rightProgressItem {
   display: flex;
   align-items: center;
-  gap: 12px;
-  height: 40px;
-  width: 150px;
+  gap: 4px;
+  height: 26px;
+  width: 70px;
   flex-shrink: 0;
 }
 
-/* Левые прогресс-бары: балл, потом прогресс-бар */
 .leftProgressItem {
   flex-direction: row;
   justify-content: flex-end;
 }
 
-/* Правые прогресс-бары: прогресс-бар, потом балл */
 .rightProgressItem {
   flex-direction: row;
   justify-content: flex-start;
 }
 
-/* Контейнер ступени в центре */
 .ladderStepContainer {
   flex: 1;
   display: flex;
@@ -158,18 +145,16 @@
   min-width: 0;
 }
 
-/* Прогресс-бары с направлением заполнения */
+/* Прогресс-бары */
 .progressBar {
-  width: 100px;
-  height: 8px;
-  background: #e2e8f0;
-  border-radius: 4px;
+  width: 45px;
+  height: 4px;
+  background: #e5e7eb;
+  border-radius: 2px;
   overflow: hidden;
   position: relative;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-/* Левый прогресс-бар заполняется справа налево */
 .leftProgressBar {
   direction: rtl;
 }
@@ -178,41 +163,39 @@
   direction: ltr;
 }
 
-/* Правый прогресс-бар заполняется слева направо (обычно) */
 .rightProgressBar {
   direction: ltr;
 }
 
 .progressFill {
   height: 100%;
-  border-radius: 4px;
-  transition: width 0.8s ease-out;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  border-radius: 2px;
+  transition: width 0.6s ease-out;
 }
 
 .progressScore {
-  font-size: 14px;
+  font-size: 10px;
   font-weight: 600;
-  color: #64748b;
-  min-width: 32px;
+  color: #9ca3af;
+  min-width: 18px;
   text-align: center;
 }
 
-/* Выделение доминирующих элементов */
+/* Доминирующие элементы */
 .progressItem.dominant {
   position: relative;
 }
 
 .progressItem.personalDominant {
-  background: rgba(79, 70, 229, 0.1);
-  border-radius: 8px;
-  padding: 4px 6px;
+  background: rgba(79, 70, 229, 0.08);
+  border-radius: 4px;
+  padding: 2px 4px;
 }
 
 .progressItem.relationshipDominant {
-  background: rgba(236, 72, 153, 0.1);
-  border-radius: 8px;
-  padding: 4px 6px;
+  background: rgba(236, 72, 153, 0.08);
+  border-radius: 4px;
+  padding: 2px 4px;
 }
 
 .progressItem.personalDominant .progressScore {
@@ -225,161 +208,75 @@
   font-weight: 700;
 }
 
-/* ========================================================================== */
-/* ИНДИКАТОРЫ ПР ОТИВОРЕЧИЙ (УЛУЧШЕННАЯ ВЕРСИЯ) */
-/* ========================================================================== */
-
+/* Индикаторы противоречий */
 .progressItem.conflict {
   position: relative;
-  outline: 2px dashed #fbbf24;
-  outline-offset: 2px;
-  animation: pulse-warning 2s infinite;
-  transition: all 0.3s ease;
   z-index: 2;
-  /* Поднимаем над обычными элементами */
 }
 
-/* Severity levels */
 .progressItem.conflict[data-conflict-type="no_foundation"] {
-  outline-color: #dc2626;
-  outline-width: 3px;
-  outline-style: solid;
+  outline: 1.5px solid #dc2626;
+  outline-offset: 1px;
+  border-radius: 4px;
 }
 
 .progressItem.conflict[data-conflict-type="spiritual_bypass"] {
-  outline-color: #ef4444;
-  outline-width: 2px;
+  outline: 1.5px dashed #ef4444;
+  outline-offset: 1px;
+  border-radius: 4px;
 }
 
 .progressItem.conflict[data-conflict-type="gap_warning"] {
-  outline-color: #fbbf24;
-  outline-width: 2px;
+  outline: 1.5px dashed #fbbf24;
+  outline-offset: 1px;
+  border-radius: 4px;
 }
 
 .conflictBadge {
   position: absolute;
-  top: -12px;
-  right: -12px;
-  font-size: 16px;
+  top: -6px;
+  right: -6px;
+  font-size: 10px;
   z-index: 100;
-  /* Самый высокий z-index */
-  animation: bounce 1.5s ease-in-out infinite;
-  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3));
   cursor: help;
-  transition: transform 0.2s ease;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
 }
 
-.conflictBadge:hover {
-  transform: scale(1.2);
-  animation: none;
-  /* Останавливаем bounce при hover */
-}
-
-/* Severity-specific styles */
 .conflictBadge.severity_critical {
-  font-size: 18px;
-  animation: bounce-intense 1s ease-in-out infinite, pulse-glow 2s infinite;
+  font-size: 12px;
 }
 
 .conflictBadge.severity_warning {
-  font-size: 16px;
-  opacity: 0.95;
+  font-size: 10px;
 }
 
 .conflictBadge.severity_info {
-  font-size: 14px;
-  opacity: 0.85;
+  font-size: 9px;
 }
 
-/* Animations */
-@keyframes pulse-warning {
-
-  0%,
-  100% {
-    outline-opacity: 1;
-  }
-
-  50% {
-    outline-opacity: 0.5;
-  }
-}
-
-@keyframes bounce {
-
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-5px);
-  }
-}
-
-@keyframes bounce-intense {
-
-  0%,
-  100% {
-    transform: translateY(0) scale(1);
-  }
-
-  50% {
-    transform: translateY(-7px) scale(1.1);
-  }
-}
-
-@keyframes pulse-glow {
-
-  0%,
-  100% {
-    filter: drop-shadow(0 2px 6px rgba(220, 38, 38, 0.3));
-  }
-
-  50% {
-    filter: drop-shadow(0 4px 12px rgba(220, 38, 38, 0.6));
-  }
-}
-
-/* Accessibility: Focus states */
-.conflictBadge:focus {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
-}
-
-/* Ensure conflict indicators are above dominant elements */
-.progressItem.dominant.conflict {
-  z-index: 3;
-}
-
-/* Центральная лестница */
+/* Ступени лестницы */
 .ladderStep {
   height: 100%;
   position: relative;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+  border-radius: 6px;
+  transition: all 0.2s ease;
   overflow: hidden;
 }
 
-.ladderStep:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-  transform: translateY(-1px);
+.ladderStep:active {
+  transform: scale(0.98);
 }
 
 .ladderStep.active {
-  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
-  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
 }
 
-/* Выделение доминирующих ступеней */
 .ladderStep.dominant {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  border: 2px solid rgba(59, 130, 246, 0.5);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
 .ladderStep.dominant.active {
-  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
-  border: 2px solid #3b82f6;
+  box-shadow: 0 3px 10px rgba(59, 130, 246, 0.3);
 }
 
 .stepBackground {
@@ -391,7 +288,7 @@
   z-index: 1;
 }
 
-.stepBackground>div {
+.stepBackground > div {
   width: 100%;
   height: 100%;
 }
@@ -402,24 +299,23 @@
   display: flex;
   align-items: center;
   height: 100%;
-  padding: 0 15px;
-  gap: 12px;
+  padding: 0 8px;
+  gap: 6px;
 }
 
 .stepLeft {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 18px;
+  height: 18px;
   background: rgba(255, 255, 255, 0.9);
   border-radius: 50%;
   flex-shrink: 0;
-  position: relative;
 }
 
 .levelNumber {
-  font-size: 14px;
+  font-size: 10px;
   font-weight: 700;
   color: #1e293b;
 }
@@ -427,15 +323,15 @@
 /* Значки доминирования */
 .dominantBadge {
   position: absolute;
-  top: -8px;
-  right: -8px;
-  width: 16px;
-  height: 16px;
+  top: -4px;
+  right: -4px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 8px;
+  font-size: 5px;
   z-index: 3;
   border: 1px solid white;
 }
@@ -457,87 +353,67 @@
 }
 
 .levelName {
-  font-size: 13px;
+  font-size: 10px;
   font-weight: 600;
   color: #1e293b;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.6);
   line-height: 1.2;
   text-align: center;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 3px;
 }
 
-/* Иконки доминирующих ступеней в названии */
 .dominantIcon {
-  font-size: 12px;
+  font-size: 9px;
   opacity: 0.9;
 }
 
-/* Новые иконки слева и справа от кнопки */
+/* Иконки слева и справа */
 .levelIconLeft,
 .levelIconRight {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
 }
 
 .levelIconLeft .dominantIcon,
 .levelIconRight .dominantIcon {
-  font-size: 20px;
+  font-size: 14px;
   opacity: 1;
-  animation: pulse 2s infinite;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }
 
-/* Анимация пульсации для иконок */
-@keyframes pulse {
-
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-
-  50% {
-    transform: scale(1.1);
-    opacity: 0.8;
-  }
-}
-
-/* Описание уровня */
+/* Описание уровня - КОМПАКТНОЕ */
 .levelDescription {
-  margin-top: 30px;
+  margin-top: 12px;
   width: 100%;
 }
 
 .descriptionCard {
-  background: white;
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e2e8f0;
+  background: #f9fafb;
+  border-radius: 10px;
+  padding: 12px;
 }
 
 .descriptionHeader {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 20px;
-  padding-bottom: 16px;
-  border-bottom: 2px solid #f1f5f9;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .levelBadge {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 28px;
+  height: 28px;
   background: linear-gradient(135deg, #3b82f6, #1d4ed8);
   border-radius: 50%;
   flex-shrink: 0;
@@ -545,7 +421,7 @@
 
 .levelBadge .levelNumber {
   color: white;
-  font-size: 16px;
+  font-size: 12px;
   font-weight: 700;
 }
 
@@ -554,263 +430,302 @@
 }
 
 .levelTitle {
-  font-size: 20px;
+  font-size: 14px;
   font-weight: 700;
   color: #1e293b;
-  margin: 0 0 4px 0;
+  margin: 0 0 2px 0;
 }
 
 .levelSubtitle {
-  font-size: 14px;
-  color: #64748b;
+  font-size: 11px;
+  color: #6b7280;
   margin: 0;
-  font-style: italic;
 }
 
 .descriptionContent {
-  line-height: 1.6;
+  line-height: 1.5;
 }
 
 .levelFullDescription {
-  color: #374151;
-  margin-bottom: 20px;
-  font-size: 15px;
+  color: #4b5563;
+  margin-bottom: 10px;
+  font-size: 12px;
+  line-height: 1.5;
 }
 
 .recommendations {
-  background: #f8fafc;
-  border-radius: 12px;
-  padding: 16px;
-  border-left: 4px solid #3b82f6;
+  background: white;
+  border-radius: 8px;
+  padding: 10px;
+  border-left: 3px solid #3b82f6;
 }
 
 .recommendationsTitle {
-  font-size: 16px;
+  font-size: 12px;
   font-weight: 600;
   color: #1e293b;
-  margin: 0 0 12px 0;
+  margin: 0 0 8px 0;
 }
 
 .recommendationsList {
   margin: 0;
-  padding-left: 20px;
+  padding-left: 16px;
 }
 
 .recommendationItem {
   color: #4b5563;
-  margin-bottom: 8px;
-  font-size: 14px;
+  margin-bottom: 4px;
+  font-size: 11px;
+  line-height: 1.4;
 }
 
 .recommendationItem:last-child {
   margin-bottom: 0;
 }
 
-/* Адаптивность */
-@media (max-width: 768px) {
-  .unionLadderContainer {
-    padding: 12px;
-    max-width: 100%;
-  }
+/* ============================================
+   АДАПТИВНОСТЬ
+   ============================================ */
 
+@media (max-width: 480px) {
   .progressHeaders {
-    padding: 0 10px;
-    margin-bottom: 10px;
+    margin-bottom: 6px;
+    padding: 0 2px;
   }
 
   .personalHeader,
   .relationshipHeader {
-    font-size: 11px;
-    width: 80px;
+    font-size: 8px;
+    width: 50px;
   }
 
   .stepsHeader {
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 9px;
   }
 
-  .ladderWithProgress {
-    padding: 0 5px;
+  .conflictLegend {
+    padding: 6px 8px;
+    margin-bottom: 6px;
+  }
+
+  .legendTitle {
+    font-size: 10px;
+    margin-bottom: 4px;
+  }
+
+  .legendItems {
+    gap: 4px;
+  }
+
+  .legendItem {
+    font-size: 8px;
+    padding: 2px 4px;
+  }
+
+  .legendIcon {
+    font-size: 8px;
+  }
+
+  .ladderRows {
+    gap: 2px;
   }
 
   .ladderRow {
-    gap: 8px;
-    /* Уменьшаем отступ между элементами в строке */
+    gap: 3px;
   }
 
-  /* Прогресс-бары остаются по бокам, но ужимаются */
   .leftProgressItem,
   .rightProgressItem {
-    width: 80px;
-    /* Уменьшаем ширину */
-    height: 32px;
-    /* Уменьшаем высоту */
-    gap: 6px;
-  }
-
-  .ladderStepContainer {
-    flex: 1;
-    min-width: 0;
-    /* Позволяем ужиматься */
+    width: 50px;
+    height: 22px;
+    gap: 2px;
   }
 
   .progressBar {
-    width: 50px;
-    /* Еще больше уменьшаем */
-    height: 6px;
+    width: 30px;
+    height: 3px;
   }
 
   .progressScore {
-    font-size: 10px;
-    min-width: 20px;
-    text-align: center;
+    font-size: 8px;
+    min-width: 14px;
   }
 
-  /* Ступени тоже ужимаются */
   .ladderStep {
-    min-height: 32px;
-    /* Уменьшаем высоту ступеней */
-    border-radius: 8px;
+    border-radius: 5px;
+    min-height: 22px;
   }
 
   .stepContent {
-    padding: 0 8px;
-    /* Уменьшаем внутренние отступы */
-    gap: 6px;
+    padding: 0 5px;
+    gap: 4px;
   }
 
   .stepLeft {
-    width: 20px;
-    height: 20px;
+    width: 14px;
+    height: 14px;
   }
 
   .levelNumber {
-    font-size: 10px;
-    font-weight: 700;
+    font-size: 8px;
   }
 
   .levelName {
-    font-size: 11px;
-    font-weight: 600;
-  }
-
-  .dominantBadge {
-    width: 12px;
-    height: 12px;
-    font-size: 6px;
-    top: -4px;
-    right: -4px;
+    font-size: 8px;
   }
 
   .dominantIcon {
-    font-size: 8px;
+    font-size: 7px;
   }
 
   .levelIconLeft,
   .levelIconRight {
+    width: 16px;
+    height: 16px;
+  }
+
+  .levelIconLeft .dominantIcon,
+  .levelIconRight .dominantIcon {
+    font-size: 11px;
+  }
+
+  .conflictBadge {
+    top: -4px;
+    right: -4px;
+    font-size: 8px;
+  }
+
+  .conflictBadge.severity_critical {
+    font-size: 9px;
+  }
+
+  /* Описание уровня */
+  .levelDescription {
+    margin-top: 8px;
+  }
+
+  .descriptionCard {
+    padding: 10px;
+    border-radius: 8px;
+  }
+
+  .descriptionHeader {
+    gap: 8px;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+  }
+
+  .levelBadge {
     width: 24px;
     height: 24px;
   }
 
-  .levelIconLeft .dominantIcon,
-  .levelIconRight .dominantIcon {
-    font-size: 16px;
-  }
-}
-
-/* Экстра мобильная адаптивность для очень узких экранов */
-@media (max-width: 480px) {
-  .unionLadderContainer {
-    padding: 8px;
-    border-radius: 16px;
-  }
-
-  .progressHeaders {
-    padding: 0 5px;
-    margin-bottom: 8px;
-  }
-
-  .personalHeader,
-  .relationshipHeader {
+  .levelBadge .levelNumber {
     font-size: 10px;
-    width: 60px;
   }
 
-  .stepsHeader {
+  .levelTitle {
     font-size: 12px;
   }
 
-  .ladderWithProgress {
-    padding: 0 2px;
+  .levelSubtitle {
+    font-size: 10px;
   }
 
-  .ladderRow {
-    gap: 4px;
-    /* Минимальный отступ между элементами */
+  .levelFullDescription {
+    font-size: 11px;
+    margin-bottom: 8px;
+  }
+
+  .recommendations {
+    padding: 8px;
+    border-left-width: 2px;
+  }
+
+  .recommendationsTitle {
+    font-size: 11px;
+    margin-bottom: 6px;
+  }
+
+  .recommendationsList {
+    padding-left: 14px;
+  }
+
+  .recommendationItem {
+    font-size: 10px;
+    margin-bottom: 3px;
+  }
+}
+
+/* Очень узкие экраны (Telegram Mini App) */
+@media (max-width: 360px) {
+  .personalHeader,
+  .relationshipHeader {
+    font-size: 7px;
+    width: 40px;
+  }
+
+  .stepsHeader {
+    font-size: 8px;
   }
 
   .leftProgressItem,
   .rightProgressItem {
-    width: 60px;
-    /* Еще меньше для очень узких экранов */
-    height: 28px;
-    gap: 4px;
+    width: 40px;
+    height: 20px;
   }
 
   .progressBar {
-    width: 35px;
-    /* Минимальная ширина */
-    height: 5px;
+    width: 22px;
+    height: 2px;
   }
 
   .progressScore {
-    font-size: 9px;
-    min-width: 16px;
+    font-size: 7px;
+    min-width: 12px;
   }
 
   .ladderStep {
-    min-height: 28px;
-    border-radius: 6px;
+    min-height: 20px;
   }
 
   .stepContent {
-    padding: 0 6px;
-    gap: 4px;
+    padding: 0 4px;
+    gap: 3px;
   }
 
   .stepLeft {
-    width: 18px;
-    height: 18px;
+    width: 12px;
+    height: 12px;
   }
 
   .levelNumber {
-    font-size: 9px;
+    font-size: 7px;
   }
 
   .levelName {
-    font-size: 10px;
-  }
-
-  .dominantBadge {
-    width: 10px;
-    height: 10px;
-    font-size: 5px;
-    top: -3px;
-    right: -3px;
-  }
-
-  .dominantIcon {
-    font-size: 6px;
+    font-size: 7px;
   }
 
   .levelIconLeft,
   .levelIconRight {
-    width: 20px;
-    height: 20px;
+    width: 14px;
+    height: 14px;
   }
 
   .levelIconLeft .dominantIcon,
   .levelIconRight .dominantIcon {
-    font-size: 14px;
+    font-size: 9px;
+  }
+}
+
+/* Reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  .progressFill {
+    transition: none;
+  }
+
+  .ladderStep {
+    transition: none;
   }
 }

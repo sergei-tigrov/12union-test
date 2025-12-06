@@ -10,7 +10,7 @@ if (typeof window !== 'undefined') {
   try {
     WebApp.ready();
     WebApp.expand(); // Разворачиваем на весь экран
-  } catch (e) {
+  } catch {
     console.log('Telegram WebApp is not available (running in browser)');
   }
 }

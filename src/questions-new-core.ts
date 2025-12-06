@@ -31,6 +31,17 @@ export const level8_acceptance: SmartQuestion = {
             indicators: ['unconditional-acceptance', 'no-change-pressure', 'mature-love'],
         },
         {
+            id: 'l9-freedom-acceptance',
+            text: {
+                self: 'Я не только принимаю партнера, но и даю ему полную свободу быть собой и развиваться своим путем.',
+                partner: 'Он/она дает мне полную свободу быть собой, не пытаясь ни контролировать, ни переделывать.',
+                potential: 'Я хочу дарить партнеру свободу быть собой, без контроля и ограничений.',
+                pair_discussion: 'Мы даем друг другу свободу быть собой и развиваться.',
+            },
+            level: 9,
+            indicators: ['freedom-in-acceptance', 'autonomy-support', 'mature-freedom'],
+        },
+        {
             id: 'l6-conditional-image',
             text: {
                 self: 'Я люблю его/ее, но мне важно, чтобы он/она соответствовал(а) определенным стандартам (внешность, поведение на людях).',
@@ -75,7 +86,7 @@ export const level8_acceptance: SmartQuestion = {
             indicators: ['synergy', 'growth-mindset', 'resource-view'],
         },
     ],
-    targetLevels: [3, 5, 6, 8, 10],
+    targetLevels: [3, 5, 6, 8, 9, 10],
     priority: 1,
 };
 
@@ -255,8 +266,19 @@ export const level3_survivalFear: SmartQuestion = {
             level: 8,
             indicators: ['conscious-choice', 'authentic-love', 'freedom-in-connection'],
         },
+        {
+            id: 'l9-sovereign',
+            text: {
+                self: 'Я полностью самодостаточен. Я не нуждаюсь в партнере, но сознательно выбираю быть с ним.',
+                partner: 'Он/она полностью самодостаточен, выбирает меня осознанно, а не из нужды.',
+                potential: 'Я хочу быть самодостаточным и выбирать партнера свободно.',
+                pair_discussion: 'Мы две целостные личности, которые выбирают быть вместе.',
+            },
+            level: 9,
+            indicators: ['sovereignty', 'self-sufficiency', 'volitional-love'],
+        },
     ],
-    targetLevels: [3, 4, 8],
+    targetLevels: [3, 4, 8, 9],
     priority: 1,
 };
 
@@ -432,19 +454,8 @@ export const level6_socialStatus: SmartQuestion = {
             level: 5,
             indicators: ['passion-priority', 'excitement-seeking', 'intensity-focus'],
         },
-        {
-            id: 'l9-authentic-freedom',
-            text: {
-                self: 'Что я могу быть полностью собой, и это не угрожает нашим отношениям.',
-                partner: 'Ценит мою искренность и свободу больше, чем "картинку".',
-                potential: 'Я хочу быть собой, даже если это кому-то не нравится.',
-                pair_discussion: 'Мы настоящие, даже если это не вписывается в стандарты.',
-            },
-            level: 9,
-            indicators: ['authenticity', 'freedom', 'self-expression'],
-        },
     ],
-    targetLevels: [5, 6, 9],
+    targetLevels: [5, 6],
     priority: 2,
 };
 
@@ -502,19 +513,8 @@ export const level7_psychologicalConnection: SmartQuestion = {
             level: 6,
             indicators: ['mask-maintenance', 'selective-disclosure', 'role-focus'],
         },
-        {
-            id: 'l9-freedom-growth',
-            text: {
-                self: 'Мне свободно быть собой И я могу свободно развиваться.',
-                partner: 'Свободен в своем развитии, я его не сдерживаю.',
-                potential: 'Я хочу свободы и развития для нас обоих.',
-                pair_discussion: 'Мы свободные личности, идущие рядом.',
-            },
-            level: 9,
-            indicators: ['authentic-freedom', 'growth-support', 'differentiation'],
-        },
     ],
-    targetLevels: [6, 7, 9],
+    targetLevels: [6, 7],
     priority: 1,
 };
 
@@ -902,6 +902,17 @@ export const zone_conflict: SmartQuestion = {
             indicators: ['constructive-dialogue', 'respect', 'problem-solving'],
         },
         {
+            id: 'z-mature-freedom',
+            text: {
+                self: 'Каждый может отстоять свою позицию без угрозы для отношений. Мы не боимся разногласий.',
+                partner: 'Уважает мое право на отличающееся мнение, не воспринимает как угрозу.',
+                potential: 'Спокойно, сохраняя уважение к своим и чужим границам.',
+                pair_discussion: 'Разногласия не угрожают нашей связи, мы можем быть разными.',
+            },
+            level: 9,
+            indicators: ['differentiation', 'autonomy-in-conflict', 'secure-disagreement'],
+        },
+        {
             id: 'z-trans-growth',
             text: {
                 self: 'Мы видим в конфликте сигнал для роста и вместе ищем корень проблемы.',
@@ -913,7 +924,7 @@ export const zone_conflict: SmartQuestion = {
             indicators: ['conflict-as-growth', 'wisdom', 'transformation'],
         },
     ],
-    targetLevels: [2, 5, 7, 10],
+    targetLevels: [2, 5, 7, 9, 10],
     priority: 1,
 };
 
@@ -961,6 +972,17 @@ export const zone_safety: SmartQuestion = {
             indicators: ['safety', 'trust', 'secure-base'],
         },
         {
+            id: 'z-mature-autonomy',
+            text: {
+                self: 'Внутренняя свобода и уверенность. Я не боюсь потерять партнера, потому что мы вместе по выбору.',
+                partner: 'Свободен и уверен в себе, не цепляется за меня из страха.',
+                potential: 'Свободу без страха потери, уверенность в осознанном выборе.',
+                pair_discussion: 'Мы вместе не из страха одиночества, а из свободного выбора.',
+            },
+            level: 9,
+            indicators: ['secure-autonomy', 'freedom-from-fear', 'conscious-choice'],
+        },
+        {
             id: 'z-trans-unity',
             text: {
                 self: 'Глубокое духовное родство, ощущение "дома" на уровне души.',
@@ -972,7 +994,7 @@ export const zone_safety: SmartQuestion = {
             indicators: ['spiritual-safety', 'soul-connection', 'home'],
         },
     ],
-    targetLevels: [3, 5, 8, 11],
+    targetLevels: [3, 5, 8, 9, 11],
     priority: 1,
 };
 
@@ -1026,6 +1048,17 @@ export const zone_growth: SmartQuestion = {
             indicators: ['mutual-support', 'encouragement', 'secure-base-for-exploration'],
         },
         {
+            id: 'z-mature-parallel',
+            text: {
+                self: 'Каждый свободно развивается в своем направлении. Мы уважаем пути друг друга.',
+                partner: 'Уважает мой путь развития, даже если он отличается от его.',
+                potential: 'Свободу развиваться в своем направлении, сохраняя близость.',
+                pair_discussion: 'Мы уважаем индивидуальные пути развития друг друга.',
+            },
+            level: 9,
+            indicators: ['parallel-development', 'respect-for-path', 'individual-growth'],
+        },
+        {
             id: 'z-trans-synergy',
             text: {
                 self: 'Вместе мы растем быстрее, чем поодиночке. Мы раскрываем скрытые таланты друг друга.',
@@ -1037,7 +1070,7 @@ export const zone_growth: SmartQuestion = {
             indicators: ['synergy', 'catalyst', 'evolutionary-partnership'],
         },
     ],
-    targetLevels: [2, 4, 8, 10],
+    targetLevels: [2, 4, 8, 9, 10],
     priority: 1,
 };
 
@@ -1074,12 +1107,34 @@ export const zone_intimacy: SmartQuestion = {
             indicators: ['sexual-intimacy', 'passion-focus', 'lack-of-depth'],
         },
         {
+            id: 'z-mat-safe',
+            text: {
+                self: 'Мне безопасно рядом с ним/ней. Я могу открыться и быть уязвимым.',
+                partner: 'Создает пространство, где я чувствую себя защищенным.',
+                potential: 'Я ищу безопасного пространства для искренности.',
+                pair_discussion: 'Мы создали безопасное пространство для открытости.',
+            },
+            level: 7,
+            indicators: ['emotional-safety', 'vulnerability', 'secure-base'],
+        },
+        {
+            id: 'z-mat-acceptance',
+            text: {
+                self: 'Мы принимаем друг друга полностью, со всеми недостатками.',
+                partner: 'Принимает меня таким, какой я есть, без условий.',
+                potential: 'Я хочу полного принятия без попыток меня переделать.',
+                pair_discussion: 'Мы любим друг друга безусловно.',
+            },
+            level: 8,
+            indicators: ['unconditional-acceptance', 'deep-intimacy', 'mature-love'],
+        },
+        {
             id: 'z-mat-friendship',
             text: {
-                self: 'Мы лучшие друзья. Я могу рассказать ему/ей все.',
+                self: 'Мы лучшие друзья. Я могу рассказать ему/ей все и быть полностью собой.',
                 partner: 'Мой лучший друг, знает обо мне все и принимает.',
                 potential: 'Я ищу лучшего друга и партнера по жизни.',
-                pair_discussion: 'У нас глубокая дружба и полное доверие.',
+                pair_discussion: 'У нас глубокая дружба, полное доверие и свобода.',
             },
             level: 9,
             indicators: ['friendship', 'deep-trust', 'intellectual-intimacy'],
@@ -1096,7 +1151,7 @@ export const zone_intimacy: SmartQuestion = {
             indicators: ['soul-connection', 'telepathy', 'spiritual-intimacy'],
         },
     ],
-    targetLevels: [3, 5, 9, 12],
+    targetLevels: [3, 5, 7, 8, 9, 12],
     priority: 1,
 };
 
@@ -1133,6 +1188,28 @@ export const zone_responsibility: SmartQuestion = {
             indicators: ['expectation', 'dependency', 'happiness-outsourcing'],
         },
         {
+            id: 'z-emot-roles',
+            text: {
+                self: 'Каждый знает свою роль: кто за что отвечает. Это ясно и стабильно.',
+                partner: 'Четко выполняет свою роль в отношениях.',
+                potential: 'Я хочу ясности: кто за что отвечает.',
+                pair_discussion: 'У нас четкое распределение ролей и обязанностей.',
+            },
+            level: 6,
+            indicators: ['role-clarity', 'structure', 'traditional-division'],
+        },
+        {
+            id: 'z-mat-dialogue',
+            text: {
+                self: 'Мы обсуждаем проблемы и вместе ищем решения.',
+                partner: 'Готов обсуждать и искать компромисс.',
+                potential: 'Я хочу диалога и совместного решения проблем.',
+                pair_discussion: 'Мы решаем проблемы через открытый диалог.',
+            },
+            level: 7,
+            indicators: ['collaborative-problem-solving', 'dialogue', 'partnership'],
+        },
+        {
             id: 'z-mat-own',
             text: {
                 self: 'Я отвечаю за свои чувства, он — за свои. Мы два взрослых человека.',
@@ -1142,6 +1219,17 @@ export const zone_responsibility: SmartQuestion = {
             },
             level: 8,
             indicators: ['personal-responsibility', 'adult-stance', 'boundaries'],
+        },
+        {
+            id: 'z-mature-autonomy-resp',
+            text: {
+                self: 'Каждый полностью автономен в своих решениях. Мы уважаем выбор друг друга.',
+                partner: 'Полностью автономен, не ждет моего одобрения для своих решений.',
+                potential: 'Я хочу полной автономии в своих решениях с уважением к партнеру.',
+                pair_discussion: 'Мы уважаем право каждого на свой выбор и свой путь.',
+            },
+            level: 9,
+            indicators: ['full-autonomy', 'mutual-respect', 'sovereign-choice'],
         },
         {
             id: 'z-trans-cocreate',
@@ -1155,7 +1243,7 @@ export const zone_responsibility: SmartQuestion = {
             indicators: ['co-creation', 'conscious-evolution', 'responsibility-for-field'],
         },
     ],
-    targetLevels: [1, 4, 8, 11],
+    targetLevels: [1, 4, 6, 7, 8, 9, 11],
     priority: 1,
 };
 
@@ -1203,6 +1291,28 @@ export const zone_future: SmartQuestion = {
             indicators: ['shared-goals', 'planning', 'conscious-direction'],
         },
         {
+            id: 'z-mature-self-actualization',
+            text: {
+                self: 'Наше будущее — это реализация потенциала каждого. Мы оба растем как личности.',
+                partner: 'Поддерживает мою самореализацию и развивается сам.',
+                potential: 'Я хочу взаимной поддержки в реализации жизненных целей.',
+                pair_discussion: 'Наша цель — помочь друг другу стать лучшими версиями себя.',
+            },
+            level: 9,
+            indicators: ['self-actualization', 'mutual-growth', 'individual-realization'],
+        },
+        {
+            id: 'z-trans-creation',
+            text: {
+                self: 'Мы создаем что-то вместе: проект, дело, идею, которая переживет нас.',
+                partner: 'Видит в нас творческий союз, способный создавать новое.',
+                potential: 'Я хочу совместного творчества и создания наследия.',
+                pair_discussion: 'Мы вместе творим что-то ценное для мира.',
+            },
+            level: 11,
+            indicators: ['co-creation', 'legacy', 'creative-partnership'],
+        },
+        {
             id: 'z-trans-mission',
             text: {
                 self: 'У нас есть общая миссия, которая выходит за рамки нашей пары.',
@@ -1214,7 +1324,7 @@ export const zone_future: SmartQuestion = {
             indicators: ['mission', 'legacy', 'service'],
         },
     ],
-    targetLevels: [2, 6, 7, 12],
+    targetLevels: [2, 6, 7, 9, 11, 12],
     priority: 1,
 };
 
@@ -1225,114 +1335,235 @@ export const zone_future: SmartQuestion = {
 export const validation_honesty: SmartQuestion = {
     id: 'validation-honesty-001',
     text: {
-        self: 'Если быть честным с самим собой:',
-        partner: 'Если быть честным о партнере:',
-        potential: 'Честно говоря, я:',
-        pair_discussion: 'Если быть честными друг с другом:',
+        self: 'Если быть честным с самим собой о негативных чувствах в отношениях:',
+        partner: 'Если быть честным о негативных чувствах партнера:',
+        potential: 'Честно говоря, о негативных чувствах в отношениях я думаю:',
+        pair_discussion: 'Если быть честными о негативных чувствах в нашей паре:',
     },
     category: 'validation',
     isValidation: true,
     options: [
         {
-            id: 'val-h-ideal',
+            id: 'val-h-fake',
             text: {
                 self: 'Я никогда не злюсь на партнера и не испытываю негативных чувств.',
-                partner: 'Он/она идеален и никогда не ошибается.',
+                partner: 'Он/она идеален(на) и никогда не вызывает негатива.',
                 potential: 'Я никогда не буду злиться в отношениях.',
                 pair_discussion: 'Мы никогда не ссоримся и не злимся друг на друга.',
             },
-            level: 0, // Fake level
+            level: 0, // Явная нечестность
             indicators: ['social-desirability', 'idealization', 'dishonesty'],
         },
         {
-            id: 'val-h-real',
+            id: 'val-h-struggle',
             text: {
-                self: 'Иногда я злюсь, раздражаюсь или хочу побыть один.',
-                partner: 'Иногда бывает невыносим, как и любой человек.',
-                potential: 'Я понимаю, что буду иногда злиться и раздражаться.',
-                pair_discussion: 'Мы живые люди, и у нас бывают сложные моменты.',
+                self: 'Негативные чувства пугают меня, я пытаюсь их подавить или скрыть.',
+                partner: 'Его/ее негатив меня ранит, я стараюсь его избегать.',
+                potential: 'Я боюсь конфликтов и буду стараться их избегать.',
+                pair_discussion: 'Мы избегаем конфликтов и стараемся не показывать негатив.',
             },
-            level: 10, // Real level
-            indicators: ['honesty', 'reality-check', 'authenticity'],
+            level: 6,
+            indicators: ['emotional-avoidance', 'fear-of-conflict', 'suppression'],
+        },
+        {
+            id: 'val-h-aware',
+            text: {
+                self: 'Иногда злюсь, но стараюсь понять причину и проработать чувства.',
+                partner: 'Иногда раздражает, но я учусь понимать причины.',
+                potential: 'Я понимаю, что негатив бывает, и готов с ним работать.',
+                pair_discussion: 'Мы признаем негатив и учимся с ним справляться.',
+            },
+            level: 8,
+            indicators: ['emotional-awareness', 'self-reflection', 'growth-mindset'],
+        },
+        {
+            id: 'val-h-mature',
+            text: {
+                self: 'Злость — это сигнал о моих потребностях. Я не боюсь её испытывать.',
+                partner: 'Его/ее негатив — это информация, а не угроза нашим отношениям.',
+                potential: 'Негативные чувства — часть жизни, я умею с ними быть.',
+                pair_discussion: 'Мы свободно выражаем негатив, не разрушая отношения.',
+            },
+            level: 9,
+            indicators: ['emotional-freedom', 'secure-expression', 'maturity'],
+        },
+        {
+            id: 'val-h-transcend',
+            text: {
+                self: 'Негатив — учитель. Он показывает, где я могу расти дальше.',
+                partner: 'В его/ее негативе я вижу возможность для нашего общего роста.',
+                potential: 'Любые эмоции — часть пути, включая сложные.',
+                pair_discussion: 'Мы трансформируем негатив в топливо для эволюции.',
+            },
+            level: 10,
+            indicators: ['growth-orientation', 'transformation', 'wisdom'],
         },
     ],
-    targetLevels: [],
+    targetLevels: [6, 8, 9, 10],
     priority: 3,
 };
 
 export const validation_bypass: SmartQuestion = {
     id: 'validation-bypass-002',
     text: {
-        self: 'Как духовность влияет на наши отношения?',
-        partner: 'Как партнер относится к духовности?',
-        potential: 'Я хочу духовных отношений, потому что:',
-        pair_discussion: 'Духовность в нашей паре:',
+        self: 'Как соотносятся духовное развитие и бытовые/материальные вопросы в отношениях?',
+        partner: 'Как партнер соотносит духовность и быт?',
+        potential: 'Как я вижу баланс духовного и материального в отношениях?',
+        pair_discussion: 'Как мы соотносим духовное и бытовое?',
     },
     category: 'validation',
     isValidation: true,
     options: [
         {
-            id: 'val-b-bypass',
+            id: 'val-b-fake',
             text: {
                 self: 'Мы выше земных проблем, быт и деньги нас не волнуют.',
                 partner: 'Считает, что мы выше "низменных" проблем.',
                 potential: 'Я не хочу заниматься бытом, только духовным ростом.',
                 pair_discussion: 'Мы не обсуждаем приземленные вещи, мы выше этого.',
             },
-            level: 0,
+            level: 0, // Духовный байпас — нечестность
             indicators: ['spiritual-bypass', 'denial', 'ungrounded'],
+        },
+        {
+            id: 'val-b-material',
+            text: {
+                self: 'Быт и материальное — главное. Духовность — роскошь, когда есть время.',
+                partner: 'Сосредоточен на материальном, духовность не приоритет.',
+                potential: 'Сначала быт, потом всё остальное.',
+                pair_discussion: 'Мы решаем конкретные задачи, философия — для досуга.',
+            },
+            level: 4,
+            indicators: ['material-focus', 'pragmatism', 'survival-mode'],
+        },
+        {
+            id: 'val-b-separate',
+            text: {
+                self: 'Духовное и бытовое — разные сферы. Я стараюсь их не смешивать.',
+                partner: 'Разделяет духовность и повседневность на разные зоны.',
+                potential: 'Духовное отдельно, бытовое отдельно.',
+                pair_discussion: 'У нас есть время для духовного и время для быта.',
+            },
+            level: 7,
+            indicators: ['compartmentalization', 'balance-seeking', 'separation'],
+        },
+        {
+            id: 'val-b-balance',
+            text: {
+                self: 'Я стараюсь интегрировать духовные ценности в бытовые решения.',
+                partner: 'Приносит осознанность в повседневные дела.',
+                potential: 'Хочу, чтобы духовность пронизывала обычную жизнь.',
+                pair_discussion: 'Мы стараемся быть осознанными в бытовых делах.',
+            },
+            level: 9,
+            indicators: ['integration-attempt', 'mindfulness', 'values-alignment'],
+        },
+        {
+            id: 'val-b-unity',
+            text: {
+                self: 'Нет разделения: каждое действие — духовная практика.',
+                partner: 'Видит священное в обычном, быт — часть практики.',
+                potential: 'Вся жизнь — духовный путь, включая мытьё посуды.',
+                pair_discussion: 'Наша совместная жизнь — это духовная практика.',
+            },
+            level: 11,
+            indicators: ['non-duality', 'sacred-ordinary', 'integration'],
         },
         {
             id: 'val-b-grounded',
             text: {
-                self: 'Духовность помогает нам лучше справляться с земными задачами.',
-                partner: 'Интегрирует духовность в реальную жизнь.',
-                potential: 'Духовность должна помогать в реальной жизни.',
-                pair_discussion: 'Наша духовная связь помогает нам в быту и делах.',
+                self: 'Духовность делает нас более ответственными в бытовых вопросах.',
+                partner: 'Чем глубже духовность, тем лучше справляется с земным.',
+                potential: 'Истинная духовность заземляет и укрепляет.',
+                pair_discussion: 'Наша духовная связь делает нас эффективнее в жизни.',
             },
             level: 12,
-            indicators: ['grounded-spirituality', 'integration', 'wisdom'],
+            indicators: ['grounded-spirituality', 'embodied-wisdom', 'mastery'],
         },
     ],
-    targetLevels: [],
+    targetLevels: [4, 7, 9, 11, 12],
     priority: 3,
 };
 
 export const validation_consistency: SmartQuestion = {
     id: 'validation-consistency-003',
     text: {
-        self: 'В принятии решений:',
-        partner: 'В принятии решений партнер:',
-        potential: 'В принятии решений я:',
-        pair_discussion: 'Как мы принимаем решения:',
+        self: 'Когда мы с партнером не согласны в важном вопросе:',
+        partner: 'Когда мы не согласны, партнер:',
+        potential: 'Если возникнет разногласие по важному вопросу, я:',
+        pair_discussion: 'Когда мы не согласны по важному вопросу:',
     },
     category: 'validation',
     isValidation: true,
     options: [
         {
-            id: 'val-c-rigid',
+            id: 'val-c-control',
             text: {
-                self: 'Я всегда прав(а), и мое мнение единственно верное.',
-                partner: 'Всегда считает себя правым.',
-                potential: 'Я всегда буду настаивать на своем.',
-                pair_discussion: 'Один из нас всегда прав, другой подчиняется.',
+                self: 'Я настаиваю на своем, пока партнер не согласится.',
+                partner: 'Давит, пока я не уступлю.',
+                potential: 'Я буду настаивать на своем мнении.',
+                pair_discussion: 'Кто-то один продавливает свою позицию.',
             },
-            level: 1,
-            indicators: ['rigidity', 'control', 'lack-of-flexibility'],
+            level: 2,
+            indicators: ['control', 'domination', 'power-struggle'],
         },
         {
-            id: 'val-c-flex',
+            id: 'val-c-avoid',
             text: {
-                self: 'Я могу менять мнение, если слышу разумные аргументы.',
-                partner: 'Готов(а) менять мнение и слышать меня.',
+                self: 'Я уступаю, чтобы избежать конфликта.',
+                partner: 'Уступает или замолкает, чтобы не ссориться.',
+                potential: 'Я скорее уступлю, чем буду спорить.',
+                pair_discussion: 'Кто-то уступает ради мира, но копит обиду.',
+            },
+            level: 4,
+            indicators: ['avoidance', 'submission', 'peace-keeping'],
+        },
+        {
+            id: 'val-c-compromise',
+            text: {
+                self: 'Мы ищем компромисс, где каждый немного уступает.',
+                partner: 'Готов(а) искать компромисс.',
+                potential: 'Я готов(а) идти на компромисс.',
+                pair_discussion: 'Мы находим середину, устраивающую обоих.',
+            },
+            level: 7,
+            indicators: ['compromise', 'negotiation', 'balance'],
+        },
+        {
+            id: 'val-c-dialogue',
+            text: {
+                self: 'Мы обсуждаем, пока не поймем позицию друг друга, даже если не согласны.',
+                partner: 'Готов(а) услышать мои аргументы и пересмотреть позицию.',
                 potential: 'Я готов(а) менять мнение ради истины.',
-                pair_discussion: 'Мы гибки и открыты к аргументам друг друга.',
+                pair_discussion: 'Мы исследуем тему вместе, не привязываясь к своей правоте.',
             },
             level: 8,
-            indicators: ['flexibility', 'open-mindedness', 'dialogue'],
+            indicators: ['dialogue', 'openness', 'flexibility'],
+        },
+        {
+            id: 'val-c-autonomy',
+            text: {
+                self: 'Каждый может остаться при своем мнении — это не угроза отношениям.',
+                partner: 'Уважает мое право думать иначе.',
+                potential: 'Я могу не соглашаться и при этом любить.',
+                pair_discussion: 'Мы можем думать по-разному и всё равно быть близки.',
+            },
+            level: 9,
+            indicators: ['differentiation', 'autonomy', 'secure-disagreement'],
+        },
+        {
+            id: 'val-c-synthesis',
+            text: {
+                self: 'Из наших разных взглядов рождается что-то новое, лучшее.',
+                partner: 'Видит в наших разногласиях потенциал для нового решения.',
+                potential: 'Разногласия — это шанс для творческого решения.',
+                pair_discussion: 'Наши споры приводят к открытиям и росту.',
+            },
+            level: 10,
+            indicators: ['synthesis', 'creative-tension', 'growth-through-conflict'],
         },
     ],
-    targetLevels: [],
+    targetLevels: [2, 4, 7, 8, 9, 10],
     priority: 3,
 };
 
