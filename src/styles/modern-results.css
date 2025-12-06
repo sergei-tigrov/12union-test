@@ -804,3 +804,10 @@
     transition: none;
   }
 }
+
+/* ============================================
+   TELEGRAM MINI APP - Красивые отступы
+   ============================================ */
+body.telegram-webapp-mode .mr-tabs {
+  margin-top: 12px;
+}
