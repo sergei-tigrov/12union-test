@@ -44,7 +44,7 @@ export interface DiagnosticResult {
 function calculateSpectrogram(
     answers: UserAnswer[],
     questions: Map<string, SmartQuestion>
-): Map<UnionLevel, number> {
+): { normalizedScores: Map<UnionLevel, number>; maxPossibleScores: Map<UnionLevel, number> } {
     const scores = new Map<UnionLevel, number>();
     const maxPossibleScores = new Map<UnionLevel, number>();
 
@@ -104,14 +104,15 @@ function calculateSpectrogram(
         normalizedScores.set(i as UnionLevel, percent);
     }
 
-    return normalizedScores;
+    return { normalizedScores, maxPossibleScores };
 }
 
 /**
  * Анализирует паттерн профиля на основе спектрограммы
  */
 function analyzePattern(
-    spectrogram: Map<UnionLevel, number>
+    spectrogram: Map<UnionLevel, number>,
+    maxPossibleScores: Map<UnionLevel, number>
 ): {
     pattern: ProfilePattern;
     baseLevel: UnionLevel;
@@ -119,13 +120,43 @@ function analyzePattern(
     peaks: UnionLevel[];
 } {
     const levels = Array.from(spectrogram.entries()).sort((a, b) => a[0] - b[0]);
-    const peaks: UnionLevel[] = [];
+    let peaks: UnionLevel[] = [];
     const gaps: UnionLevel[] = [];
 
-    // Поиск пиков (уровни с освоением > 40%)
+    // 1. Первичный поиск пиков (уровни с освоением > 40%)
     levels.forEach(([lvl, score]) => {
         if (score > 0.4) peaks.push(lvl);
     });
+
+    // 2. УМНОЕ ЗАПОЛНЕНИЕ (Smart Backfill)
+    // Если уровень X взят, а уровень X-1 не тестировался (не было вопросов),
+    // мы считаем X-1 пройденным "автоматом".
+    // Но если вопросы БЫЛИ, а пика нет - значит это реальный провал.
+
+    if (peaks.length > 0) {
+        const maxPeak = Math.max(...peaks);
+
+        // Идем сверху вниз от самого высокого достижения
+        for (let lvl = maxPeak; lvl >= 1; lvl--) {
+            const level = lvl as UnionLevel;
+
+            // Если уровень уже в пиках - отлично
+            if (peaks.includes(level)) continue;
+
+            // Если уровня нет в пиках, проверяем: мы его тестировали?
+            const wasTested = (maxPossibleScores.get(level) || 0) > 0.1;
+
+            if (!wasTested) {
+                // Не тестировали -> Считаем пройденным (Implicit Pass)
+                peaks.push(level);
+            } else {
+                // Тестировали и не сдали -> Это реальная дыра, оставляем как есть
+            }
+        }
+
+        // Сортируем пики после добавления
+        peaks.sort((a, b) => a - b);
+    }
 
     if (peaks.length === 0) {
         return { pattern: 'crisis', baseLevel: 1, gaps: [], peaks: [] };
@@ -136,11 +167,10 @@ function analyzePattern(
 
     // Поиск Базового Уровня (Base Level)
     // Это самый высокий уровень непрерывной цепочки снизу
-    // Если 1-й уровень провален (нет в пиках), то база = 0 (Кризис)
     let baseLevel: UnionLevel = 1;
 
     if (!peaks.includes(1)) {
-        // Если нет фундамента (Ур.1), то это всегда кризис или избегание
+        // Если даже после Backfill нет 1-го уровня, значит он был протестирован и провален
         baseLevel = 1;
     } else {
         // Ищем, где обрывается цепочка
@@ -252,10 +282,10 @@ export function diagnoseUser(
     questions: Map<string, SmartQuestion>
 ): DiagnosticResult {
     // 1. Строим спектрограмму
-    const spectrogram = calculateSpectrogram(answers, questions);
+    const { normalizedScores, maxPossibleScores } = calculateSpectrogram(answers, questions);
 
     // 2. Анализируем паттерн
-    const analysis = analyzePattern(spectrogram);
+    const analysis = analyzePattern(normalizedScores, maxPossibleScores);
 
     // 3. Генерируем тексты
     const diagnosis = generateDiagnosis(
@@ -272,7 +302,7 @@ export function diagnoseUser(
     // Если паттерн гармоничный или потенциал, добавляем дробную часть
     if (analysis.pattern === 'harmonious' || analysis.pattern === 'potential') {
         const nextLvl = Math.min(analysis.baseLevel + 1, 12) as UnionLevel;
-        const nextScore = spectrogram.get(nextLvl) || 0;
+        const nextScore = normalizedScores.get(nextLvl) || 0;
         currentLevel += (nextScore * 0.8); // Добавляем прогресс следующего уровня
     }
 
@@ -285,7 +315,7 @@ export function diagnoseUser(
         potentialLevel: Math.min(analysis.baseLevel + 1, 12) as UnionLevel,
         pattern: analysis.pattern,
         patternStrength: 1.0, // TODO: рассчитать силу
-        levelScores: spectrogram,
+        levelScores: normalizedScores,
         gaps: analysis.gaps,
         conflicts: [], // TODO: добавить детектор конфликтов
         diagnosisTitle: diagnosis.title,
@@ -293,3 +323,4 @@ export function diagnoseUser(
         recommendationFocus: diagnosis.focus
     };
 }
+
