@@ -515,35 +515,48 @@
    ============================================ */
 
 @media (max-width: 480px) {
-  /* Скрываем заголовки прогресс-баров на мобильных */
+  /* Скрываем заголовки прогресс-баров */
   .progressHeaders {
-    display: none;
+    display: none !important;
   }
 
-  /* Скрываем прогресс-бары */
+  /* Скрываем прогресс-бары полностью */
   .leftProgressItem,
-  .rightProgressItem {
+  .rightProgressItem,
+  .progressItem {
     display: none !important;
+    width: 0 !important;
+    visibility: hidden !important;
   }
 
   /* Скрываем иконки слева/справа */
   .levelIconLeft,
   .levelIconRight {
     display: none !important;
+    width: 0 !important;
   }
 
-  /* Скрываем десктопную версию кнопки */
-  .stepLeft,
+  /* ВАЖНО: Скрываем кружок с номером */
+  .stepLeft {
+    display: none !important;
+    width: 0 !important;
+    visibility: hidden !important;
+  }
+
+  /* Скрываем десктопное имя */
   .stepRight {
     display: none !important;
+    width: 0 !important;
+    visibility: hidden !important;
   }
 
   /* Показываем компактную версию */
   .stepCompact {
     display: flex !important;
+    visibility: visible !important;
   }
 
-  /* Легенда конфликтов - компактнее */
+  /* Легенда конфликтов */
   .conflictLegend {
     padding: 6px 8px;
     margin-bottom: 6px;
@@ -567,151 +580,177 @@
     font-size: 8px;
   }
 
-  /* Лестница - компактнее */
+  /* Лестница - УЗКИЕ кнопки слева */
   .ladderRows {
-    gap: 4px;
+    gap: 3px;
+    align-items: flex-start;
+    padding-left: 8px;
   }
 
   .ladderRow {
     gap: 0;
-    justify-content: center;
+    justify-content: flex-start;
   }
 
   .ladderStepContainer {
-    flex: none;
-    width: 55%;
-    max-width: 200px;
+    flex: none !important;
+    width: 38% !important;
+    max-width: 140px !important;
   }
 
   .ladderStep {
-    border-radius: 20px;
-    min-height: 32px;
+    border-radius: 16px;
+    min-height: 28px;
+    width: 100% !important;
   }
 
   .ladderStep.active {
-    box-shadow: 0 2px 12px rgba(59, 130, 246, 0.35);
-    transform: scale(1.02);
+    box-shadow: 0 2px 10px rgba(59, 130, 246, 0.4);
+    transform: scale(1.03);
   }
 
   .stepContent {
-    padding: 6px 12px;
+    padding: 5px 10px;
     justify-content: center;
+    gap: 3px;
   }
 
   .compactNumber {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 800;
   }
 
   .compactName {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
   }
 
-  /* Описание уровня - полная ширина, меньший шрифт */
+  /* Описание уровня - справа от лестницы или снизу */
   .levelDescription {
-    margin-top: 12px;
+    margin-top: 10px;
     position: relative;
   }
 
   .descriptionCard {
-    padding: 12px;
-    border-radius: 12px;
+    padding: 10px;
+    border-radius: 10px;
     background: white;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   }
 
   .descriptionHeader {
-    gap: 10px;
-    margin-bottom: 10px;
-    padding-bottom: 8px;
+    gap: 8px;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
   }
 
   .levelBadge {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
   }
 
   .levelBadge .levelNumber {
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .levelTitle {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 700;
   }
 
   .levelSubtitle {
-    font-size: 11px;
+    font-size: 10px;
     line-height: 1.4;
   }
 
   .levelFullDescription {
-    font-size: 12px;
+    font-size: 11px;
     line-height: 1.5;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     color: #374151;
   }
 
   .recommendations {
-    padding: 10px;
-    border-left-width: 3px;
+    padding: 8px;
+    border-left-width: 2px;
     background: #f8fafc;
   }
 
   .recommendationsTitle {
-    font-size: 12px;
-    margin-bottom: 8px;
+    font-size: 11px;
+    margin-bottom: 6px;
   }
 
   .recommendationsList {
-    padding-left: 16px;
+    padding-left: 14px;
   }
 
   .recommendationItem {
-    font-size: 11px;
+    font-size: 10px;
     line-height: 1.4;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
   }
 }
 
-/* Telegram Mini App (body class detection) */
+/* Telegram Mini App - ещё компактнее */
+:global(body.telegram-webapp-mode) .progressHeaders,
+:global(body.telegram-webapp-mode) .leftProgressItem,
+:global(body.telegram-webapp-mode) .rightProgressItem,
+:global(body.telegram-webapp-mode) .progressItem,
+:global(body.telegram-webapp-mode) .levelIconLeft,
+:global(body.telegram-webapp-mode) .levelIconRight,
+:global(body.telegram-webapp-mode) .stepLeft,
+:global(body.telegram-webapp-mode) .stepRight {
+  display: none !important;
+  width: 0 !important;
+  visibility: hidden !important;
+}
+
+:global(body.telegram-webapp-mode) .stepCompact {
+  display: flex !important;
+}
+
 :global(body.telegram-webapp-mode) .ladderStepContainer {
-  width: 50%;
-  max-width: 180px;
+  width: 35% !important;
+  max-width: 130px !important;
 }
 
 :global(body.telegram-webapp-mode) .ladderStep {
-  min-height: 30px;
+  min-height: 26px;
+  border-radius: 14px;
+}
+
+:global(body.telegram-webapp-mode) .stepContent {
+  padding: 4px 8px;
 }
 
 :global(body.telegram-webapp-mode) .compactNumber,
 :global(body.telegram-webapp-mode) .compactName {
-  font-size: 11px;
+  font-size: 10px;
 }
 
 :global(body.telegram-webapp-mode) .levelFullDescription {
-  font-size: 11px;
+  font-size: 10px;
 }
 
 :global(body.telegram-webapp-mode) .recommendationItem {
-  font-size: 10px;
+  font-size: 9px;
 }
 
 /* Очень узкие экраны */
 @media (max-width: 360px) {
   .ladderStepContainer {
-    width: 60%;
-    max-width: 160px;
+    width: 42% !important;
+    max-width: 120px !important;
   }
 
   .ladderStep {
-    min-height: 28px;
-    border-radius: 16px;
+    min-height: 26px;
+    border-radius: 14px;
   }
 
   .stepContent {
-    padding: 5px 10px;
+    padding: 4px 8px;
   }
 
   .compactNumber {
