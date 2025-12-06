@@ -601,7 +601,6 @@
   .ladderStep {
     border-radius: 16px;
     min-height: 28px;
-    width: 100% !important;
   }
 
   .ladderStep.active {
