@@ -36,7 +36,7 @@ const scenarios: Scenario[] = [
 function simulate(chooser: (options: { id: string; level: number }[]) => string) {
   const engine = new SmartAdaptiveEngine();
 
-  // eslint-disable-next-line no-constant-condition
+   
   while (true) {
     const next = engine.getNextQuestion();
     if (!next) break;
@@ -57,21 +57,21 @@ describe('Эмуляции сценариев SmartAdaptiveEngine', () => {
       /*
         Логируем ключевые метрики для ручного анализа. Это не проверка, а сбор данных.
       */
-      // eslint-disable-next-line no-console
+       
       console.log('\n==============================');
-      // eslint-disable-next-line no-console
+       
       console.log('Сценарий:', name);
-      // eslint-disable-next-line no-console
+       
       console.log('Личная зрелость:', result.personalMaturity.toFixed(1));
-      // eslint-disable-next-line no-console
+       
       console.log('Зрелость отношений:', result.relationshipMaturity.toFixed(1));
-      // eslint-disable-next-line no-console
+       
       console.log('Определённая зона:', result.detectedZone);
-      // eslint-disable-next-line no-console
+       
       console.log('Уверенность:', (result.confidence * 100).toFixed(0) + '%');
-      // eslint-disable-next-line no-console
+       
       console.log('Согласованность:', (result.consistency * 100).toFixed(0) + '%');
-      // eslint-disable-next-line no-console
+       
       console.log('Индикаторы:', result.indicators.join(', '));
 
       // Простая проверка: результат должен содержать 12 уровней в распределении

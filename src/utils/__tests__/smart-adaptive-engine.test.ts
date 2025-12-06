@@ -11,7 +11,7 @@ function runEngineSimulation(chooseHighest: boolean): ReturnType<SmartAdaptiveEn
   const engine = new SmartAdaptiveEngine();
 
   // walk until complete
-  // eslint-disable-next-line no-constant-condition
+   
   while (true) {
     const next = engine.getNextQuestion();
     if (!next) break;
@@ -192,7 +192,7 @@ describe('Social desirability penalty', () => {
       { questionId: 'q5', selectedOptionId: 'opt_level_6' }
     ];
     
-    // @ts-ignore: Вызов приватного метода для тестирования
+    // @ts-expect-error Вызов приватного метода для тестирования
     const penalty = engine.detectSocialDesirability(normalAnswers);
     
     // Штраф не должен превышать определенного порога для нормальных ответов

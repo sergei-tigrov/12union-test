@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * ИНТЕРПРЕТАЦИЯ РЕЗУЛЬТАТОВ
  * "Лестница союза" (2025 Refactoring)

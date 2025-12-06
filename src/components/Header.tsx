@@ -72,7 +72,6 @@ const Header: React.FC = () => {
 
   // Проверяем, запущены ли мы в Telegram
   const isTelegram = typeof window !== 'undefined' &&
-    // @ts-ignore
     window.Telegram?.WebApp?.initData !== '';
 
   if (isTelegram) return null;

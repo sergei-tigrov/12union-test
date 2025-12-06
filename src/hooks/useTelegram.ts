@@ -7,10 +7,12 @@ export function useTelegram() {
     const [isReady, setIsReady] = useState(false);
 
     // Проверка, запущены ли мы в Telegram
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const isTelegram = typeof window !== 'undefined' && !!(window as any).Telegram?.WebApp?.initData;
 
     // Инициализация при старте
     useEffect(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp) {
             tg.ready();
             setIsReady(true);

@@ -98,6 +98,7 @@ export const SmartAdaptiveTest: React.FC<SmartAdaptiveTestProps> = ({
   const [questionHistory, setQuestionHistory] = useState<Array<{ question: SmartQuestion; selectedOption: string }>>([]);
 
   // Helper function to get the correct answer text variant based on testMode
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const getAnswerText = (optionText: any): string => {
     if (typeof optionText === 'string') {
       // Legacy format - just return as is

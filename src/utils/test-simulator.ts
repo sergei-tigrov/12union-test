@@ -64,8 +64,10 @@ console.log('Используйте: scenarios.scenario1_mixed() и т.д.');
 console.log('Доступные сценарии:', Object.keys(scenarios));
 
 // Экспорт в глобальную область видимости
+/* eslint-disable @typescript-eslint/no-explicit-any */
 (window as any).testScenarios = scenarios;
 (window as any).simulateTest = simulateTestAnswers;
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 console.log(`%c✅ Утилита загружена!`, 'font-size: 14px; color: #10b981');
 console.log('Используйте: \n - window.testScenarios.scenario1_mixed()\n - window.simulateTest([2, 5, 7])');

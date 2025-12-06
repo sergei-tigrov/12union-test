@@ -30,7 +30,7 @@ interface Scenario {
 function simulate(chooser: (options: { id: string; level: number }[]) => string): ReturnType<SmartAdaptiveEngine["getResults"]> {
   const engine = new SmartAdaptiveEngine();
 
-  // eslint-disable-next-line no-constant-condition
+   
   while (true) {
     const next = engine.getNextQuestion();
     if (!next) break;
@@ -96,7 +96,7 @@ function main() {
   const results = scenarios.map(s => ({ name: s.name, result: s.run() }));
 
   results.forEach(({ name, result }) => {
-    // eslint-disable-next-line no-console
+     
     console.log("==============================\nScenario:", name);
     // Key numbers
     console.log("Personal maturity:", result.personalMaturity);

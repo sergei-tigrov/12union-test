@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * РАСЧЕТ ОЦЕНОК
  * "Лестница союза"

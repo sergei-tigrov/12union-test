@@ -66,7 +66,7 @@ export const SmartAdaptiveTestPage: React.FC = () => {
 
   if (testResult) {
     console.log('🔥 SmartAdaptiveTestPage: Rendering ModernAdaptiveResults with result:', testResult);
-    // TODO: Update ModernAdaptiveResults to work with new TestResult type
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return <ModernAdaptiveResults result={testResult as any} onRestart={handleRestart} />;
   }
 

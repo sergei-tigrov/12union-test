@@ -1,14 +1,7 @@
 /**
- * Индексный файл для экспорта всех рефакторинговых компонентов анализа
+ * Индексный файл для экспорта адаптивных компонентов
  */
 
-// Экспорт общего компонента
-export { default as PsychologicalAnalysisRefactored } from './PsychologicalAnalysisRefactored';
-
-// Экспорт отдельных модулей анализа
-export { default as AttachmentStyleAnalysisRefactored } from './AttachmentStyleAnalysisRefactored';
-export { default as TraumaPatternAnalysisRefactored } from './TraumaPatternAnalysisRefactored';
-export { default as BoundariesHealthAnalysisRefactored } from './BoundariesHealthAnalysisRefactored';
-export { default as JealousyDynamicsAnalysisRefactored } from './JealousyDynamicsAnalysisRefactored';
-export { default as MaturityGapAnalysisRefactored } from './MaturityGapAnalysisRefactored';
-export { default as RelationshipMotivationAnalysisRefactored } from './RelationshipMotivationAnalysisRefactored';
+export { SmartAdaptiveTest } from './SmartAdaptiveTest';
+export { ScenarioSelector } from './ScenarioSelector';
+export { default as ModernAdaptiveResults } from './ModernAdaptiveResults';
