@@ -178,6 +178,49 @@ export const ModernAdaptiveResults: React.FC<ModernAdaptiveResultsProps> = ({
           </div>
         )}
 
+        {/* COMPATIBILITY CTA - Only for 'compatibility' scenario */}
+        {result.testScenario === 'compatibility' && (
+          <div className="modern-card" style={{
+            marginBottom: 'var(--space-6)',
+            background: 'linear-gradient(135deg, #fff0f5 0%, #fff 100%)', // Pinkish background
+            borderLeft: '4px solid #ff69b4',
+            textAlign: 'center'
+          }}>
+            <h3 style={{ color: '#d147a3', marginBottom: 'var(--space-3)' }}>
+              ❤️ Узнайте вашу совместимость
+            </h3>
+            <p style={{ color: 'var(--color-text-muted)', marginBottom: 'var(--space-4)' }}>
+              Вы прошли свою часть. Теперь очередь партнера! Отправьте ему этот тест, чтобы узнать, на каком уровне вы находитесь как пара.
+            </p>
+
+            <button
+              className="modern-button modern-button-primary"
+              style={{
+                background: 'linear-gradient(90deg, #ff69b4, #ff1493)',
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem'
+              }}
+              onClick={() => {
+                const text = `Я прошел тест "Лестница Союза" и мой уровень: ${result.personalLevel}. Пройди и ты, чтобы мы узнали нашу совместимость! 👇`;
+                const url = 'https://t.me/UnionLadderBot'; // Замените на реального бота
+                const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
+
+                // Пытаемся открыть через Telegram WebApp, иначе просто в новой вкладке
+                if (window.Telegram?.WebApp) {
+                  window.Telegram.WebApp.openTelegramLink(shareUrl);
+                } else {
+                  window.open(shareUrl, '_blank');
+                }
+              }}
+            >
+              <span>💌 Отправить партнеру</span>
+            </button>
+          </div>
+        )}
+
         {/* TABS NAVIGATION */}
         <motion.div
           initial={{ opacity: 0 }}
