@@ -524,19 +524,21 @@
   .leftProgressItem,
   .rightProgressItem {
     flex: 0 0 auto;
-    gap: 2px !important;
-    height: 18px !important;
+    gap: 3px !important;
+    height: auto;
+    align-items: center;
   }
 
   .progressBar {
-    width: 30px !important;
-    height: 3px !important;
-    min-width: 25px;
+    width: 55px !important;
+    height: 7px !important;
+    min-width: 50px;
   }
 
   .progressScore {
-    font-size: 7px !important;
-    min-width: 12px !important;
+    font-size: 9px !important;
+    min-width: 14px !important;
+    font-weight: 700;
   }
 
   /* Скрываем иконки слева/справа */
@@ -724,19 +726,21 @@
 :global(body.telegram-webapp-mode) .leftProgressItem,
 :global(body.telegram-webapp-mode) .rightProgressItem {
   flex: 0 0 auto;
-  gap: 2px !important;
-  height: 18px !important;
+  gap: 3px !important;
+  height: auto;
+  align-items: center;
 }
 
 :global(body.telegram-webapp-mode) .progressBar {
-  width: 30px !important;
-  height: 3px !important;
-  min-width: 25px;
+  width: 55px !important;
+  height: 7px !important;
+  min-width: 50px;
 }
 
 :global(body.telegram-webapp-mode) .progressScore {
-  font-size: 7px !important;
-  min-width: 12px !important;
+  font-size: 9px !important;
+  min-width: 14px !important;
+  font-weight: 700;
 }
 
 /* Лестница - используем всю ширину */
