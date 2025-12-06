@@ -167,8 +167,13 @@ function analyzePattern(
     const maxPeak = Math.max(...peaks);
 
     // Поиск Базового Уровня (Base Level)
-    // НОВАЯ ЛОГИКА: Weighted Median (центр масс)
-    // Вместо требования непрерывной цепочки используем взвешенную медиану пиков
+    // ОБНОВЛЕННАЯ ЛОГИКА v3: Weighted Median + High Profile Boost
+    //
+    // Проблема: Weighted median всегда "центрирует" результат,
+    // из-за чего даже при идеальных ответах на 11-12 baseLevel = 10
+    //
+    // Решение: Если профиль явно "высокий" (концентрация на 9-12),
+    // используем weighted average вместо median для более точного отражения
     let baseLevel: UnionLevel = 1;
 
     if (peaks.length === 0) {
@@ -182,16 +187,87 @@ function analyzePattern(
 
         const totalWeight = weightedPeaks.reduce((sum, p) => sum + p.weight, 0);
 
-        if (totalWeight > 0) {
-            let cumulativeWeight = 0;
-            const medianThreshold = totalWeight / 2;
+        // НОВОЕ: Анализ профиля для определения метода расчёта
+        const highLevelPeaks = weightedPeaks.filter(p => p.level >= 9);
+        const highLevelWeight = highLevelPeaks.reduce((sum, p) => sum + p.weight, 0);
+        const topPeaks = weightedPeaks.filter(p => p.level >= 11);
+        const topWeight = topPeaks.reduce((sum, p) => sum + p.weight, 0);
 
-            // Находим взвешенную медиану
-            for (const peak of weightedPeaks) {
-                cumulativeWeight += peak.weight;
-                if (cumulativeWeight >= medianThreshold) {
-                    baseLevel = peak.level;
-                    break;
+        // Процент веса на высоких уровнях
+        const highRatio = totalWeight > 0 ? highLevelWeight / totalWeight : 0;
+        const topRatio = totalWeight > 0 ? topWeight / totalWeight : 0;
+
+        // Проверяем состояние базы (уровни 1-4)
+        const baseLevels = [1, 2, 3, 4] as UnionLevel[];
+        const baseWeight = baseLevels.reduce((sum, lvl) => sum + (spectrogram.get(lvl) || 0), 0);
+        const baseAvg = baseWeight / 4;
+
+        // Различаем:
+        // - База НЕ ТЕСТИРОВАЛАСЬ (baseAvg < 0.1) - допустимо для высокого профиля
+        // - База ПРОВАЛЕНА (0.1 <= baseAvg < 0.3 при высоких показателях на верху) - это bypass
+        // - База ХОРОШАЯ (baseAvg >= 0.5) - допустимо
+        const baseNotTested = baseAvg < 0.1;
+        const baseStrong = baseAvg >= 0.5;
+        const baseOkForHighProfile = baseNotTested || baseStrong;
+
+        // ВЫСОКИЙ ПРОФИЛЬ: если >60% веса на уровнях 9-12 И база не провалена
+        const isHighProfile = highRatio > 0.6 && baseOkForHighProfile;
+        // ТОП-ПРОФИЛЬ: 30%+ веса на уровнях 11-12
+        const isTopProfile = topRatio > 0.3 && highRatio > 0.5 && baseOkForHighProfile;
+
+        if (totalWeight > 0) {
+            if (isTopProfile) {
+                // ПРОФИЛЬ С ВЕРШИНОЙ: Рассчитываем только среди высоких уровней (9-12)
+                // Уровни 7-8 не должны "тянуть вниз" если профиль явно высокий
+                const highOnlyPeaks = weightedPeaks.filter(p => p.level >= 9);
+                const highOnlyWeight = highOnlyPeaks.reduce((sum, p) => sum + p.weight, 0);
+
+                if (highOnlyWeight > 0) {
+                    // Weighted average только среди высоких уровней с бустом для 11-12
+                    let weightedSum = 0;
+                    let adjustedTotalWeight = 0;
+
+                    for (const peak of highOnlyPeaks) {
+                        // Буст для уровней 11-12: вес * 1.5 (увеличен с 1.3)
+                        const boost = peak.level >= 11 ? 1.5 : 1.0;
+                        const adjustedWeight = peak.weight * boost;
+                        weightedSum += peak.level * adjustedWeight;
+                        adjustedTotalWeight += adjustedWeight;
+                    }
+
+                    baseLevel = Math.round(weightedSum / adjustedTotalWeight) as UnionLevel;
+                } else {
+                    // Fallback: максимальный пик
+                    baseLevel = maxPeak;
+                }
+                // Ограничиваем до реального максимального пика
+                baseLevel = Math.min(baseLevel, maxPeak) as UnionLevel;
+            } else if (isHighProfile) {
+                // ВЫСОКИЙ ПРОФИЛЬ: Weighted average среди уровней >= 8
+                const highPeaks = weightedPeaks.filter(p => p.level >= 8);
+                const highWeight = highPeaks.reduce((sum, p) => sum + p.weight, 0);
+
+                if (highWeight > 0) {
+                    let weightedSum = 0;
+                    for (const peak of highPeaks) {
+                        weightedSum += peak.level * peak.weight;
+                    }
+                    baseLevel = Math.round(weightedSum / highWeight) as UnionLevel;
+                } else {
+                    baseLevel = maxPeak;
+                }
+                baseLevel = Math.min(baseLevel, maxPeak) as UnionLevel;
+            } else {
+                // СТАНДАРТНЫЙ ПРОФИЛЬ: Weighted median (как раньше)
+                let cumulativeWeight = 0;
+                const medianThreshold = totalWeight / 2;
+
+                for (const peak of weightedPeaks) {
+                    cumulativeWeight += peak.weight;
+                    if (cumulativeWeight >= medianThreshold) {
+                        baseLevel = peak.level;
+                        break;
+                    }
                 }
             }
         } else {
@@ -224,8 +300,13 @@ function analyzePattern(
 
     // База сильная если >= 50%, слабая если < 30%
     const foundationStrong = foundationAvg >= 0.5;
-    const foundationWeak = foundationAvg < 0.3;
     const highStrong = highAvg >= 0.5;
+
+    // ВАЖНО: Различаем "база не тестировалась" и "база провалена"
+    // - База < 0.1 = НЕ ТЕСТИРОВАЛАСЬ (допустимо)
+    // - База 0.1-0.3 при высоком верхе = ПРОВАЛЕНА (bypass)
+    const foundationNotTested = foundationAvg < 0.1;
+    const foundationWeak = foundationAvg >= 0.1 && foundationAvg < 0.3; // Только если тестировалась И низкая
 
     // Проверка разброса для определения гармоничности
     const significantScores = Array.from(spectrogram.values()).filter(s => s > 0.15);
@@ -233,21 +314,25 @@ function analyzePattern(
         ? Math.max(...significantScores) - Math.min(...significantScores)
         : 0;
 
-    // Профиль гармоничный если малый разброс или высокий средний без провала базы
+    // Профиль гармоничный если:
+    // 1. Малый разброс между уровнями
+    // 2. ИЛИ база сильная
+    // 3. ИЛИ база не тестировалась + высокие уровни хорошие (топ-профиль)
     const isHarmoniousProfile = (
         (scoreVariance < 0.4 && significantScores.length >= 3) ||
-        (foundationStrong && foundationAvg >= 0.5)
+        (foundationStrong && foundationAvg >= 0.5) ||
+        (foundationNotTested && highStrong) // НОВОЕ: топ-профиль без тестирования базы
     );
 
-    // Обновлённая детекция паттернов
+    // Обновлённая детекция паттернов (v3)
     if (peaks.length < 3) {
         pattern = 'crisis'; // Недостаточно данных
     } else if (highStrong && foundationWeak && (highAvg - foundationAvg > 0.3)) {
-        // НОВАЯ ЛОГИКА: Духовный обход только при КОНТРАСТЕ
-        // Высокий верх (>=50%) + слабая база (<30%) + разрыв > 30%
+        // Духовный обход только при РЕАЛЬНОМ провале базы (0.1-0.3)
+        // Если база не тестировалась (< 0.1), это НЕ bypass
         pattern = 'spiritual_bypass';
     } else if (isHarmoniousProfile) {
-        // Гармоничный профиль - приоритет над gap
+        // Гармоничный профиль - включая топ-профили
         pattern = 'harmonious';
     } else if (gaps.length > 0 && !foundationStrong) {
         // Дыры только если база не сильная
