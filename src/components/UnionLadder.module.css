@@ -520,13 +520,20 @@
     display: none !important;
   }
 
-  /* Скрываем прогресс-бары полностью */
+  /* Прогресс-бары видны, но компактнее */
   .leftProgressItem,
-  .rightProgressItem,
-  .progressItem {
-    display: none !important;
-    width: 0 !important;
-    visibility: hidden !important;
+  .rightProgressItem {
+    width: 50px !important;
+    height: 20px !important;
+  }
+
+  .progressBar {
+    width: 35px !important;
+    height: 3px !important;
+  }
+
+  .progressScore {
+    font-size: 8px !important;
   }
 
   /* Скрываем иконки слева/справа */
